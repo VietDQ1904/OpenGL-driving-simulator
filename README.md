@@ -20,21 +20,31 @@ player-controlled car and procedural generated terrains using Perlin Noise.
 
 ### Instructons ###
    1. Install the respository via the command:
+      ```
       git clone https://github.com/VietDQ1904/OpenGL-driving-game.git
+      ```
    
-   2. Change directory to the project. Create a build folder, change your current directory to /build
+   2. Change directory to the project. Create a build folder, change your current directory to /build:
+      ```
       cd OpenGL-driving-game
       mkdir build
       cd build
+      ```
    
    3. Make sure that all dependencies are installed in MSYS2 MINGW64 (use pacman -Q inside MSYS2 to view installed
    packages). Then build the project using the command: 
+
+      ```
       cmake -G "MinGW Makefiles" ..
       cmake --build .
+      ```
 
       If you already use MINGW64 as your main compiler, you don't need to specify it:
+
+      ```
       cmake -G ..
       cmake --build .
+      ```
 
       Alternatively, if you use VSCode, you can download CMake Tools extensions to automate the build process.
    
