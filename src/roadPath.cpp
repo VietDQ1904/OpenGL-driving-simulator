@@ -35,6 +35,11 @@ void Road::generateSpline(){
       return;
    }
 
+   points.insert(points.begin(), points[points.size() - 2]);
+   points.push_back(points[1]);
+   points.push_back(points[2]);
+
+
    // Generate Catmull-Rom spline curve.
    for (size_t i = 1; i < points.size() - 2; ++i){
       for (int j = 0; j < samplePerFragments; ++j){
@@ -71,7 +76,7 @@ void Road::generateIndices(){
 
 }
 
-void Road::generateVertices(){
+void Road::generateVertices(Physics &simulation){
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
    glm::vec3 v;
    glm::vec3 w;
@@ -85,9 +90,7 @@ void Road::generateVertices(){
 
    glm::vec3 normal;
 
-   float accumulatedLength = 0.0f;
    float segmentLength;
-   float v0, v1;
 
    for (int i = 0; i < roadPath.size() - 1; ++i){
 
@@ -113,9 +116,8 @@ void Road::generateVertices(){
       normal = glm::normalize(glm::cross(C - A, B - A));
 
       segmentLength = glm::length(roadPath[i + 1] - roadPath[i]);
-      v0 = accumulatedLength / tileLength;
-      v1 = (accumulatedLength + segmentLength) / tileLength;
-      
+
+      // 1st vertex
       vertices.push_back(A.x); 
       vertices.push_back(A.y); 
       vertices.push_back(A.z);
@@ -123,8 +125,9 @@ void Road::generateVertices(){
       vertices.push_back(normal.y); 
       vertices.push_back(normal.z);
       vertices.push_back(0.0f); 
-      vertices.push_back(v0);
+      vertices.push_back(0.2f * (roadPathWidth));
 
+      // 2nd vertex 
       vertices.push_back(B.x);
       vertices.push_back(B.y);
       vertices.push_back(B.z);
@@ -132,38 +135,32 @@ void Road::generateVertices(){
       vertices.push_back(normal.y); 
       vertices.push_back(normal.z);
       vertices.push_back(0.0f); 
-      vertices.push_back(v1);
+      vertices.push_back(0.0f);
 
+      // 3rd vertex
       vertices.push_back(C.x);
       vertices.push_back(C.y);
       vertices.push_back(C.z);
       vertices.push_back(normal.x); 
       vertices.push_back(normal.y); 
       vertices.push_back(normal.z);
-      vertices.push_back(1.0f); 
-      vertices.push_back(v0);
+      vertices.push_back(0.2f * (segmentLength)); 
+      vertices.push_back(0.2f * (roadPathWidth));
 
+      // 4th vertex
       vertices.push_back(D.x);
       vertices.push_back(D.y);
       vertices.push_back(D.z);
       vertices.push_back(normal.x); 
       vertices.push_back(normal.y); 
       vertices.push_back(normal.z);
-      vertices.push_back(1.0f); 
-      vertices.push_back(v1);
+      vertices.push_back(0.2f * (segmentLength)); 
+      vertices.push_back(0.0f);
 
-      accumulatedLength += segmentLength;
+      // Create a rigid body.
+      simulation.createRigidBody(A, B, C, D, normal, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+   
    }
-
-   // std::cout << "vertices = {";
-   // for (int i = 0; i < vertices.size(); i += 8){
-   //    std::cout << "(" << vertices[i] << "," << vertices[i + 1] << "," << vertices[i + 2] << ","
-   //    << vertices[i + 3] << "," << vertices[i + 4] << "," << vertices[i + 5] << "," << 
-   //    vertices[i + 6] << "," << vertices[i + 7] << "),";
-   // }
-   // std::cout << "}\n";
-   // std::cout << "\n" << "Vertices size: " << vertices.size() << "\n";
-
 
 }
 
@@ -192,7 +189,6 @@ void Road::setUp(){
 void Road::render(Shader &shader){
 
    model = glm::mat4(1.0f);
-   model = glm::translate(model, glm::vec3(1.0f, 3.0f, 1.0f));
    shader.setMat4("model", model);
 
    glBindVertexArray(vao);

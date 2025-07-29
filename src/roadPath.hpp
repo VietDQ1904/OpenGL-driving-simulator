@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader.hpp"
+#include "physics.hpp"
 
 #ifndef ROAD_PATH
 #define ROAD_PATH
@@ -13,13 +14,25 @@
 class Road{
    public:
       std::vector<glm::vec3> points = {
-         glm::vec3(-10, 0, 0),
-         glm::vec3(-5, -1, 5),
-         glm::vec3(0, -2, 0),
-         glm::vec3(5, -1, -5),
-         glm::vec3(10, 0, 0),
-         glm::vec3(15, -1, 5)
+         glm::vec3(0.0f, 0.0f, 0.0f),
+         glm::vec3(21.0f, 0.5f ,-3.0f),
+         glm::vec3(36.0f, 0.0f, -12.0f),
+         glm::vec3(51.0f, 0.5f, -2.0f),
+         glm::vec3(65.0f, 0.5f, -5.0f),
+         glm::vec3(76.0f, 0.8f, -13.0f),
+         glm::vec3(66.0f, 0.9f, -25.0f),
+         glm::vec3(73.0f, 1.0f, -38.0f),
+         glm::vec3(56.0f, 0.5f, -45.0f),
+         glm::vec3(38.0f, 0.5f, -55.0f),
+         glm::vec3(31.0f, 0.5f, -41.0f),
+         glm::vec3(13.0f, 0.0f, -46.0f),
+         glm::vec3(-2.0f, -0.5f, -34.0f),
+         glm::vec3(-23.0f, -0.2f, -32.0f),
+         glm::vec3(-30.0f, 0.0f, -17.0f),
+         glm::vec3(-20.0f, 0.0f, -1.0f),
+         //glm::vec3(0.0f, 0.0f, 0.0f)
       };
+
 
       std::vector<float> vertices;
       std::vector<int> indices;
@@ -31,12 +44,15 @@ class Road{
       float alpha = 0.5f;
       int samplePerFragments = 20;
       float roadPathWidth = 20.0f;
-      float tileLength = 1.0f / roadPathWidth;
+      float tileLength = roadPathWidth;
       
-      Road(){
+      Road(Physics &simulation){
+         for (auto& point : points) {
+            point *= 5.0f;
+         }
 
          this->generateSpline();
-         this->generateVertices();
+         this->generateVertices(simulation);
          this->generateIndices();
          
          this->setUp();
@@ -56,7 +72,7 @@ class Road{
 
       void generateSpline();
       void generateIndices();
-      void generateVertices();
+      void generateVertices(Physics &simulation);
       void setUp();
 
 };

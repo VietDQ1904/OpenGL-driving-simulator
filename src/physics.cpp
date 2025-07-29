@@ -20,7 +20,7 @@ btRigidBody* Physics::createRigidBody(int type, glm::vec3 pos, glm::vec3 size, g
    btVector3 position = btVector3(pos.x, pos.y, pos.z);
    
    btQuaternion rotation;
-   rotation.setEuler(rot.x, rot.y, rot.z);
+   rotation.setEulerZYX(rot.x, rot.y, rot.z);
    btVector3 dimension;
 
    switch (type){
@@ -28,7 +28,7 @@ btRigidBody* Physics::createRigidBody(int type, glm::vec3 pos, glm::vec3 size, g
          dimension = btVector3(size.x, size.y, size.z);
          collisionShape = new btBoxShape(dimension);
          break;
-         
+
       case SPHERE:
          collisionShape = new btSphereShape(size.x);
          break;
@@ -73,6 +73,52 @@ btRigidBody* Physics::createRigidBody(int type, glm::vec3 pos, glm::vec3 size, g
       rigidBodyInfo.m_angularDamping = 0.25f;
       rigidBodyInfo.m_rollingFriction = 0.75f;
    }
+
+   btRigidBody* rigidBody = new btRigidBody(rigidBodyInfo);
+   this->dynamicsWorld->addRigidBody(rigidBody, group, mask);
+
+   return rigidBody;
+}
+
+btRigidBody* Physics::createRigidBody(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 D, glm::vec3 normal, float m,
+                                   float friction, float restitution, short group, short mask){
+
+   btConvexHullShape* collisionShape = new btConvexHullShape();
+   collisionShape->addPoint(btVector3(A.x, A.y, A.z));
+   collisionShape->addPoint(btVector3(B.x, B.y, B.z));
+   collisionShape->addPoint(btVector3(C.x, C.y, C.z));
+   collisionShape->addPoint(btVector3(D.x, D.y, D.z));
+
+   collisionShape->addPoint(btVector3(A.x + normal.x * 10.0f, A.y + normal.y * 10.0f, A.z + normal.z * 10.0f));
+   collisionShape->addPoint(btVector3(B.x + normal.x * 10.0f, B.y + normal.y * 10.0f, B.z + normal.z * 10.0f));
+   collisionShape->addPoint(btVector3(C.x + normal.x * 10.0f, C.y + normal.y * 10.0f, C.z + normal.z * 10.0f));
+   collisionShape->addPoint(btVector3(D.x + normal.x * 10.0f, D.y + normal.y * 10.0f, D.z + normal.z * 10.0f));
+   
+   this->collisionShapes.push_back(collisionShape);
+   
+   // Transform object.
+   btTransform objTransform;
+   objTransform.setIdentity();
+   // objTransform.setRotation(rotation);
+   // objTransform.setOrigin(position);
+
+
+   btScalar mass = m;
+   bool isDynamic = (mass != 0.0f); // Check if it's a static (not affected by forces) object
+
+   // Calculate local inertia.
+   btVector3 localInertia(0.0f, 0.0f, 0.0f);
+   if (isDynamic){
+      collisionShape->calculateLocalInertia(mass, localInertia);
+   }
+   
+   btDefaultMotionState* motionState = new btDefaultMotionState(objTransform);
+
+   // Calculate rigid body info.
+   btRigidBody::btRigidBodyConstructionInfo rigidBodyInfo(mass, motionState, collisionShape, localInertia);
+
+   rigidBodyInfo.m_friction = friction;
+   rigidBodyInfo.m_restitution = restitution;
 
    btRigidBody* rigidBody = new btRigidBody(rigidBodyInfo);
    this->dynamicsWorld->addRigidBody(rigidBody, group, mask);

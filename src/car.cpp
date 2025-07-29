@@ -2,7 +2,7 @@
 
 Car::Car(Physics& simulation): simulation(simulation){
 
-   this->spawn = glm::vec3(-40.0f, 0.0f, 0.0f);
+   this->spawn = glm::vec3(0.0f, 1.0f, 0.0f);
    this->carPos = glm::vec3(0.0f, 1.0f, 0.0f);
    this->carSize = glm::vec3(1.0f, 0.6f, 3.0f);
    this->carRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -197,7 +197,7 @@ void Car::control(GLFWwindow *window, float &deltaTime){
 void Car::setUp(){
    
    // Car
-   car = simulation.createRigidBody(BOX, this->carPos, this->carSize, this->carRot, carMass, 1.75f, 0.2f,
+   car = simulation.createRigidBody(BOX, this->carPos + this->spawn, this->carSize, this->carRot, carMass, 1.75f, 0.2f,
    COLLISION_CHASSIS, COLLISION_ELSE ^ COLLISION_CAR);
    car->setSleepingThresholds(0.0f, 0.0f);
    car->setDamping(carLinearDamp * assist, carAngularDamp * assist);

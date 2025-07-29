@@ -177,7 +177,7 @@ int main(int argc, char* argv[]){
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
    camera.setPositionToCar(car);
 
-   Road *road = new Road();
+   Road *road = new Road(simulation);
 
    
    glActiveTexture(GL_TEXTURE0);

@@ -9,18 +9,18 @@ class Car{
    public:
       short acceleration = 0;
       float steering = 0.0f;
-      float maxAcceleration = 800.0f;
-      float maxVelocity = 50.0f;
-      float carMass = 3000.0f;
+      float maxAcceleration = 1200.0f;
+      float maxVelocity = 80.0f;
+      float carMass = 2000.0f;
       float wheelMass_1 = 15.0f;
       float wheelMass_2 = 20.0f;
-      float wheelFriction = 2.25f;
-      float wheelStiffness = 120000.0f;
+      float wheelFriction = 4.25f;
+      float wheelStiffness = 220000.0f;
       float wheelDamping = 0.00002f;
-      float wheelSteeringAngle = 0.5f;
+      float wheelSteeringAngle = 0.9f;
       float assist = 0.5f;
-      float lowLimit = 0.0f;
-      float upLimit = 0.1f;
+      float lowLimit = -0.2f;
+      float upLimit = 0.2f;
       bool movingForward = true;
 
       const float carLinearDamp = 0.02f;
