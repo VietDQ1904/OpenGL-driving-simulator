@@ -12,6 +12,7 @@ set (SOURCES src/main.cpp
              src/camera.cpp
              src/terrain.cpp
              src/perlinNoise.cpp
+             src/roadPath.cpp
             )
 
 

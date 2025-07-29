@@ -31,7 +31,7 @@ class Mesh{
 
       Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);  
       void draw(Shader &shader);
-      void unbind();
+      void cleanUpBuffers();
    
    private:
       void setUpMesh();
@@ -42,7 +42,7 @@ class Model{
    public:
       Model(const char *path);
       void draw(Shader &shader);
-      void unbind();
+      void cleanUpBuffers();
       std::vector<Mesh> meshes;
       std::string directory;
 

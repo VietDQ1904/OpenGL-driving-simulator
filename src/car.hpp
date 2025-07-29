@@ -51,7 +51,7 @@ class Car{
       void initWheel_3(glm::vec3 wheelPos_3, glm::vec3 wheelSize_3, glm::vec3 wheelRot_3);
       void initWheel_4(glm::vec3 wheelPos_4, glm::vec3 wheelSize_4, glm::vec3 wheelRot_4);
       
-      void drawCar(Shader shader);
+      void render(Shader shader);
       void update();
       void control(GLFWwindow *window, float &deltaTime);
 
@@ -61,7 +61,7 @@ class Car{
       GLfloat matrix[16];
       btTransform transform;
 
-      void setUpCar();
+      void setUp();
    
 };
 

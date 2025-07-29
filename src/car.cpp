@@ -19,7 +19,7 @@ Car::Car(Physics& simulation): simulation(simulation){
    this->wheelSize_4 = glm::vec3(0.45f, 0.4f, 0.4f);
    this->wheelRot_4 = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
 
-   setUpCar();
+   setUp();
 }
 
 void Car::initCarBody(glm::vec3 spawn, glm::vec3 carPos, glm::vec3 carSize, glm::vec3 carRot){
@@ -54,9 +54,9 @@ void Car::initWheel_4(glm::vec3 wheelPos_4, glm::vec3 wheelSize_4, glm::vec3 whe
 }
 
 Car::~Car(){
-   carModel->unbind();
-   wheelModel1->unbind();
-   wheelModel2->unbind();
+   carModel->cleanUpBuffers();
+   wheelModel1->cleanUpBuffers();
+   wheelModel2->cleanUpBuffers();
 
    delete car, wheel1, wheel2, wheel3, wheel4;
    delete carModel, wheelModel1, wheelModel2;
@@ -194,7 +194,7 @@ void Car::control(GLFWwindow *window, float &deltaTime){
 
 }
 
-void Car::setUpCar(){
+void Car::setUp(){
    
    // Car
    car = simulation.createRigidBody(BOX, this->carPos, this->carSize, this->carRot, carMass, 1.75f, 0.2f,
@@ -311,7 +311,7 @@ void Car::setUpCar(){
    simulation.dynamicsWorld->addConstraint(springConst4);
 }
 
-void Car::drawCar(Shader shader){
+void Car::render(Shader shader){
 
    car->getMotionState()->getWorldTransform(transform);
    transform.getOpenGLMatrix(matrix);

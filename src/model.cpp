@@ -12,7 +12,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
    setUpMesh();
 }
 
-void Mesh::unbind(){
+void Mesh::cleanUpBuffers(){
    glDeleteVertexArrays(1, &vao);
    glDeleteBuffers(1, &vbo);
    glDeleteBuffers(1, &ebo);
@@ -85,9 +85,9 @@ void Model::draw(Shader &shader){
    }
 }
 
-void Model::unbind(){
+void Model::cleanUpBuffers(){
    for (unsigned int i = 0; i < meshes.size(); ++i){
-      meshes[i].unbind();
+      meshes[i].cleanUpBuffers();
    }
 }
 

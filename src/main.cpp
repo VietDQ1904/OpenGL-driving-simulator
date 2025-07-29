@@ -5,7 +5,8 @@
 #include "physics.hpp"
 #include "car.hpp"
 #include "texture.hpp"
-#include "terrain.hpp"
+//#include "terrain.hpp"
+#include "roadPath.hpp"
 
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
@@ -170,13 +171,13 @@ int main(int argc, char* argv[]){
    
    mainShader.use();
 
-   Model planet("../assets/planet.obj");
-   Model baseplate("../assets/baseplate.obj");
    Model grass("../assets/grass.obj");
    Model asphalt("../assets/asphalt.obj");
 
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
    camera.setPositionToCar(car);
+
+   Road *road = new Road();
 
    
    glActiveTexture(GL_TEXTURE0);
@@ -190,7 +191,7 @@ int main(int argc, char* argv[]){
    glActiveTexture(GL_TEXTURE4);
    Texture texture5("", "../assets/car.png");
 
-   Terrain terrain;
+   //Terrain terrain;
 
    // glfwSetCursorPosCallback(window, mouseCallback); // When move the mouse
    // glfwSetScrollCallback(window, scrollCallback); // When scroll the mouse
@@ -259,13 +260,19 @@ int main(int argc, char* argv[]){
 
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
+      mainShader.setInt("texture_diffuse1", 3);
+      road->render(mainShader);
+
+      mainShader.setMat4("view", view);
+      mainShader.setMat4("projection", projection);  
       mainShader.setInt("texture_diffuse1", 4);
-      car->drawCar(mainShader);
+      car->render(mainShader);
 
       terrainShader.use();
       terrainShader.setMat4("view", view);
       terrainShader.setMat4("projection", projection);
-      terrain.render(terrainShader, camera);
+
+      //terrain.render(terrainShader, camera);
 
       skyBox.draw(cubemapShader, projection, view);
       
@@ -273,7 +280,7 @@ int main(int argc, char* argv[]){
       glfwPollEvents();
    }
 
-   delete car;
+   delete car, road;
    glfwTerminate();
 
    return 0;
