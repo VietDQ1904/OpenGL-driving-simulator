@@ -1,0 +1,328 @@
+#include "terrainPath.hpp"
+
+void Terrain::generateIndices(){
+   int topLeft, bottomLeft, topRight, bottomRight;
+
+   for (int i = 0; i < vertices.size() / 3; i += 4){
+      
+      // First triangle
+      indices.push_back(i);
+      indices.push_back(i + 1);
+      indices.push_back(i + 2);
+
+      // Second triangle
+      indices.push_back(i + 1);
+      indices.push_back(i + 2);
+      indices.push_back(i + 3);
+
+   }
+
+   for (int i = 0; i < verticesSub.size() / 8; i += 3){
+      
+      // First triangle
+      indicesSub.push_back(i);
+      indicesSub.push_back(i + 1);
+      indicesSub.push_back(i + 2);
+
+   }
+
+
+}
+
+void Terrain::subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth){
+   if (depth == 0){
+      triangles.push_back(triangle);
+      return;
+   }  
+
+   // Find the mid point of every edge.
+   glm::vec3 ab = (triangle.a + triangle.b) * 0.5f;
+   glm::vec3 bc = (triangle.b + triangle.c) * 0.5f;
+   glm::vec3 ac = (triangle.a + triangle.c) * 0.5f;
+
+   // Subdivide for smaller triangles.
+   subdivide(triangles, {triangle.a, ab, ac}, depth - 1);
+   subdivide(triangles, {triangle.b, bc, ab}, depth - 1);
+   subdivide(triangles, {triangle.c, ac, bc}, depth - 1);
+   subdivide(triangles, {ab, bc, ac}, depth - 1);
+}  
+
+
+void Terrain::generateVertices(Physics &simulation){
+   glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
+   glm::vec3 v;
+   glm::vec3 w;
+
+   glm::vec3 prevA1, prevB1, prevA2, prevB2;
+
+   glm::vec3 A1, B1, C1, D1; // the left side 
+   glm::vec3 A2, B2, C2, D2; // the right side
+
+   glm::vec3 normal;
+   glm::vec3 normal1, normal2;
+
+   float segmentLength;
+   float uCoord, vCoord;
+   float uvScale = 0.2f;
+
+   // Setup for grass path next to the road
+   for (int i = 0; i < generatedPath.size() - 1; ++i){
+
+      v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
+      w = glm::normalize(glm::cross(u, v));
+
+      if (i == 0){
+         A1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+         B1 = w * (roadPathWidth / 2) + generatedPath[i];
+         A2 = -w * (roadPathWidth / 2) + generatedPath[i];
+         B2 = -w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+      }
+      else{
+         A1 = prevA1;
+         B1 = prevB1;
+         A2 = prevA2;
+         B2 = prevB2;
+      }
+
+      C1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      D1 = w * (roadPathWidth / 2) + generatedPath[i + 1];
+      C2 = -w * (roadPathWidth / 2) + generatedPath[i + 1];
+      D2 = -w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+
+      // Save point C1, D1 of the current iteration.
+      prevA1 = C1;
+      prevB1 = D1;
+      prevA2 = C2;
+      prevB2 = D2;
+
+      normal1 = glm::normalize(glm::cross(C1 - A1, B1 - A1));
+      normal2 = glm::normalize(glm::cross(C2 - A2, B2 - A2));
+
+      segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
+
+   
+      // 1st vertex of the left side
+      vertices.push_back(A1.x); 
+      vertices.push_back(A1.y); 
+      vertices.push_back(A1.z);
+      vertices.push_back(normal1.x); 
+      vertices.push_back(normal1.y); 
+      vertices.push_back(normal1.z);
+      vertices.push_back(0.0f); 
+      vertices.push_back(0.2f * (roadPathWidth));
+
+      // 2nd vertex of the left side 
+      vertices.push_back(B1.x);
+      vertices.push_back(B1.y);
+      vertices.push_back(B1.z);
+      vertices.push_back(normal1.x); 
+      vertices.push_back(normal1.y); 
+      vertices.push_back(normal1.z);
+      vertices.push_back(0.0f); 
+      vertices.push_back(0.0f);
+
+      // 3rd vertex of the left side
+      vertices.push_back(C1.x);
+      vertices.push_back(C1.y);
+      vertices.push_back(C1.z);
+      vertices.push_back(normal1.x); 
+      vertices.push_back(normal1.y); 
+      vertices.push_back(normal1.z);
+      vertices.push_back(0.2f * (segmentLength)); 
+      vertices.push_back(0.2f * (roadPathWidth));
+
+      // 4th vertex of the left side
+      vertices.push_back(D1.x);
+      vertices.push_back(D1.y);
+      vertices.push_back(D1.z);
+      vertices.push_back(normal1.x); 
+      vertices.push_back(normal1.y); 
+      vertices.push_back(normal1.z);
+      vertices.push_back(0.2f * (segmentLength)); 
+      vertices.push_back(0.0f);
+
+      // 1st vertex of the right side
+      vertices.push_back(A2.x); 
+      vertices.push_back(A2.y); 
+      vertices.push_back(A2.z);
+      vertices.push_back(normal2.x); 
+      vertices.push_back(normal2.y); 
+      vertices.push_back(normal2.z);
+      vertices.push_back(0.0f); 
+      vertices.push_back(0.2f * (roadPathWidth));
+
+      // 2nd vertex of the right side 
+      vertices.push_back(B2.x);
+      vertices.push_back(B2.y);
+      vertices.push_back(B2.z);
+      vertices.push_back(normal2.x); 
+      vertices.push_back(normal2.y); 
+      vertices.push_back(normal2.z);
+      vertices.push_back(0.0f); 
+      vertices.push_back(0.0f);
+
+      // 3rd vertex of the right side
+      vertices.push_back(C2.x);
+      vertices.push_back(C2.y);
+      vertices.push_back(C2.z);
+      vertices.push_back(normal2.x); 
+      vertices.push_back(normal2.y); 
+      vertices.push_back(normal2.z);
+      vertices.push_back(0.2f * (segmentLength)); 
+      vertices.push_back(0.2f * (roadPathWidth));
+
+      // 4th vertex of the right side
+      vertices.push_back(D2.x);
+      vertices.push_back(D2.y);
+      vertices.push_back(D2.z);
+      vertices.push_back(normal2.x); 
+      vertices.push_back(normal2.y); 
+      vertices.push_back(normal2.z);
+      vertices.push_back(0.2f * (segmentLength)); 
+      vertices.push_back(0.0f);
+
+      // Create a rigid body.
+      simulation.createRigidBody(A1, B1, C1, D1, normal1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A2, B2, C2, D2, normal2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+   }
+
+   // Set up terrain.
+   for (int h = 2; h <= horizontalTiles; ++h){
+      // horizontalTiles -> 1
+      for (int i = 0; i < generatedPath.size() - 1; ++i){
+         v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
+         w = glm::normalize(glm::cross(u, v));
+
+         if (i == 0){
+            A1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i];
+            B1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i];
+            A2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i];
+            B2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i];
+         }
+         else{
+            A1 = prevA1;
+            B1 = prevB1;
+            A2 = prevA2;
+            B2 = prevB2;
+         }
+
+         C1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i + 1];
+         D1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i + 1];
+         C2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i + 1];
+         D2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i + 1];
+
+         // Save point C1, D1 of the current iteration.
+         prevA1 = C1;
+         prevB1 = D1;
+         prevA2 = C2;
+         prevB2 = D2;
+
+         segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
+
+         std::vector<Triangle> triangles;
+
+         Triangle t1 = {A1, B1, C1};
+         Triangle t2 = {B1, C1, D1};
+         Triangle t3 = {A2, B2, C2};
+         Triangle t4 = {B2, C2, D2};
+
+         subdivide(triangles, t1, subdivision);
+         subdivide(triangles, t2, subdivision);
+         subdivide(triangles, t3, subdivision);
+         subdivide(triangles, t4, subdivision);
+
+         for (const Triangle &t : triangles) {
+            normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
+            for (const glm::vec3 &p : {t.a, t.b, t.c}) {
+               uCoord = glm::dot(p - generatedPath[i], v);
+               vCoord = glm::dot(p - generatedPath[i], w);
+
+               uCoord *= uvScale;
+               vCoord *= uvScale;
+
+               verticesSub.push_back(p.x); 
+               verticesSub.push_back(p.y); 
+               verticesSub.push_back(p.z);
+               verticesSub.push_back(normal.x); 
+               verticesSub.push_back(normal.y); 
+               verticesSub.push_back(normal.z);
+               verticesSub.push_back(uCoord); 
+               verticesSub.push_back(vCoord);
+
+            }
+            //simulation.createRigidBody(t.a, t.b, t.c, normal, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+         }
+      }
+   }
+
+   std::cout << "Vertices: " << vertices.size() << "\n";
+   std::cout << "Vertices sub: " << verticesSub.size() << "\n";
+
+}
+
+void Terrain::setUp(){
+   glGenVertexArrays(1, &vao);
+   glGenBuffers(1, &vbo);
+   glGenBuffers(1, &ebo);
+
+   glBindVertexArray(vao);
+   glBindBuffer(GL_ARRAY_BUFFER, vbo);
+   glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
+
+   glEnableVertexAttribArray(0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+   glEnableVertexAttribArray(1);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+   glEnableVertexAttribArray(2);
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+
+   glBindVertexArray(0);
+
+   glGenVertexArrays(1, &vao2);
+   glGenBuffers(1, &vbo2);
+   glGenBuffers(1, &ebo2);
+
+   glBindVertexArray(vao2);
+   glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+   glBufferData(GL_ARRAY_BUFFER, verticesSub.size() * sizeof(float), verticesSub.data(), GL_STATIC_DRAW);
+
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo2);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSub.size() * sizeof(int), indicesSub.data(), GL_STATIC_DRAW);
+
+   glEnableVertexAttribArray(0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+   glEnableVertexAttribArray(1);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+   glEnableVertexAttribArray(2);
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+
+   glBindVertexArray(0);
+}
+
+void Terrain::render(Shader &shader){
+
+   model = glm::mat4(1.0f);
+   shader.setMat4("model", model);
+
+   glBindVertexArray(vao);
+   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+   glBindVertexArray(0);
+
+   glBindVertexArray(vao2);
+   glDrawElements(GL_TRIANGLES, indicesSub.size(), GL_UNSIGNED_INT, 0);
+   glBindVertexArray(0);
+}
+
+void Terrain::cleanUpBuffers(){
+   glDeleteVertexArrays(1, &vao);
+   glDeleteBuffers(1, &vbo);
+   glDeleteBuffers(1, &ebo);
+   glDeleteVertexArrays(1, &vao2);
+   glDeleteBuffers(1, &vbo2);
+   glDeleteBuffers(1, &ebo2);
+}
+
+

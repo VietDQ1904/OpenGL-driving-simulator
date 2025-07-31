@@ -1,62 +1,5 @@
 #include "roadPath.hpp"
 
-glm::vec3 Road::catmullRom(const glm::vec3 &p0, const glm::vec3 &p1,
-                     const glm::vec3 &p2, const glm::vec3 &p3,
-                     float t){
-
-   auto tj = [](const glm::vec3& a, const glm::vec3& b, float alpha) {
-      return std::pow(glm::length(b - a), alpha);
-   };
-      
-   float t0 = 0.0f;
-   float t1 = t0 + tj(p0, p1, alpha);
-   float t2 = t1 + tj(p1, p2, alpha);
-   float t3 = t2 + tj(p2, p3, alpha);
-   
-   // Change t from [0, 1] -> [t1, t2]
-   float t_actual = t1 + (t2 - t1) * t;
-
-   glm::vec3 A1 = ((t1 - t_actual) / (t1 - t0)) * p0 + ((t_actual - t0) / (t1 - t0)) * p1;
-   glm::vec3 A2 = ((t2 - t_actual) / (t2 - t1)) * p1 + ((t_actual - t1) / (t2 - t1)) * p2;
-   glm::vec3 A3 = ((t3 - t_actual) / (t3 - t2)) * p2 + ((t_actual - t2) / (t3 - t2)) * p3;
-
-   glm::vec3 B1 = ((t2 - t_actual) / (t2 - t0)) * A1 + ((t_actual - t0) / (t2 - t0)) * A2;
-   glm::vec3 B2 = ((t3 - t_actual) / (t3 - t1)) * A2 + ((t_actual - t1) / (t3 - t1)) * A3;
-
-   glm::vec3 C  = ((t2 - t_actual) / (t2 - t1)) * B1 + ((t_actual - t1) / (t2 - t1)) * B2;
-   
-   return C;
-}
-
-void Road::generateSpline(){
-
-   // Catmull-Rom spline must have at least 4 points.
-   if (points.size() < 4){
-      return;
-   }
-
-   points.insert(points.begin(), points[points.size() - 2]);
-   points.push_back(points[1]);
-   points.push_back(points[2]);
-
-
-   // Generate Catmull-Rom spline curve.
-   for (size_t i = 1; i < points.size() - 2; ++i){
-      for (int j = 0; j < samplePerFragments; ++j){
-         float t = static_cast<float>(j) / samplePerFragments;
-         glm::vec3 point = catmullRom(points[i - 1],
-                                      points[i],
-                                      points[i + 1],
-                                      points[i + 2], 
-                                      t);
-         
-         roadPath.push_back(point);
-
-      }
-   }
-
-}
-
 void Road::generateIndices(){
    int topLeft, bottomLeft, topRight, bottomRight;
 
@@ -92,22 +35,22 @@ void Road::generateVertices(Physics &simulation){
 
    float segmentLength;
 
-   for (int i = 0; i < roadPath.size() - 1; ++i){
+   for (int i = 0; i < generatedPath.size() - 1; ++i){
 
-      v = glm::normalize(roadPath[i + 1] - roadPath[i]);
+      v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
       w = glm::normalize(glm::cross(u, v));
 
       if (i == 0){ // Only calculate A and B for the first iteration
-         A = w * (roadPathWidth / 2) + roadPath[i];
-         B = -w * (roadPathWidth / 2) + roadPath[i];
+         A = w * (roadPathWidth / 2) + generatedPath[i];
+         B = -w * (roadPathWidth / 2) + generatedPath[i];
       }
       else{  // Assign the previous points of C and D.
          A = prevA;
          B = prevB;
       }
 
-      C = w * (roadPathWidth / 2) + roadPath[i + 1];
-      D = -w * (roadPathWidth / 2) + roadPath[i + 1];
+      C = w * (roadPathWidth / 2) + generatedPath[i + 1];
+      D = -w * (roadPathWidth / 2) + generatedPath[i + 1];
 
       // Save point C, D of the current iteration.
       prevA = C;
@@ -115,7 +58,7 @@ void Road::generateVertices(Physics &simulation){
 
       normal = glm::normalize(glm::cross(C - A, B - A));
 
-      segmentLength = glm::length(roadPath[i + 1] - roadPath[i]);
+      segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
 
       // 1st vertex
       vertices.push_back(A.x); 

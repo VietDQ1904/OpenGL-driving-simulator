@@ -9,23 +9,35 @@
 #include "physics.hpp"
 #include "spline.hpp"
 
-#ifndef ROAD_PATH
-#define ROAD_PATH
+#ifndef TERRAIN_PATH
+#define TERRAIN_PATH
 
-class Road: public Spline{
+struct Triangle{
+   glm::vec3 a;
+   glm::vec3 b;
+   glm::vec3 c;
+};
+
+class Terrain: public Spline{
    public:
 
       std::vector<float> vertices;
       std::vector<int> indices;
+      std::vector<float> verticesSub;
+      std::vector<int> indicesSub;
 
       GLuint vao, vbo, ebo;
+      GLuint vao2, vbo2, ebo2;
+
       glm::mat4 model;
 
-      //float alpha = 0.5f;
-      //float roadPathWidth = 15.0f;
-      // float tileLength = roadPathWidth;
+      float alpha = 0.5f;
+      int samplePerFragments = 20;
+      float tileLength = roadPathWidth;
+      int subdivision = 1;
+      int horizontalTiles = static_cast<int>(terrainPathWidth / 5.0f);
       
-      Road(Physics &simulation){
+      Terrain(Physics &simulation){
          for (auto& point : points) {
             point *= 5.0f;
          }
@@ -37,7 +49,7 @@ class Road: public Spline{
          this->setUp();
       } 
 
-      ~Road(){
+      ~Terrain(){
          this->cleanUpBuffers();
       }
 
@@ -46,10 +58,10 @@ class Road: public Spline{
 
    private:
       void generateIndices();
+      void subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth);
       void generateVertices(Physics &simulation);
       void setUp();
 
 };
-
 
 #endif

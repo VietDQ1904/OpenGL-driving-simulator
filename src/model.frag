@@ -8,6 +8,20 @@ in vec2 TexCoords;
 in vec3 normal;
 in vec3 fragPos;
 
+// Generate a pseudo-random number.
+float hash(vec2 p) {
+   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+vec2 rotateUV(vec2 uv, float angle, vec2 center) {
+   float s = sin(angle);
+   float c = cos(angle);
+   uv -= center;
+   uv = mat2(c, -s, s, c) * uv;
+   uv += center;
+   return uv;
+}
+
 void main(){
    
    // vec3 dir = normalize(-lightDir);
@@ -24,5 +38,17 @@ void main(){
 
    // vec3 result = ambient + diffuse + specular;
 
-   FragColor = vec4(vec3(texture(texture_diffuse1, TexCoords)), 1.0);
+   //FragColor = vec4(vec3(texture(texture_diffuse1, TexCoords)), 1.0);
+
+   vec2 tileCoord = floor(fragPos.xz);
+   float angle = hash(tileCoord) * 6.28318530718;
+   vec2 uv = fract(fragPos.xz);
+
+   float scale = 0.5;
+   uv = (uv - 0.5) * scale + 0.5;
+
+   uv = rotateUV(uv, angle, vec2(0.5));
+   vec4 color = texture(texture_diffuse1, uv);
+
+   FragColor = color;
 }

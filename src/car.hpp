@@ -10,8 +10,8 @@ class Car{
       short acceleration = 0;
       float steering = 0.0f;
       float maxAcceleration = 1200.0f;
-      float maxVelocity = 80.0f;
-      float carMass = 2000.0f;
+      float maxVelocity = 120.0f;
+      float carMass = 3000.0f;
       float wheelMass_1 = 15.0f;
       float wheelMass_2 = 20.0f;
       float wheelFriction = 4.25f;

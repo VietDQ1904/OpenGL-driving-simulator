@@ -22,7 +22,7 @@ void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos){
 
    this->yaw += offsetX;
    // Add constraints to pitch (so that you cannot rotate up 360 degrees)
-   this->pitch = std::max(std::min(this->pitch + offsetY, 89.0f), -89.0f);
+   this->pitch = std::max(std::min(this->pitch + offsetY, 90.0f), -0.0f);
    
    glm::vec3 direction;
    direction.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
@@ -58,9 +58,12 @@ void Camera::updateFollowCamera(btRigidBody* car) {
    glm::vec3 camWorldOffset = carRotation * offset;
 
    this->cameraPos = carPosition + camWorldOffset;
-   this->cameraFront = glm::normalize(carPosition -this->cameraPos);
+   // Prevents the camera from seeing from the underground.
+   this->cameraPos.y = std::max(carPosition.y + camWorldOffset.y, carPosition.y); 
+
+   this->cameraFront = glm::normalize(carPosition - this->cameraPos);
    this->right = glm::normalize(glm::cross(this->cameraFront, glm::vec3(0.0f, 1.0f, 0.0f)));
-   this->up = glm::normalize(glm::cross(this->right,this->cameraFront));
+   this->up = glm::normalize(glm::cross(this->right, this->cameraFront));
 }
 
 void Camera::setPositionToCar(Car *car){

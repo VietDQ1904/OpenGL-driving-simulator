@@ -7,6 +7,8 @@
 #include "texture.hpp"
 //#include "terrain.hpp"
 #include "roadPath.hpp"
+#include "terrainPath.hpp"
+#include "../lib/stb_image.h"
 
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
@@ -47,7 +49,10 @@ int main(int argc, char* argv[]){
    }
 
    glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
-
+   GLFWimage imageIcons[1];
+   imageIcons[0].pixels = stbi_load("../assets/racing-car.png", &imageIcons[0].width, &imageIcons[0].height, 0, 4);
+   glfwSetWindowIcon(window, 1, imageIcons);
+   stbi_image_free(imageIcons[0].pixels);
    
    glm::mat4 model = glm::mat4(0.0f);
    glm::mat4 view = glm::mat4(1.0f);
@@ -68,93 +73,6 @@ int main(int argc, char* argv[]){
    Shader terrainShader("../src/terrain.vert", "../src/terrain.frag", nullptr);
 
    Physics simulation;
-
-   const unsigned int gridWidth = 5;
-   const unsigned int gridHeight = 8;
-   const unsigned int tiles = gridWidth * gridHeight;
-
-   unsigned int track[gridHeight][gridWidth] = {
-      {0, 0, 0, 0, 0},
-      {0, 1, 1, 1, 0},
-      {0, 1, 0, 1, 0},
-      {0, 1, 0, 1, 0},
-      {0, 1, 0, 1, 0},
-      {0, 1, 0, 1, 0},
-      {0, 1, 1, 1, 0},
-      {0, 0, 0, 0, 0}
-   };
-
-   btRigidBody *plane[tiles];
-   glm::vec3 planePos[tiles];
-   glm::vec3 planeSize[tiles];
-   const float planeEdge = 20.0f;
-
-   // Grass & asphalt floor
-   for (unsigned int i = 0; i < gridWidth; ++i){
-      for (unsigned int j = 0; j < gridHeight; ++j){
-         planePos[i * gridHeight + j] = glm::vec3(2* planeEdge * i - planeEdge * (gridWidth - 1), 
-                                                 -0.0f * (i * gridHeight + j), 
-                                                  2 * planeEdge * j - planeEdge * (gridHeight - 1));
-         planeSize[i* gridHeight + j] = glm::vec3(planeEdge, 0.0f, planeEdge);
-
-         glm::vec3 plane_rot = glm::vec3(0.0f, 0.0f, 0.0f);
-         if (track[j][i] == 0) {
-            // Grass
-            plane[i * gridHeight + j] = simulation.createRigidBody(
-                                                            BOX, 
-                                                            planePos[i * gridHeight + j], 
-                                                            planeSize[i * gridHeight + j], 
-                                                            plane_rot, 0.0f, 0.25f, 0.25f, 
-                                                            COLLISION_TERRAIN, 
-                                                            COLLISION_ELSE
-                                                         );
-         } 
-         
-         else if (track[j][i] == 1) {
-            // Asphalt
-            plane[i * gridHeight + j] = simulation.createRigidBody(
-                                                            BOX, 
-                                                            planePos[i * gridHeight + j] + glm::vec3(0.0f, 0.05f, 0.0f), 
-                                                            planeSize[i * gridHeight + j] + glm::vec3(0.0f, 0.05f, 0.0f), 
-                                                            plane_rot, 0.0f, 0.5f, 0.5f, 
-                                                            COLLISION_TERRAIN, 
-                                                            COLLISION_ELSE
-                                                         );
-         }
-      }
-   }
-
-   // // Invisible walls
-   // const unsigned int walls = 4;
-   // float side;
-   // glm::vec3 wallPos;
-   // glm::vec3 wallSize;
-   // btRigidBody *wall;
-
-   // side = planeEdge * gridHeight;
-   // wallSize = glm::vec3(2*side, 5.0f, 0.0f);
-
-   // wallPos = glm::vec3(0.0f, 2.5f, -side);
-   // wall = simulation.createRigidBody(BOX, wallPos, wallSize, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 
-   //                                   COLLISION_TERRAIN, 
-   //                                   COLLISION_ELSE);
-   // wallPos = glm::vec3(0.0f, 2.5f, side);
-   // wall = simulation.createRigidBody(BOX, wallPos, wallSize, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 
-   //                                   COLLISION_TERRAIN, 
-   //                                   COLLISION_ELSE);
-
-   // side = planeEdge * gridWidth;
-   // wallSize = glm::vec3(0.0f, 5.0f, 2*side);
-
-   // wallPos = glm::vec3(-side, 2.5f, 0.0f);
-   // wall = simulation.createRigidBody(BOX, wallPos, wallSize, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 
-   //                                   COLLISION_TERRAIN, 
-   //                                   COLLISION_ELSE);
-   // wallPos = glm::vec3(side, 2.5f, 0.0f);
-   // wall = simulation.createRigidBody(BOX, wallPos, wallSize, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 
-   //                                   COLLISION_TERRAIN, 
-   //                                   COLLISION_ELSE);
-
 
    Car *car = new Car(simulation);
    car->loadModels("../assets/car.obj", "../assets/wheelFront.obj", "../assets/wheelBack.obj");
@@ -178,7 +96,7 @@ int main(int argc, char* argv[]){
    camera.setPositionToCar(car);
 
    Road *road = new Road(simulation);
-
+   Terrain *terrain = new Terrain(simulation);
    
    glActiveTexture(GL_TEXTURE0);
    Texture texture1("", "../assets/mars.png");
@@ -196,6 +114,8 @@ int main(int argc, char* argv[]){
    // glfwSetCursorPosCallback(window, mouseCallback); // When move the mouse
    // glfwSetScrollCallback(window, scrollCallback); // When scroll the mouse
 
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      
    glfwSetWindowUserPointer(window, &camera);
    glfwSetCursorPosCallback(window, [](GLFWwindow *window, double x, double y){
       if (Camera *cam = static_cast<Camera*> (glfwGetWindowUserPointer(window))){
@@ -228,35 +148,19 @@ int main(int argc, char* argv[]){
       car->update();
       simulation.dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime: maxSecPerFrame), 10);
 
-      projection = glm::perspective(glm::radians(camera.zoom), (float) windowWidth / windowHeight, 0.1f, 300.0f);
+      projection = glm::perspective(glm::radians(camera.zoom), (float) windowWidth / windowHeight, 0.1f, 200.0f);
       view = glm::mat4(1.0f);
       view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.up);
       model = glm::mat4(1.0f);
       model = glm::translate(model, glm::vec3(1.0f, 1.0f, 1.0f));
       model = glm::scale(model, glm::vec3(1.0f));
 
+      mainShader.use();
 
-      model = glm::mat4(1.0f);
-      for (unsigned int i = 0; i < gridWidth; ++i){
-         for (unsigned int j = 0; j < gridHeight; ++j){
-            model = glm::translate(model, planePos[i * gridHeight + j]);
-            mainShader.use();
-            mainShader.setMat4("model", model);
-            mainShader.setMat4("view", view);
-            mainShader.setMat4("projection", projection);
-
-            if (track[j][i] == 0){
-               mainShader.setInt("texture_diffuse1", 2);
-               asphalt.draw(mainShader);
-            }
-            else{
-               mainShader.setInt("texture_diffuse1", 3);
-               grass.draw(mainShader);
-            }
-            
-            model = glm::mat4(1.0f);
-         }
-      }
+      mainShader.setMat4("view", view);
+      mainShader.setMat4("projection", projection);  
+      mainShader.setInt("texture_diffuse1", 2);
+      terrain->render(mainShader);
 
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
@@ -272,7 +176,6 @@ int main(int argc, char* argv[]){
       terrainShader.setMat4("view", view);
       terrainShader.setMat4("projection", projection);
 
-      //terrain.render(terrainShader, camera);
 
       skyBox.draw(cubemapShader, projection, view);
       
@@ -280,7 +183,7 @@ int main(int argc, char* argv[]){
       glfwPollEvents();
    }
 
-   delete car, road;
+   delete car, terrain, road;
    glfwTerminate();
 
    return 0;

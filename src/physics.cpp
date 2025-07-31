@@ -89,18 +89,11 @@ btRigidBody* Physics::createRigidBody(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm
    collisionShape->addPoint(btVector3(C.x, C.y, C.z));
    collisionShape->addPoint(btVector3(D.x, D.y, D.z));
 
-   collisionShape->addPoint(btVector3(A.x + normal.x * 10.0f, A.y + normal.y * 10.0f, A.z + normal.z * 10.0f));
-   collisionShape->addPoint(btVector3(B.x + normal.x * 10.0f, B.y + normal.y * 10.0f, B.z + normal.z * 10.0f));
-   collisionShape->addPoint(btVector3(C.x + normal.x * 10.0f, C.y + normal.y * 10.0f, C.z + normal.z * 10.0f));
-   collisionShape->addPoint(btVector3(D.x + normal.x * 10.0f, D.y + normal.y * 10.0f, D.z + normal.z * 10.0f));
-   
    this->collisionShapes.push_back(collisionShape);
    
    // Transform object.
    btTransform objTransform;
    objTransform.setIdentity();
-   // objTransform.setRotation(rotation);
-   // objTransform.setOrigin(position);
 
 
    btScalar mass = m;
