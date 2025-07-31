@@ -95,7 +95,7 @@ btRigidBody* Physics::createRigidBody(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm
    btTransform objTransform;
    objTransform.setIdentity();
 
-
+   
    btScalar mass = m;
    bool isDynamic = (mass != 0.0f); // Check if it's a static (not affected by forces) object
 

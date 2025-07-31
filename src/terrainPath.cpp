@@ -17,16 +17,6 @@ void Terrain::generateIndices(){
 
    }
 
-   for (int i = 0; i < verticesSub.size() / 8; i += 3){
-      
-      // First triangle
-      indicesSub.push_back(i);
-      indicesSub.push_back(i + 1);
-      indicesSub.push_back(i + 2);
-
-   }
-
-
 }
 
 void Terrain::subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth){
@@ -283,14 +273,10 @@ void Terrain::setUp(){
 
    glGenVertexArrays(1, &vao2);
    glGenBuffers(1, &vbo2);
-   glGenBuffers(1, &ebo2);
 
    glBindVertexArray(vao2);
    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
    glBufferData(GL_ARRAY_BUFFER, verticesSub.size() * sizeof(float), verticesSub.data(), GL_STATIC_DRAW);
-
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo2);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSub.size() * sizeof(int), indicesSub.data(), GL_STATIC_DRAW);
 
    glEnableVertexAttribArray(0);
    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
@@ -312,7 +298,7 @@ void Terrain::render(Shader &shader){
    glBindVertexArray(0);
 
    glBindVertexArray(vao2);
-   glDrawElements(GL_TRIANGLES, indicesSub.size(), GL_UNSIGNED_INT, 0);
+   glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesSub.size() / 8));
    glBindVertexArray(0);
 }
 
@@ -322,7 +308,6 @@ void Terrain::cleanUpBuffers(){
    glDeleteBuffers(1, &ebo);
    glDeleteVertexArrays(1, &vao2);
    glDeleteBuffers(1, &vbo2);
-   glDeleteBuffers(1, &ebo2);
 }
 
 
