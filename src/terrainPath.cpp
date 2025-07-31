@@ -37,6 +37,18 @@ void Terrain::subdivide(std::vector<Triangle> &triangles, const Triangle &triang
    subdivide(triangles, {ab, bc, ac}, depth - 1);
 }  
 
+void Terrain::subdivide(std::vector<Quadrilateral> &quadrilaterals, const Quadrilateral &quadrilateral, int depth){
+   if (depth == 0){
+      quadrilaterals.push_back(quadrilateral);
+      return;
+   }
+
+   glm::vec3 ab = (quadrilateral.a + quadrilateral.b) * 0.5f;
+   glm::vec3 cd = (quadrilateral.c + quadrilateral.d) * 0.5f;  
+
+   subdivide(quadrilaterals, {quadrilateral.a, ab, quadrilateral.c, cd}, depth - 1);
+   subdivide(quadrilaterals, {ab, quadrilateral.b, cd, quadrilateral.d}, depth - 1);
+}
 
 void Terrain::generateVertices(Physics &simulation){
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -89,8 +101,7 @@ void Terrain::generateVertices(Physics &simulation){
       normal2 = glm::normalize(glm::cross(C2 - A2, B2 - A2));
 
       segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
-
-   
+      
       // 1st vertex of the left side
       vertices.push_back(A1.x); 
       vertices.push_back(A1.y); 
@@ -177,49 +188,52 @@ void Terrain::generateVertices(Physics &simulation){
    }
 
    // Set up terrain.
-   for (int h = 2; h <= horizontalTiles; ++h){
-      // horizontalTiles -> 1
-      for (int i = 0; i < generatedPath.size() - 1; ++i){
-         v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
-         w = glm::normalize(glm::cross(u, v));
+   for (int i = 0; i < generatedPath.size() - 1; ++i){
 
-         if (i == 0){
-            A1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i];
-            B1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i];
-            A2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i];
-            B2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i];
-         }
-         else{
-            A1 = prevA1;
-            B1 = prevB1;
-            A2 = prevA2;
-            B2 = prevB2;
-         }
+      v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
+      w = glm::normalize(glm::cross(u, v));
 
-         C1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i + 1];
-         D1 = w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i + 1];
-         C2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h - 1) / horizontalTiles)) + generatedPath[i + 1];
-         D2 = -w * (roadPathWidth / 2 + terrainPathWidth * (static_cast<float>(h) / horizontalTiles)) + generatedPath[i + 1];
+      if (i == 0){
+         A1 = w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i];
+         B1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+         A2 = -w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i];
+         B2 = -w * (roadPathWidth / 2) + generatedPath[i];
+      }
+      else{
+         A1 = prevA1;
+         B1 = prevB1;
+         A2 = prevA2;
+         B2 = prevB2;
+      }
 
-         // Save point C1, D1 of the current iteration.
-         prevA1 = C1;
-         prevB1 = D1;
-         prevA2 = C2;
-         prevB2 = D2;
+      C1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      D1 = w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i + 1];
+      C2 = -w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      D2 = -w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i + 1];
 
-         segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
+      // Save point C1, D1 of the current iteration.
+      prevA1 = C1;
+      prevB1 = D1;
+      prevA2 = C2;
+      prevB2 = D2;
 
+      segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
+
+      std::vector<Quadrilateral> quadrilaterals;
+
+      Quadrilateral q1 = {A1, B1, C1, D1};
+      Quadrilateral q2 = {A2, B2, C2, D2};
+
+      subdivide(quadrilaterals, q1, horizontalTiles / 2);
+      subdivide(quadrilaterals, q2, horizontalTiles / 2);
+
+      for (const Quadrilateral &q: quadrilaterals){
          std::vector<Triangle> triangles;
 
-         Triangle t1 = {A1, B1, C1};
-         Triangle t2 = {B1, C1, D1};
-         Triangle t3 = {A2, B2, C2};
-         Triangle t4 = {B2, C2, D2};
-
+         Triangle t1 = {q.a, q.b, q.c};
+         Triangle t2 = {q.b, q.c, q.d};
          subdivide(triangles, t1, subdivision);
          subdivide(triangles, t2, subdivision);
-         subdivide(triangles, t3, subdivision);
-         subdivide(triangles, t4, subdivision);
 
          for (const Triangle &t : triangles) {
             normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
@@ -240,10 +254,10 @@ void Terrain::generateVertices(Physics &simulation){
                verticesSub.push_back(vCoord);
 
             }
-            //simulation.createRigidBody(t.a, t.b, t.c, normal, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
          }
       }
    }
+
 
    std::cout << "Vertices: " << vertices.size() << "\n";
    std::cout << "Vertices sub: " << verticesSub.size() << "\n";
@@ -251,6 +265,7 @@ void Terrain::generateVertices(Physics &simulation){
 }
 
 void Terrain::setUp(){
+
    glGenVertexArrays(1, &vao);
    glGenBuffers(1, &vbo);
    glGenBuffers(1, &ebo);
@@ -298,6 +313,7 @@ void Terrain::render(Shader &shader){
    glBindVertexArray(0);
 
    glBindVertexArray(vao2);
+   // Use drawArrays instead because all triangles were already defined.
    glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesSub.size() / 8));
    glBindVertexArray(0);
 }

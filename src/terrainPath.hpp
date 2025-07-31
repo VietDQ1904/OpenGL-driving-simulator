@@ -18,6 +18,13 @@ struct Triangle{
    glm::vec3 c;
 };
 
+struct Quadrilateral{
+   glm::vec3 a;
+   glm::vec3 b;
+   glm::vec3 c;
+   glm::vec3 d;
+};
+
 class Terrain: public Spline{
    public:
 
@@ -58,6 +65,7 @@ class Terrain: public Spline{
    private:
       void generateIndices();
       void subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth);
+      void subdivide(std::vector<Quadrilateral> &quadrilaterals, const Quadrilateral &quadrilateral, int depth);
       void generateVertices(Physics &simulation);
       void setUp();
 
