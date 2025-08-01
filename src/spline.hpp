@@ -19,22 +19,21 @@ class Spline{
          glm::vec3(65.0f, 0.5f, -5.0f),
          glm::vec3(76.0f, 0.8f, -13.0f),
          glm::vec3(66.0f, 0.9f, -25.0f),
-         glm::vec3(73.0f, 1.0f, -38.0f),
+         glm::vec3(73.0f, 1.2f, -38.0f),
          glm::vec3(56.0f, 0.5f, -45.0f),
          glm::vec3(38.0f, 0.5f, -55.0f),
          glm::vec3(31.0f, 0.5f, -41.0f),
          glm::vec3(13.0f, 0.0f, -46.0f),
          glm::vec3(-2.0f, -0.5f, -34.0f),
-         glm::vec3(-23.0f, -0.2f, -32.0f),
-         glm::vec3(-30.0f, 0.0f, -17.0f),
-         glm::vec3(-20.0f, 0.0f, -1.0f),
+         glm::vec3(-23.0f, -1.0f, -32.0f),
+         glm::vec3(-30.0f, -0.3f, -17.0f),
+         glm::vec3(-20.0f, 0.0f, -1.0f), 
       };
 
       float alpha = 0.5f;
       int samplePerFragments = 20;
       float roadPathWidth = 15.0f;
       float terrainPathWidth = 30.0f;
-      
       std::vector<glm::vec3> generatedPath;
 
       glm::vec3 catmullRom(const glm::vec3 &p0, const glm::vec3 &p1,
