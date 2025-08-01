@@ -70,7 +70,6 @@ int main(int argc, char* argv[]){
 
    Shader mainShader("../src/model.vert", "../src/model.frag", nullptr);
    Shader cubemapShader("../src/cubemap.vert", "../src/cubemap.frag", nullptr);
-   Shader terrainShader("../src/terrain.vert", "../src/terrain.frag", nullptr);
 
    Physics simulation;
 
@@ -114,7 +113,7 @@ int main(int argc, char* argv[]){
    // glfwSetCursorPosCallback(window, mouseCallback); // When move the mouse
    // glfwSetScrollCallback(window, scrollCallback); // When scroll the mouse
 
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       
    glfwSetWindowUserPointer(window, &camera);
    glfwSetCursorPosCallback(window, [](GLFWwindow *window, double x, double y){
@@ -160,7 +159,7 @@ int main(int argc, char* argv[]){
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
       mainShader.setInt("texture_diffuse1", 2);
-      terrain->render(mainShader);
+      terrain->render(mainShader, camera);
 
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
@@ -171,11 +170,6 @@ int main(int argc, char* argv[]){
       mainShader.setMat4("projection", projection);  
       mainShader.setInt("texture_diffuse1", 4);
       car->render(mainShader);
-
-      terrainShader.use();
-      terrainShader.setMat4("view", view);
-      terrainShader.setMat4("projection", projection);
-
 
       skyBox.draw(cubemapShader, projection, view);
       

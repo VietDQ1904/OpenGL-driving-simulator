@@ -8,6 +8,8 @@
 #include "shader.hpp"
 #include "physics.hpp"
 #include "spline.hpp"
+#include "camera.hpp"
+#include "perlinNoise.hpp"
 
 #ifndef TERRAIN_PATH
 #define TERRAIN_PATH
@@ -27,13 +29,13 @@ struct Quadrilateral{
 
 class Terrain: public Spline{
    public:
-
       std::vector<float> vertices;
       std::vector<int> indices;
-      std::vector<float> verticesSub;
+      std::vector<std::vector<float>> verticesTerrain;
+      std::vector<glm::vec3> pivots;
 
       GLuint vao, vbo, ebo;
-      GLuint vao2, vbo2;
+      std::vector<GLuint> vaos, vbos;
 
       glm::mat4 model;
 
@@ -42,7 +44,13 @@ class Terrain: public Spline{
       float tileLength = roadPathWidth;
       int subdivision = 2;
       int horizontalTiles = static_cast<int>(terrainPathWidth / 5.0f);
-      
+      int partitionSize = 25;
+      float renderDistance = 250.0f;
+
+      PerlinNoise noise;
+      float amplitude = 10.0f;
+      float noiseScale = 0.15f;
+
       Terrain(Physics &simulation){
          for (auto& point : points) {
             point *= 5.0f;
@@ -51,7 +59,6 @@ class Terrain: public Spline{
          this->generateSpline();
          this->generateVertices(simulation);
          this->generateIndices();
-         
          this->setUp();
       } 
 
@@ -59,7 +66,7 @@ class Terrain: public Spline{
          this->cleanUpBuffers();
       }
 
-      void render(Shader &shader);
+      void render(Shader &shader, Camera &camera);
       void cleanUpBuffers();
 
    private:

@@ -1,10 +1,15 @@
 #include "terrainPath.hpp"
 
+float getNoiseMultiplierByDistance(float referenceDistance, float distance){
+   float value = glm::clamp(distance / referenceDistance - 1.0f, 0.0f, 1.0f);
+   value = std::pow(value, 5) * 2.0f;
+   return value;
+}
+
 void Terrain::generateIndices(){
    int topLeft, bottomLeft, topRight, bottomRight;
 
    for (int i = 0; i < vertices.size() / 3; i += 4){
-      
       // First triangle
       indices.push_back(i);
       indices.push_back(i + 1);
@@ -188,6 +193,14 @@ void Terrain::generateVertices(Physics &simulation){
    }
 
    // Set up terrain.
+   int elements = 0;
+   float noiseValue;
+   float extraFlatDistance = 10.0f; 
+   float minDist = roadPathWidth / 2.0f + extraFlatDistance;
+   float maxDist = minDist + terrainPathWidth;
+   float baseHeight = 0.5f;
+
+   std::vector<float> verticesSub;
    for (int i = 0; i < generatedPath.size() - 1; ++i){
 
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
@@ -237,13 +250,22 @@ void Terrain::generateVertices(Physics &simulation){
 
          for (const Triangle &t : triangles) {
             normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
-            for (const glm::vec3 &p : {t.a, t.b, t.c}) {
+         
+            for (glm::vec3 p : {t.a, t.b, t.c}) {
                uCoord = glm::dot(p - generatedPath[i], v);
                vCoord = glm::dot(p - generatedPath[i], w);
 
                uCoord *= uvScale;
                vCoord *= uvScale;
 
+               // Change Y coordinate of the point according to the noise values
+               float distanceToRoad = std::abs(glm::dot(p - generatedPath[i], w));
+               noiseValue = noise.getNoise(p.x * noiseScale, 0.0, p.z * noiseScale);
+
+               float multiplierValue = getNoiseMultiplierByDistance(terrainPathWidth / 2, distanceToRoad);
+               p.y += multiplierValue * noiseValue * amplitude;
+
+               
                verticesSub.push_back(p.x); 
                verticesSub.push_back(p.y); 
                verticesSub.push_back(p.z);
@@ -256,11 +278,22 @@ void Terrain::generateVertices(Physics &simulation){
             }
          }
       }
+      
+      if (elements >= partitionSize){
+         verticesTerrain.push_back(verticesSub);
+         elements = 0;
+         verticesSub.clear();
+      }
+      elements++;
    }
 
+   if (!verticesSub.empty()){
+      verticesTerrain.push_back(verticesSub);
+   }
 
-   std::cout << "Vertices: " << vertices.size() << "\n";
-   std::cout << "Vertices sub: " << verticesSub.size() << "\n";
+   // std::cout << "Vertices: " << vertices.size() << "\n";
+   // std::cout << "Vertices sub: " << verticesSub.size() << "\n";
+   // std::cout << "Vertices Terrain: " << verticesTerrain.size() << "\n";
 
 }
 
@@ -286,24 +319,40 @@ void Terrain::setUp(){
 
    glBindVertexArray(0);
 
-   glGenVertexArrays(1, &vao2);
-   glGenBuffers(1, &vbo2);
+   
+   for (const auto& partition: verticesTerrain){
+      GLuint vaoPartition, vboPartition;
+      glGenVertexArrays(1, &vaoPartition);
+      glGenBuffers(1, &vboPartition);
 
-   glBindVertexArray(vao2);
-   glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-   glBufferData(GL_ARRAY_BUFFER, verticesSub.size() * sizeof(float), verticesSub.data(), GL_STATIC_DRAW);
+      vaos.push_back(vaoPartition);
+      vbos.push_back(vboPartition);
 
-   glEnableVertexAttribArray(0);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-   glEnableVertexAttribArray(1);
-   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
-   glEnableVertexAttribArray(2);
-   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+      int numVertices = partition.size() / 8;
+      int middleIndex = numVertices / 2;
 
-   glBindVertexArray(0);
+      // Add middle points to the pivots list.
+      pivots.push_back(glm::vec3(partition[middleIndex * 8],
+                                 partition[middleIndex * 8 + 1],
+                                 partition[middleIndex * 8 + 2]));
+
+      glBindVertexArray(vaoPartition);
+      glBindBuffer(GL_ARRAY_BUFFER, vboPartition);
+      glBufferData(GL_ARRAY_BUFFER, partition.size() * sizeof(float), partition.data(), GL_STATIC_DRAW);
+
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+      glEnableVertexAttribArray(1);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+      glEnableVertexAttribArray(2);
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+
+      glBindVertexArray(0);
+   }
+
 }
 
-void Terrain::render(Shader &shader){
+void Terrain::render(Shader &shader, Camera &camera){
 
    model = glm::mat4(1.0f);
    shader.setMat4("model", model);
@@ -312,9 +361,17 @@ void Terrain::render(Shader &shader){
    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
    glBindVertexArray(0);
 
-   glBindVertexArray(vao2);
-   // Use drawArrays instead because all triangles were already defined.
-   glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesSub.size() / 8));
+   float length;
+   for (int i = 0; i < vaos.size(); ++i){
+      length = glm::distance(camera.cameraPos, pivots[i]);
+
+      if (length < renderDistance){
+         glBindVertexArray(vaos[i]);
+         // Use drawArrays instead because all triangles were already defined.
+         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrain[i].size() / 8));
+      }
+   }
+
    glBindVertexArray(0);
 }
 
@@ -322,8 +379,14 @@ void Terrain::cleanUpBuffers(){
    glDeleteVertexArrays(1, &vao);
    glDeleteBuffers(1, &vbo);
    glDeleteBuffers(1, &ebo);
-   glDeleteVertexArrays(1, &vao2);
-   glDeleteBuffers(1, &vbo2);
+
+   for (GLuint v: vaos){
+      glDeleteVertexArrays(1, &v);
+   }
+
+   for (GLuint v: vbos){
+      glDeleteBuffers(1, &v);
+   }
 }
 
 
