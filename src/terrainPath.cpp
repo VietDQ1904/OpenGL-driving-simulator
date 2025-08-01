@@ -195,10 +195,8 @@ void Terrain::generateVertices(Physics &simulation){
    // Set up terrain.
    int elements = 0;
    float noiseValue;
-   float extraFlatDistance = 10.0f; 
-   float minDist = roadPathWidth / 2.0f + extraFlatDistance;
-   float maxDist = minDist + terrainPathWidth;
-   float baseHeight = 0.5f;
+   float distanceToRoad;
+   float multiplierValue;
 
    std::vector<float> verticesSub;
    for (int i = 0; i < generatedPath.size() - 1; ++i){
@@ -249,6 +247,7 @@ void Terrain::generateVertices(Physics &simulation){
          subdivide(triangles, t2, subdivision);
 
          for (const Triangle &t : triangles) {
+
             normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
          
             for (glm::vec3 p : {t.a, t.b, t.c}) {
@@ -259,13 +258,12 @@ void Terrain::generateVertices(Physics &simulation){
                vCoord *= uvScale;
 
                // Change Y coordinate of the point according to the noise values
-               float distanceToRoad = std::abs(glm::dot(p - generatedPath[i], w));
+               distanceToRoad = std::abs(glm::dot(p - generatedPath[i], w));
                noiseValue = noise.getNoise(p.x * noiseScale, 0.0, p.z * noiseScale);
 
-               float multiplierValue = getNoiseMultiplierByDistance(terrainPathWidth / 2, distanceToRoad);
+               multiplierValue = getNoiseMultiplierByDistance(terrainPathWidth / 2, distanceToRoad);
                p.y += multiplierValue * noiseValue * amplitude;
-
-               
+    
                verticesSub.push_back(p.x); 
                verticesSub.push_back(p.y); 
                verticesSub.push_back(p.z);
@@ -290,10 +288,6 @@ void Terrain::generateVertices(Physics &simulation){
    if (!verticesSub.empty()){
       verticesTerrain.push_back(verticesSub);
    }
-
-   // std::cout << "Vertices: " << vertices.size() << "\n";
-   // std::cout << "Vertices sub: " << verticesSub.size() << "\n";
-   // std::cout << "Vertices Terrain: " << verticesTerrain.size() << "\n";
 
 }
 

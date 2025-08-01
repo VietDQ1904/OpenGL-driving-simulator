@@ -216,7 +216,7 @@ void Car::setUp(){
    frameB = btTransform::getIdentity();
 
    frameA.getBasis().setEulerZYX(0, 0, 0);
-   frameB.getBasis().setEulerZYX(0, 0, glm::radians(90.0f));
+   frameB.getBasis().setEulerZYX(0, 0, glm::radians(-90.0f));
    frameA.setOrigin(btVector3(-this->wheelPos_1.x, -this->wheelPos_1.y, this->wheelPos_1.z));
    frameB.setOrigin(btVector3(0.0, 0.0, 0.0));
 
@@ -241,7 +241,7 @@ void Car::setUp(){
    frameB = btTransform::getIdentity();
 
    frameA.getBasis().setEulerZYX(0, 0, 0);
-   frameB.getBasis().setEulerZYX(0, 0, glm::radians(-90.0f));
+   frameB.getBasis().setEulerZYX(0, 0, glm::radians(90.0f));
    frameA.setOrigin(btVector3(-this->wheelPos_2.x, -this->wheelPos_2.y, this->wheelPos_2.z));
    frameB.setOrigin(btVector3(0.0, 0.0, 0.0));
 
