@@ -56,14 +56,14 @@ void Barrier::generateVertices(Physics &simulation){
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, midPoint1);
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.1f, 1.0f, segmentLength / 2.1f));
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.0f, 1.0f, segmentLength / 2.0f));
       modelMatrices.push_back(modelMatrix);
 
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, midPoint2);
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
       modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.1f, 1.0f, segmentLength / 2.1f));
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.0f, 1.0f, segmentLength / 2.0f));
       modelMatrices.push_back(modelMatrix);
 
 

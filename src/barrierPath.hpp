@@ -33,7 +33,7 @@ class Barrier: public Spline{
             point *= 5.0f;
          }
 
-         barrierModel = new Model("../assets/barrier.obj");
+         barrierModel = new Model("../assets/Barrier/barrier.obj");
 
          this->generateSpline();
          this->generateVertices(simulation);

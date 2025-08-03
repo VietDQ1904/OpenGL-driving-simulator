@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
    Physics simulation;
 
    Car *car = new Car(simulation);
-   car->loadModels("../assets/car.obj", "../assets/wheelFront.obj", "../assets/wheelBack.obj");
+   car->loadModels("../assets/Car/car.obj", "../assets/Car/wheelFront.obj", "../assets/Car/wheelBack.obj");
    
 
    std::array<std::string, 6> images = {"right.jpg",
@@ -101,18 +101,11 @@ int main(int argc, char* argv[]){
    Terrain *terrain = new Terrain(simulation);
    Barrier *barrier = new Barrier(simulation);
    
-   glActiveTexture(GL_TEXTURE0);
-   Texture texture1("", "../assets/mars.png");
+
    glActiveTexture(GL_TEXTURE1);
-   Texture texture2("", "../assets/concrete.png");
+   Texture texture1("", "../assets/grass.png");
    glActiveTexture(GL_TEXTURE2);
-   Texture texture3("", "../assets/grass.png");
-   glActiveTexture(GL_TEXTURE3);
-   Texture texture4("", "../assets/asphalt.png");
-   glActiveTexture(GL_TEXTURE4);
-   Texture texture5("", "../assets/car.png");
-   glActiveTexture(GL_TEXTURE5);
-   Texture texture6("", "../assets/stripeBarrier.png");
+   Texture texture2("", "../assets/asphalt.png");
 
    //Terrain terrain;
 
@@ -164,24 +157,24 @@ int main(int argc, char* argv[]){
 
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
-      mainShader.setInt("texture_diffuse1", 2);
+      mainShader.setInt("texture_diffuse1", 1);
       terrain->render(mainShader, camera);
 
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
-      mainShader.setInt("texture_diffuse1", 3);
+      mainShader.setInt("texture_diffuse1", 2);
       road->render(mainShader);
 
       carShader.use();
       carShader.setMat4("view", view);
       carShader.setMat4("projection", projection);  
-      carShader.setInt("texture_diffuse1", 4);
+      //carShader.setInt("texture_diffuse1", 4);
       car->render(carShader);
 
       barrierShader.use();
       barrierShader.setMat4("view", view);
       barrierShader.setMat4("projection", projection);  
-      barrierShader.setInt("texture_diffuse1", 5);
+      //barrierShader.setInt("texture_diffuse1", 5);
       barrier->render(barrierShader);
 
       skyBox.draw(cubemapShader, projection, view);

@@ -34,12 +34,8 @@ void Mesh::draw(Shader &shader){
          number = std::to_string(specularNr++);
       }
       
+      shader.setInt((name + number).c_str(), i);
       glBindTexture(GL_TEXTURE_2D, textures[i].textureID);
-
-      glBindVertexArray(vao);
-      glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-      glBindVertexArray(0);
-
    }
    glBindVertexArray(vao);
    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -101,7 +97,6 @@ void Model::loadModel(std::string path){
    }
    // Get the last directory of the path
    directory = path.substr(0, path.find_last_of('/'));
-
    // Process the root node.
    processNode(scene->mRootNode, scene);
 }
@@ -180,7 +175,6 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
       Texture texture(typeName, textureFile);
 
       textures.push_back(texture);
-   
    }
 
    return textures;
