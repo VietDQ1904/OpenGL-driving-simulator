@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# OpenGL-driving-game
-A driving game project made in OpenGL.
-=======
 # Car Driving Project with OpenGL #
 
 This project demonstrates a car driving game using OpenGL, GLM, stb_image, Bullet Physics and Assimp. It has a 
@@ -61,4 +57,3 @@ player-controlled car and procedural generated terrains using Perlin Noise.
 
 
 
->>>>>>> dev
