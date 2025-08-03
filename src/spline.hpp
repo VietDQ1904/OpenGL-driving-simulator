@@ -27,7 +27,7 @@ class Spline{
          glm::vec3(-2.0f, -0.5f, -34.0f),
          glm::vec3(-23.0f, -1.0f, -32.0f),
          glm::vec3(-30.0f, -0.3f, -17.0f),
-         glm::vec3(-20.0f, 0.0f, -1.0f), 
+         glm::vec3(-5.0f, 0.0f, -1.0f), 
       };
 
       float alpha = 0.5f;

@@ -13,6 +13,7 @@ set (SOURCES src/main.cpp
              src/perlinNoise.cpp
              src/roadPath.cpp
              src/terrainPath.cpp
+             src/barrierPath.cpp
             )
 
 

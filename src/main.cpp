@@ -8,6 +8,7 @@
 //#include "terrain.hpp"
 #include "roadPath.hpp"
 #include "terrainPath.hpp"
+#include "barrierPath.hpp"
 #include "../lib/stb_image.h"
 
 const float windowWidth = 1080.0f;
@@ -70,6 +71,8 @@ int main(int argc, char* argv[]){
 
    Shader mainShader("../src/model.vert", "../src/model.frag", nullptr);
    Shader cubemapShader("../src/cubemap.vert", "../src/cubemap.frag", nullptr);
+   Shader carShader("../src/model.vert", "../src/modelTexture.frag", nullptr);
+   Shader barrierShader("../src/barrier.vert", "../src/modelTexture.frag", nullptr);
 
    Physics simulation;
 
@@ -96,6 +99,7 @@ int main(int argc, char* argv[]){
 
    Road *road = new Road(simulation);
    Terrain *terrain = new Terrain(simulation);
+   Barrier *barrier = new Barrier(simulation);
    
    glActiveTexture(GL_TEXTURE0);
    Texture texture1("", "../assets/mars.png");
@@ -107,6 +111,8 @@ int main(int argc, char* argv[]){
    Texture texture4("", "../assets/asphalt.png");
    glActiveTexture(GL_TEXTURE4);
    Texture texture5("", "../assets/car.png");
+   glActiveTexture(GL_TEXTURE5);
+   Texture texture6("", "../assets/stripeBarrier.png");
 
    //Terrain terrain;
 
@@ -166,10 +172,17 @@ int main(int argc, char* argv[]){
       mainShader.setInt("texture_diffuse1", 3);
       road->render(mainShader);
 
-      mainShader.setMat4("view", view);
-      mainShader.setMat4("projection", projection);  
-      mainShader.setInt("texture_diffuse1", 4);
-      car->render(mainShader);
+      carShader.use();
+      carShader.setMat4("view", view);
+      carShader.setMat4("projection", projection);  
+      carShader.setInt("texture_diffuse1", 4);
+      car->render(carShader);
+
+      barrierShader.use();
+      barrierShader.setMat4("view", view);
+      barrierShader.setMat4("projection", projection);  
+      barrierShader.setInt("texture_diffuse1", 5);
+      barrier->render(barrierShader);
 
       skyBox.draw(cubemapShader, projection, view);
       
@@ -177,7 +190,7 @@ int main(int argc, char* argv[]){
       glfwPollEvents();
    }
 
-   delete car, terrain, road;
+   delete car, terrain, road, barrier;
    glfwTerminate();
 
    return 0;

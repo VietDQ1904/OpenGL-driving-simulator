@@ -1,8 +1,14 @@
 #include "terrainPath.hpp"
 
+float roundToDecimal(float value, int decimals) {
+   float factor = std::pow(10.0, decimals);
+   return std::round(value * factor) / factor;
+}
+
+
 float getNoiseMultiplierByDistance(float referenceDistance, float distance){
    float value = glm::clamp(distance / referenceDistance - 1.0f, 0.0f, 1.0f);
-   value = std::pow(value, 5) * 2.0f;
+   value = roundToDecimal(std::pow(value, 5), 1) * 2.0f;
    return value;
 }
 
