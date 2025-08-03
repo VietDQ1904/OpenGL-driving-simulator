@@ -5,6 +5,14 @@ float roundToDecimal(float value, int decimals) {
    return std::round(value * factor) / factor;
 }
 
+float pointToSegmentDistance(const glm::vec3& p, const glm::vec3& a, const glm::vec3& b) {
+   glm::vec3 ab = b - a;
+   glm::vec3 ap = p - a;
+   float t = glm::dot(ap, ab) / glm::dot(ab, ab);
+   t = glm::clamp(t, 0.0f, 1.0f);
+   glm::vec3 projection = a + t * ab;
+   return glm::length(p - projection);
+}
 
 float getNoiseMultiplierByDistance(float referenceDistance, float distance){
    float value = glm::clamp(distance / referenceDistance - 1.0f, 0.0f, 1.0f);
@@ -256,7 +264,7 @@ void Terrain::generateVertices(Physics &simulation){
 
             for (glm::vec3 *p : {&t.a, &t.b, &t.c}){
                // Change Y coordinate of the point according to the noise values
-               distanceToRoad = std::abs(glm::dot(*p - generatedPath[i], w));
+               distanceToRoad = pointToSegmentDistance(*p, generatedPath[i], generatedPath[i + 1]);
                noiseValue = noise.getNoise(p->x * noiseScale, 0.0, p->z * noiseScale);
                multiplierValue = getNoiseMultiplierByDistance(terrainPathWidth / 2, distanceToRoad);
                p->y += multiplierValue * noiseValue * amplitude;
