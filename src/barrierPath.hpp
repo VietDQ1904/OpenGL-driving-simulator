@@ -38,6 +38,7 @@ class Barrier: public Spline{
          this->generateSpline();
          this->generateVertices(simulation);
          this->setUp();
+         
       } 
 
       ~Barrier(){

@@ -12,19 +12,28 @@ Texture::Texture(std::string type, std::string path):
 void Texture::loadTexture(){
 
    int width, height, nrChannels;
-   stbi_set_flip_vertically_on_load(true);
-   unsigned char *data = stbi_load(this->path.c_str(), &width, &height, &nrChannels, 0);
 
+   //stbi_set_flip_vertically_on_load(true);
+   unsigned char *data = stbi_load(this->path.c_str(), &width, &height, &nrChannels, 0);
+   
    if (data){
       GLenum formatStandard;
-      formatStandard = (nrChannels == 1) ? GL_RED :
-                     (nrChannels == 3) ? GL_RGB :
-                     (nrChannels == 4) ? GL_RGBA : 0;
-     
 
+      if (type == "texture_diffuse"){
+         formatStandard = (nrChannels == 1) ? GL_RED :
+                     (nrChannels == 3) ? GL_SRGB :
+                     (nrChannels == 4) ? GL_SRGB_ALPHA : 0;
+      }
+      else{
+         formatStandard = (nrChannels == 1) ? GL_RED :
+                        (nrChannels == 3) ? GL_RGB :
+                        (nrChannels == 4) ? GL_RGBA : 0;
+      }
+      
       GLenum format = (nrChannels == 1) ? GL_RED :
                         (nrChannels == 3) ? GL_RGB :
                         (nrChannels == 4) ? GL_RGBA : 0;
+      
                
       glGenTextures(1, &this->textureID);
       glBindTexture(GL_TEXTURE_2D, this->textureID);
@@ -44,4 +53,8 @@ void Texture::loadTexture(){
       std::cout << "ERROR::IMAGE::FAILED TO LOAD IMAGE " << path << std::endl;
    }
 
+}
+
+void Texture::bindTexture(){
+   glBindTexture(1, this->textureID);
 }

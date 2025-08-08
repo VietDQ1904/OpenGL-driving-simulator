@@ -11,7 +11,6 @@ void Barrier::generateVertices(Physics &simulation){
    glm::vec3 A2, B2, C2, D2; // the right side
 
    glm::vec3 normal;
-   glm::vec3 normal1, normal2;
    glm::vec3 midPoint1, midPoint2;
 
    float segmentLength;
@@ -56,23 +55,19 @@ void Barrier::generateVertices(Physics &simulation){
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, midPoint1);
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.0f, 1.0f, segmentLength / 2.0f));
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 3.0f, 1.0f, segmentLength / 1.75f));
       modelMatrices.push_back(modelMatrix);
 
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, midPoint2);
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
       modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.0f, 1.0f, segmentLength / 2.0f));
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 3.0f, 1.0f, segmentLength / 1.75f));
       modelMatrices.push_back(modelMatrix);
 
-
-      normal1 = glm::normalize(glm::cross(C1 - A1, B1 - A1));
-      normal2 = glm::normalize(glm::cross(C2 - A2, B2 - A2));
-
       // Create a rigid body.
-      simulation.createRigidBody(A1, B1, C1, D1, normal1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
-      simulation.createRigidBody(A2, B2, C2, D2, normal2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
    }
 
 }
@@ -89,34 +84,35 @@ void Barrier::setUp(){
 
       size_t matrixSegment = sizeof(glm::vec4);
 
-      glEnableVertexAttribArray(3);
-      glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
-      glEnableVertexAttribArray(4);
-      glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
       glEnableVertexAttribArray(5);
-      glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+      glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
       glEnableVertexAttribArray(6);
-      glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
+      glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
+      glEnableVertexAttribArray(7);
+      glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+      glEnableVertexAttribArray(8);
+      glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
 
-      glVertexAttribDivisor(3, 1);
-      glVertexAttribDivisor(4, 1);
       glVertexAttribDivisor(5, 1);
       glVertexAttribDivisor(6, 1);
+      glVertexAttribDivisor(7, 1);
+      glVertexAttribDivisor(8, 1);
       
       glBindVertexArray(0);
    }
 
 }
 
-void Barrier::render(Shader &shader){
 
+void Barrier::render(Shader &shader){
+   
    for (unsigned int i = 0; i < barrierModel->meshes.size(); ++i){
       glBindVertexArray(barrierModel->meshes[i].vao);
       glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(barrierModel->meshes[i].indices.size()), 
       GL_UNSIGNED_INT, 0, modelMatrices.size());
       glBindVertexArray(0);
    }
-
+   
 }
 
 void Barrier::cleanUpBuffers(){

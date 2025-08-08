@@ -101,7 +101,7 @@ void Road::generateVertices(Physics &simulation){
       vertices.push_back(0.0f);
 
       // Create a rigid body.
-      simulation.createRigidBody(A, B, C, D, normal, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
    
    }
 

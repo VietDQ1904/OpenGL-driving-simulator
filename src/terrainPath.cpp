@@ -202,8 +202,8 @@ void Terrain::generateVertices(Physics &simulation){
       vertices.push_back(0.0f);
 
       // Create a rigid body.
-      simulation.createRigidBody(A1, B1, C1, D1, normal1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
-      simulation.createRigidBody(A2, B2, C2, D2, normal2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
    }
 
    // Set up terrain.

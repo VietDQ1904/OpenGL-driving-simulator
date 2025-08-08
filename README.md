@@ -35,7 +35,7 @@ player-controlled car and procedural generated road and terrain.
    installed packages). Build the project using the command: 
 
       ```
-      cmake -G "MinGW Makefiles" ..
+      cmake -G "MinGW Makefiles" .. 
       cmake --build .
       ```
 

@@ -18,6 +18,8 @@ struct Vertex{
    glm::vec3 position;
    glm::vec3 normal;
    glm::vec2 texCoords;
+   glm::vec3 tangent;
+   glm::vec3 bitangent;
 };
 
 class Model;
@@ -40,11 +42,12 @@ class Mesh{
 
 class Model{
    public:
+      std::vector<Mesh> meshes;
+      std::string directory;
+
       Model(const char *path);
       void draw(Shader &shader);
       void cleanUpBuffers();
-      std::vector<Mesh> meshes;
-      std::string directory;
 
    private:
       void loadModel(std::string path);
