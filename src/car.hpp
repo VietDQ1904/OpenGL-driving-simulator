@@ -54,7 +54,6 @@ class Car{
       void loadShaderFrontWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
       void loadShaderBackWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
    
-      void render();
       void render(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPos);
       void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
       void update();

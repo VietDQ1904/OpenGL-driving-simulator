@@ -47,7 +47,6 @@ class Barrier: public Spline{
          delete barrierModel;
       }
 
-      void render(Shader &shader);
       void render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos);
       void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
       void cleanUpBuffers();

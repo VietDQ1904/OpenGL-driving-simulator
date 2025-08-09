@@ -172,17 +172,8 @@ int main(int argc, char* argv[]){
       road->render(mainShader);
 
       car->render(view, projection, camera.cameraPos);
-
       barrier->render(view, projection, camera.cameraPos);
 
-      // barrierShader.use();
-      // barrierShader.setVec3("viewPos", camera.cameraPos);
-      // barrierShader.setVec3("light.direction", glm::vec3(1.0f, -1.0f, 1.0f));
-      // barrierShader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
-      // barrierShader.setMat4("view", view);
-      // barrierShader.setMat4("projection", projection);  
-      // //barrierShader.setInt("texture_diffuse1", 5);
-      // barrier->render(barrierShader);
 
       skyBox.draw(cubemapShader, projection, view);
       

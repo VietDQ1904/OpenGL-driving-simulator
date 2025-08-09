@@ -338,45 +338,6 @@ void Car::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
    wheelModel2->modelShader.setVec3("light.color", lightColor);
 }
 
-void Car::render(){
-
-   carModel->modelShader.use();
-   car->getMotionState()->getWorldTransform(transform);
-   transform.getOpenGLMatrix(matrix);
-   objectModelMatrix = glm::make_mat4(matrix);
-   carModel->modelShader.setMat4("model", objectModelMatrix);
-   carModel->draw();
-
-   wheelModel1->modelShader.use();
-   wheel1->getMotionState()->getWorldTransform(transform);
-   transform.getOpenGLMatrix(matrix);
-   objectModelMatrix = glm::make_mat4(matrix);
-   wheelModel1->modelShader.setMat4("model", objectModelMatrix);
-   wheelModel1->draw();
-
-   wheelModel1->modelShader.use();
-   wheel2->getMotionState()->getWorldTransform(transform);
-   transform.getOpenGLMatrix(matrix);
-   objectModelMatrix = glm::make_mat4(matrix);
-   wheelModel1->modelShader.setMat4("model", objectModelMatrix);
-   wheelModel1->draw();
-
-   wheelModel2->modelShader.use();
-   wheel3->getMotionState()->getWorldTransform(transform);
-   transform.getOpenGLMatrix(matrix);
-   objectModelMatrix = glm::make_mat4(matrix);
-   wheelModel2->modelShader.setMat4("model", objectModelMatrix);
-   wheelModel2->draw();
-
-   wheelModel2->modelShader.use();
-   wheel4->getMotionState()->getWorldTransform(transform);
-   transform.getOpenGLMatrix(matrix);
-   objectModelMatrix = glm::make_mat4(matrix);
-   wheelModel2->modelShader.setMat4("model", objectModelMatrix);
-   wheelModel2->draw();
-
-}
-
 void Car::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
    
    carModel->modelShader.use();

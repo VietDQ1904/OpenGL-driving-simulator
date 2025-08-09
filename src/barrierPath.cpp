@@ -103,19 +103,8 @@ void Barrier::setUp(){
 
 }
 
-void Barrier::render(Shader &shader){
-   
-   for (unsigned int i = 0; i < barrierModel->meshes.size(); ++i){
-      glBindVertexArray(barrierModel->meshes[i].vao);
-      glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(barrierModel->meshes[i].indices.size()), 
-      GL_UNSIGNED_INT, 0, modelMatrices.size());
-      glBindVertexArray(0);
-   }
-   
-}
-
 void Barrier::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
-   
+
    barrierModel->modelShader.use();
    barrierModel->modelShader.setMat4("view", view);
    barrierModel->modelShader.setMat4("projection", projection);

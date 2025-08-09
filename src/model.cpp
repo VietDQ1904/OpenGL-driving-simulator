@@ -47,7 +47,7 @@ void Mesh::bindTextures(Shader &shader){
       else if (name == "texture_metallic"){
          number = std::to_string(metallicNr++);
       }
-      //std::cout << (name + number).c_str() << "\n";
+
       shader.setInt((name + number).c_str(), i);
       textures[i].bindTexture();
    }
@@ -212,7 +212,6 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
 
       std::string textureFile = directory + "/" + str.C_Str();
       std::string textureName = typeName + "_" + str.C_Str();
-      std::cout << textureName << "\n";
       
       Texture texture = ResourceManagement::loadTexture(textureName, textureFile.c_str(), true, (typeName == "texture_diffuse"));
       texture.type = typeName;
