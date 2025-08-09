@@ -166,7 +166,6 @@ int main(int argc, char* argv[]){
       carShader.setMat4("view", view);
       carShader.setMat4("projection", projection);  
       //carShader.setInt("texture_diffuse1", 4);
-      car->bindTextures(carShader);
       car->render(carShader);
 
       barrierShader.use();
@@ -176,7 +175,6 @@ int main(int argc, char* argv[]){
       barrierShader.setMat4("view", view);
       barrierShader.setMat4("projection", projection);  
       //barrierShader.setInt("texture_diffuse1", 5);
-      barrier->bindTextures(barrierShader);
       barrier->render(barrierShader);
 
       skyBox.draw(cubemapShader, projection, view);

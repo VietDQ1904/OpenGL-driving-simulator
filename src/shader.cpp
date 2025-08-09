@@ -41,6 +41,81 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 
 }
 
+void Shader::compileShader(const char* vertexSource, const char* fragmentSource, const char* geometrySource){
+
+   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+   glShaderSource(vertexShader, 1, &vertexSource, nullptr);
+   glCompileShader(vertexShader);
+   checkForErrors(vertexShader, VERTEX);
+
+   GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+   glShaderSource(fragmentShader, 1, &fragmentSource, nullptr);
+   glCompileShader(fragmentShader);
+   checkForErrors(fragmentShader, FRAGMENT);
+
+   GLuint geometryShader;
+
+   if (geometrySource != nullptr){
+      geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+      glShaderSource(geometryShader, 1, &geometrySource, nullptr);
+      glCompileShader(geometryShader);
+      checkForErrors(geometryShader, GEOMETRY);
+   }
+   
+   this->shaderProgram = glCreateProgram();
+   glAttachShader(this->shaderProgram, vertexShader);
+   glAttachShader(this->shaderProgram, fragmentShader);
+   if (geometrySource != nullptr){
+      glAttachShader(this->shaderProgram, geometryShader);
+   }
+   checkForErrors(shaderProgram, PROGRAM);
+
+   glDeleteShader(vertexShader);
+   glDeleteShader(fragmentShader);
+   if (geometrySource != nullptr){
+      glDeleteShader(geometryShader);
+   }
+
+}
+
+void Shader::checkForErrors(GLuint shader, ShaderType type){
+   int success;
+   char infoLog[512];
+
+   std::string shaderType;
+   switch (type){
+      case 0:
+         shader = glCreateShader(GL_VERTEX_SHADER);
+         shaderType = "VERTEX_SHADER";
+         break;
+      case 1:
+         shader = glCreateShader(GL_FRAGMENT_SHADER);
+         shaderType = "FRAGMENT_SHADER";
+         break;
+      case 2:
+         shader = glCreateShader(GL_GEOMETRY_SHADER);
+         shaderType = "GEOMETRY_SHADER";
+         break;
+   }
+
+   if (!shaderType.empty()){
+      glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+      if (!success){
+         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+         std::cout << "ERROR::SHADER::"<< shaderType << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+      }
+   }
+   else{
+      glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+      if (!success){
+         glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+         std::cout << "ERROR::PROGRAM::SHADER_COMPILATION_FAILED\n"
+         << infoLog << std::endl;
+      }
+   }
+   
+}
+
 GLuint Shader::setUpShader(std::string path, enum ShaderType type){
    std::string shaderSource;
    std::ifstream shaderFile;

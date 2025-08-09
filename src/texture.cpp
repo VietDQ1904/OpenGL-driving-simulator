@@ -4,9 +4,26 @@
 
 Texture::Texture(std::string type, std::string path): 
    type(type),
-   path(path)  
+   path(path),
+   wrapS(GL_REPEAT), 
+   wrapT(GL_REPEAT), 
+   filterMin(GL_LINEAR_MIPMAP_LINEAR), 
+   filterMax(GL_LINEAR)
 {
    loadTexture();
+}
+
+Texture::Texture(): 
+   width(0),
+   height(0),
+   wrapS(GL_REPEAT),
+   wrapT(GL_REPEAT),
+   filterMin(GL_LINEAR_MIPMAP_LINEAR),
+   filterMax(GL_LINEAR),
+   imageFormat(GL_RGB),
+   internalFormat(GL_RGB)
+{ 
+   glGenTextures(1, &this->textureID);
 }
 
 void Texture::loadTexture(){
@@ -33,18 +50,16 @@ void Texture::loadTexture(){
       GLenum format = (nrChannels == 1) ? GL_RED :
                         (nrChannels == 3) ? GL_RGB :
                         (nrChannels == 4) ? GL_RGBA : 0;
-      
+  
                
       glGenTextures(1, &this->textureID);
       glBindTexture(GL_TEXTURE_2D, this->textureID);
       glTexImage2D(GL_TEXTURE_2D, 0, formatStandard, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->wrapS);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->wrapT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->filterMin); 
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->filterMax);
 
       glGenerateMipmap(GL_TEXTURE_2D);
       stbi_image_free(data);
@@ -52,7 +67,22 @@ void Texture::loadTexture(){
    else{
       std::cout << "ERROR::IMAGE::FAILED TO LOAD IMAGE " << path << std::endl;
    }
+   
+}
 
+void Texture::generateTexture(int width, int height, int nrChannels, unsigned char* data){
+
+   glGenTextures(1, &this->textureID);
+   glBindTexture(GL_TEXTURE_2D, this->textureID);
+   glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, width, height, 0, this->imageFormat, GL_UNSIGNED_BYTE, data);
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->wrapS);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->wrapT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->filterMin); 
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->filterMax);
+
+   glGenerateMipmap(GL_TEXTURE_2D);
+   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture::bindTexture(){
