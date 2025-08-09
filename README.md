@@ -49,6 +49,11 @@ player-controlled car and procedural generated road and terrain.
       Alternatively, if you use VSCode, you can download CMake Tools extension to automate the build process.
    
    - After you build, you will have an executable file. Run it to start the game.
+
+<a name= "license"></a>
+
+### License ###
+   This project is licensed under MIT license - see [LICENSE.md](LICENSE.md) for more details.
    
    
 
