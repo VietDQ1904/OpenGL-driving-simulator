@@ -34,6 +34,7 @@ class Barrier: public Spline{
          }
 
          barrierModel = new Model("../assets/Barrier/barrier.obj");
+         barrierModel->loadShader("barrierShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
 
          this->generateSpline();
          this->generateVertices(simulation);
@@ -47,6 +48,8 @@ class Barrier: public Spline{
       }
 
       void render(Shader &shader);
+      void render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos);
+      void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
       void cleanUpBuffers();
 
    private:

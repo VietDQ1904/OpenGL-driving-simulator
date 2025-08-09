@@ -8,8 +8,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "shader.hpp"
-#include "texture.hpp"
+#include "resourceManagement.hpp"
 
 #ifndef MODEL_3D
 #define MODEL_3D
@@ -29,11 +28,12 @@ class Mesh{
       std::vector<Vertex> vertices;
       std::vector<unsigned int> indices;
       std::vector<Texture> textures;
-      unsigned int vao, vbo, ebo;
-
+      GLuint vao, vbo, ebo;
+      
       Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);  
       void draw(Shader &shader);
       void cleanUpBuffers();
+      void bindTextures(Shader &shader);
    
    private:
       void setUpMesh();
@@ -44,9 +44,12 @@ class Model{
    public:
       std::vector<Mesh> meshes;
       std::string directory;
+      Shader modelShader;
+      std::string shaderName;
 
       Model(const char *path);
-      void draw(Shader &shader);
+      void loadShader(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
+      void draw();
       void cleanUpBuffers();
 
    private:

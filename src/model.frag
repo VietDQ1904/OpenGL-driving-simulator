@@ -14,7 +14,6 @@ struct DirLight{
    vec3 specular;
 };
 
-
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform DirLight light;

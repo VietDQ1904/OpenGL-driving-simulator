@@ -13,3 +13,4 @@ illum 2
 map_Kd BarrierDiffuseMap.png
 map_Bump BarrierNormalMap.png
 map_Ks BarrierRoughnessMap.png
+map_Ka BarrierMetalnessMap.png

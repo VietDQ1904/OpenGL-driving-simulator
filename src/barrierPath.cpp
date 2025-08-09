@@ -103,7 +103,6 @@ void Barrier::setUp(){
 
 }
 
-
 void Barrier::render(Shader &shader){
    
    for (unsigned int i = 0; i < barrierModel->meshes.size(); ++i){
@@ -113,6 +112,29 @@ void Barrier::render(Shader &shader){
       glBindVertexArray(0);
    }
    
+}
+
+void Barrier::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
+   
+   barrierModel->modelShader.use();
+   barrierModel->modelShader.setMat4("view", view);
+   barrierModel->modelShader.setMat4("projection", projection);
+   barrierModel->modelShader.setVec3("viewPos", viewPos);
+
+   for (unsigned int i = 0; i < barrierModel->meshes.size(); ++i){
+      barrierModel->meshes[i].bindTextures(barrierModel->modelShader);
+      glBindVertexArray(barrierModel->meshes[i].vao);
+      glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(barrierModel->meshes[i].indices.size()), 
+      GL_UNSIGNED_INT, 0, modelMatrices.size());
+      glBindVertexArray(0);
+   }
+   
+}
+
+void Barrier::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
+   barrierModel->modelShader.use();
+   barrierModel->modelShader.setVec3("light.direction", direction);
+   barrierModel->modelShader.setVec3("light.color", lightColor);  
 }
 
 void Barrier::cleanUpBuffers(){

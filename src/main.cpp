@@ -5,7 +5,7 @@
 #include "physics.hpp"
 #include "car.hpp"
 #include "texture.hpp"
-//#include "terrain.hpp"
+#include "resourceManagement.hpp"
 #include "roadPath.hpp"
 #include "terrainPath.hpp"
 #include "barrierPath.hpp"
@@ -68,16 +68,21 @@ int main(int argc, char* argv[]){
 
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-   Shader mainShader("../src/model.vert", "../src/model.frag", nullptr);
-   Shader cubemapShader("../src/cubemap.vert", "../src/cubemap.frag", nullptr);
-   Shader carShader("../src/model.vert", "../src/modelTexture.frag", nullptr);
-   Shader barrierShader("../src/barrier.vert", "../src/barrier.frag", nullptr);
+
+   //ResourceManagement::loadShader("carShader", "../src/model.vert", "../src/modelTexture.frag", nullptr);
+   ResourceManagement::loadShader("Main", "../src/model.vert", "../src/model.frag", nullptr);
+   ResourceManagement::loadTexture("Grass", "../assets/grass.png", false, false);
+   ResourceManagement::loadTexture("Asphalt", "../assets/asphalt.png", false, false);
+   ResourceManagement::loadShader("Cubemap", "../src/cubemap.vert", "../src/cubemap.frag", nullptr);
 
    Physics simulation;
 
    Car *car = new Car(simulation);
    car->loadModels("../assets/Car/car.obj", "../assets/Car/wheelFront.obj", "../assets/Car/wheelBack.obj");
-   
+   car->loadShaderCarBody("CarBodyShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderFrontWheels("CarFrontWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderBackWheels("CarBackWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
    std::array<std::string, 6> images = {"right.jpg",
                                         "left.jpg", 
@@ -88,7 +93,7 @@ int main(int argc, char* argv[]){
 
    Cubemap skyBox("../assets/Skybox/", images);
    
-   mainShader.use();
+   //mainShader.use();
 
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
    camera.setPositionToCar(car);
@@ -96,12 +101,13 @@ int main(int argc, char* argv[]){
    Road *road = new Road(simulation);
    Terrain *terrain = new Terrain(simulation);
    Barrier *barrier = new Barrier(simulation);
+   barrier->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
    
+   Shader mainShader = ResourceManagement::getShader("Main");
+   mainShader.use();
 
-   glActiveTexture(GL_TEXTURE10);
-   Texture texture1("", "../assets/grass.png");
-   glActiveTexture(GL_TEXTURE11);
-   Texture texture2("", "../assets/asphalt.png");
+   Shader cubemapShader = ResourceManagement::getShader("Cubemap");
+   cubemapShader.use();
 
    //Terrain terrain;
 
@@ -151,31 +157,32 @@ int main(int argc, char* argv[]){
 
       mainShader.use();
 
+      glActiveTexture(GL_TEXTURE0);
+      ResourceManagement::getTexture("Grass").bindTexture();
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
-      mainShader.setInt("texture_diffuse1", 10);
+      mainShader.setInt("texture_diffuse1", 0);
       terrain->render(mainShader, camera);
 
+      glActiveTexture(GL_TEXTURE1);
+      ResourceManagement::getTexture("Asphalt").bindTexture();
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
-      mainShader.setInt("texture_diffuse1", 11);
+      mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader);
 
-      carShader.use();
-      carShader.setVec3("viewPos", camera.cameraPos);
-      carShader.setMat4("view", view);
-      carShader.setMat4("projection", projection);  
-      //carShader.setInt("texture_diffuse1", 4);
-      car->render(carShader);
+      car->render(view, projection, camera.cameraPos);
 
-      barrierShader.use();
-      barrierShader.setVec3("viewPos", camera.cameraPos);
-      barrierShader.setVec3("light.direction", glm::vec3(1.0f, -1.0f, 1.0f));
-      barrierShader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
-      barrierShader.setMat4("view", view);
-      barrierShader.setMat4("projection", projection);  
-      //barrierShader.setInt("texture_diffuse1", 5);
-      barrier->render(barrierShader);
+      barrier->render(view, projection, camera.cameraPos);
+
+      // barrierShader.use();
+      // barrierShader.setVec3("viewPos", camera.cameraPos);
+      // barrierShader.setVec3("light.direction", glm::vec3(1.0f, -1.0f, 1.0f));
+      // barrierShader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+      // barrierShader.setMat4("view", view);
+      // barrierShader.setMat4("projection", projection);  
+      // //barrierShader.setInt("texture_diffuse1", 5);
+      // barrier->render(barrierShader);
 
       skyBox.draw(cubemapShader, projection, view);
       

@@ -68,6 +68,8 @@ void Shader::compileShader(const char* vertexSource, const char* fragmentSource,
    if (geometrySource != nullptr){
       glAttachShader(this->shaderProgram, geometryShader);
    }
+   
+   glLinkProgram(this->shaderProgram);
    checkForErrors(shaderProgram, PROGRAM);
 
    glDeleteShader(vertexShader);
@@ -85,20 +87,17 @@ void Shader::checkForErrors(GLuint shader, ShaderType type){
    std::string shaderType;
    switch (type){
       case 0:
-         shader = glCreateShader(GL_VERTEX_SHADER);
          shaderType = "VERTEX_SHADER";
          break;
       case 1:
-         shader = glCreateShader(GL_FRAGMENT_SHADER);
          shaderType = "FRAGMENT_SHADER";
          break;
       case 2:
-         shader = glCreateShader(GL_GEOMETRY_SHADER);
          shaderType = "GEOMETRY_SHADER";
          break;
    }
 
-   if (!shaderType.empty()){
+   if (type != PROGRAM){
       glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
       if (!success){
          glGetShaderInfoLog(shader, 512, nullptr, infoLog);

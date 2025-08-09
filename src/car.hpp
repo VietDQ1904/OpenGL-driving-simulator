@@ -4,7 +4,6 @@
 #ifndef CAR_PHYSICS
 #define CAR_PHYSICS
 
-
 class Car{
    public:
       short acceleration = 0;
@@ -51,10 +50,16 @@ class Car{
       void initWheel_3(glm::vec3 wheelPos_3, glm::vec3 wheelSize_3, glm::vec3 wheelRot_3);
       void initWheel_4(glm::vec3 wheelPos_4, glm::vec3 wheelSize_4, glm::vec3 wheelRot_4);
       
-      void render(Shader shader);
+      void loadShaderCarBody(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
+      void loadShaderFrontWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
+      void loadShaderBackWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
+   
+      void render();
+      void render(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPos);
+      void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
       void update();
       void control(GLFWwindow *window, float &deltaTime);
-
+      
    private:
 
       glm::mat4 objectModelMatrix;

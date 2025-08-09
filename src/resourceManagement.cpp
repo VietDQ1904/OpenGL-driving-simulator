@@ -1,8 +1,14 @@
 #include "resourceManagement.hpp"
 #include "../lib/stb_image.h"
 
+std::unordered_map<std::string, Shader> ResourceManagement::shaders;
+std::unordered_map<std::string, Texture> ResourceManagement::textures;
 
 Shader ResourceManagement::loadShader(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile){
+   if (shaders.find(shaderName) != shaders.end()){
+      return shaders[shaderName];
+   }
+   
    shaders[shaderName] = loadShaderFromFile(vertexFile, fragmentFile, geometryFile);
    return shaders[shaderName];
 }
@@ -12,6 +18,10 @@ Shader ResourceManagement::getShader(std::string shaderName){
 }
 
 Texture ResourceManagement::loadTexture(std::string textureName, const char* fileName, bool isAlpha, bool isGammaCorrected){
+   if (textures.find(textureName) != textures.end()){
+      return textures[textureName];
+   }
+   
    textures[textureName] = loadTextureFromFile(fileName, isAlpha, isGammaCorrected);
    return textures[textureName];
 }  
@@ -90,4 +100,13 @@ Texture ResourceManagement::loadTextureFromFile(const char* fileName, bool isAlp
    texture.generateTexture(width, height, nrChannels, data);
    stbi_image_free(data);
    return texture;
+}
+
+void ResourceManagement::clearResources(){
+   for (auto &i: shaders){
+      glDeleteProgram(i.second.shaderProgram);
+   }
+   for (auto &i: textures){
+      glDeleteTextures(1, &i.second.textureID);
+   }
 }
