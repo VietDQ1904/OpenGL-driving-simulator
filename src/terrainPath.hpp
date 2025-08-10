@@ -42,10 +42,10 @@ class Terrain: public Spline{
       float alpha = 0.5f;
       int samplePerFragments = 20;
       float tileLength = roadPathWidth;
-      int subdivision = 2;
+      int subdivision = 3;
       int horizontalTiles = static_cast<int>(terrainPathWidth / 5.0f);
       int partitionSize = 25;
-      float renderDistance = 250.0f;
+      float renderDistance = 100.0f;
 
       PerlinNoise noise;
       float amplitude = 10.0f;

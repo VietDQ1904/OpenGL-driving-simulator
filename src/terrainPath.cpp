@@ -211,6 +211,8 @@ void Terrain::generateVertices(Physics &simulation){
    float noiseValue;
    float distanceToRoad;
    float multiplierValue;
+   int lastIndex = 0;
+   glm::vec3 pivot;
 
    std::vector<float> verticesSub;
    for (int i = 0; i < generatedPath.size() - 1; ++i){
@@ -294,13 +296,20 @@ void Terrain::generateVertices(Physics &simulation){
       
       if (elements >= partitionSize){
          verticesTerrain.push_back(verticesSub);
+         pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
+         pivots.push_back(pivot);
+         
          elements = 0;
+         lastIndex = i;
          verticesSub.clear();
       }
       elements++;
    }
 
+
    if (!verticesSub.empty()){
+      pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
+      pivots.push_back(pivot); 
       verticesTerrain.push_back(verticesSub);
    }
 
@@ -336,14 +345,6 @@ void Terrain::setUp(){
 
       vaos.push_back(vaoPartition);
       vbos.push_back(vboPartition);
-
-      int numVertices = partition.size() / 8;
-      int middleIndex = numVertices / 2;
-
-      // Add middle points to the pivots list.
-      pivots.push_back(glm::vec3(partition[middleIndex * 8],
-                                 partition[middleIndex * 8 + 1],
-                                 partition[middleIndex * 8 + 2]));
 
       glBindVertexArray(vaoPartition);
       glBindBuffer(GL_ARRAY_BUFFER, vboPartition);

@@ -174,7 +174,6 @@ int main(int argc, char* argv[]){
       car->render(view, projection, camera.cameraPos);
       barrier->render(view, projection, camera.cameraPos);
 
-
       skyBox.draw(cubemapShader, projection, view);
       
       glfwSwapBuffers(window);
