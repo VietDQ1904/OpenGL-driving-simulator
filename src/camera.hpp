@@ -25,8 +25,8 @@ class Camera{
       void scrollCallback(GLFWwindow *window, double offsetX, double offsetY);
       void updateFollowCamera(btRigidBody* car);
       void setPositionToCar(Car *car);
-   
-
+      glm::mat4 getViewMatrix() const;
+      glm::mat4 getProjectionMatrix(float aspect) const;
 };
 
 #endif

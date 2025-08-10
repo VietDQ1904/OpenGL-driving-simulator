@@ -93,10 +93,10 @@ void Terrain::generateVertices(Physics &simulation){
       w = glm::normalize(glm::cross(u, v));
 
       if (i == 0){
-         A1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
-         B1 = w * (roadPathWidth / 2) + generatedPath[i];
-         A2 = -w * (roadPathWidth / 2) + generatedPath[i];
-         B2 = -w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+         A1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+         B1 = w * (pathWidth / 2) + generatedPath[i];
+         A2 = -w * (pathWidth / 2) + generatedPath[i];
+         B2 = -w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
       }
       else{
          A1 = prevA1;
@@ -105,10 +105,10 @@ void Terrain::generateVertices(Physics &simulation){
          B2 = prevB2;
       }
 
-      C1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
-      D1 = w * (roadPathWidth / 2) + generatedPath[i + 1];
-      C2 = -w * (roadPathWidth / 2) + generatedPath[i + 1];
-      D2 = -w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      C1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      D1 = w * (pathWidth / 2) + generatedPath[i + 1];
+      C2 = -w * (pathWidth / 2) + generatedPath[i + 1];
+      D2 = -w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
 
       // Save point C1, D1 of the current iteration.
       prevA1 = C1;
@@ -129,7 +129,7 @@ void Terrain::generateVertices(Physics &simulation){
       vertices.push_back(normal1.y); 
       vertices.push_back(normal1.z);
       vertices.push_back(0.0f); 
-      vertices.push_back(0.2f * (roadPathWidth));
+      vertices.push_back(0.2f * (pathWidth));
 
       // 2nd vertex of the left side 
       vertices.push_back(B1.x);
@@ -149,7 +149,7 @@ void Terrain::generateVertices(Physics &simulation){
       vertices.push_back(normal1.y); 
       vertices.push_back(normal1.z);
       vertices.push_back(0.2f * (segmentLength)); 
-      vertices.push_back(0.2f * (roadPathWidth));
+      vertices.push_back(0.2f * (pathWidth));
 
       // 4th vertex of the left side
       vertices.push_back(D1.x);
@@ -169,7 +169,7 @@ void Terrain::generateVertices(Physics &simulation){
       vertices.push_back(normal2.y); 
       vertices.push_back(normal2.z);
       vertices.push_back(0.0f); 
-      vertices.push_back(0.2f * (roadPathWidth));
+      vertices.push_back(0.2f * (pathWidth));
 
       // 2nd vertex of the right side 
       vertices.push_back(B2.x);
@@ -189,7 +189,7 @@ void Terrain::generateVertices(Physics &simulation){
       vertices.push_back(normal2.y); 
       vertices.push_back(normal2.z);
       vertices.push_back(0.2f * (segmentLength)); 
-      vertices.push_back(0.2f * (roadPathWidth));
+      vertices.push_back(0.2f * (pathWidth));
 
       // 4th vertex of the right side
       vertices.push_back(D2.x);
@@ -223,10 +223,10 @@ void Terrain::generateVertices(Physics &simulation){
       w = glm::normalize(glm::cross(u, v));
 
       if (i == 0){
-         A1 = w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i];
-         B1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
-         A2 = -w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i];
-         B2 = -w * (roadPathWidth / 2) + generatedPath[i];
+         A1 = w * (pathWidth / 2 + terrainPathWidth) + generatedPath[i];
+         B1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+         A2 = -w * (pathWidth / 2 + terrainPathWidth) + generatedPath[i];
+         B2 = -w * (pathWidth / 2) + generatedPath[i];
       }
       else{
          A1 = prevA1;
@@ -235,10 +235,10 @@ void Terrain::generateVertices(Physics &simulation){
          B2 = prevB2;
       }
 
-      C1 = w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
-      D1 = w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i + 1];
-      C2 = -w * (roadPathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
-      D2 = -w * (roadPathWidth / 2 + terrainPathWidth) + generatedPath[i + 1];
+      C1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      D1 = w * (pathWidth / 2 + terrainPathWidth) + generatedPath[i + 1];
+      C2 = -w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      D2 = -w * (pathWidth / 2 + terrainPathWidth) + generatedPath[i + 1];
 
       // Save point C1, D1 of the current iteration.
       prevA1 = C1;
@@ -456,14 +456,12 @@ void Terrain::render(Shader &shader, Camera &camera){
             // Use drawArrays instead because all triangles were already defined.
             glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrain[i].size() / 8));
          }
-         
+
          glBindVertexArray(lowVaos[i]);
          glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesLowDetailsTerrain[i].size() / 8));
-      
       }
 
    }
-
 
    glBindVertexArray(0);
 }

@@ -41,9 +41,10 @@ class Terrain: public Spline{
 
       glm::mat4 model;
 
+      float terrainPathWidth = 30.0f;
       float alpha = 0.5f;
       int samplePerFragments = 20;
-      float tileLength = roadPathWidth;
+      float tileLength = pathWidth;
       int subdivision = 3;
       int horizontalTiles = static_cast<int>(terrainPathWidth / 5.0f);
       int partitionSize = 20;

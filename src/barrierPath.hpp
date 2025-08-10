@@ -20,10 +20,16 @@ class Barrier: public Spline{
 
       GLuint barrierVAO, barrierBuffer;
       glm::mat4 model;
-      float barrierOffset = roadPathWidth / 2.0f + 3.0f;
+      float barrierOffset = pathWidth / 2.0f + 3.0f;
       float barrierHeight = 1.0f;
 
-      std::vector<glm::mat4> modelMatrices;
+      std::vector<std::vector<glm::mat4>> modelMatricesList;
+      int partitionSize = 30;
+      float renderDistance = 100.0f;
+   
+      std::vector<glm::vec3> pivots;
+      std::vector<GLuint> barrierBuffers;
+
       glm::mat4 scale;
 
       Model *barrierModel;

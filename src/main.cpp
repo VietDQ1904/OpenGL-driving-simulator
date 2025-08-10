@@ -148,9 +148,9 @@ int main(int argc, char* argv[]){
       car->update();
       simulation.dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime: maxSecPerFrame), 10);
 
-      projection = glm::perspective(glm::radians(camera.zoom), (float) windowWidth / windowHeight, 0.1f, 200.0f);
-      view = glm::mat4(1.0f);
-      view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.up);
+      projection = camera.getProjectionMatrix((float) windowWidth / windowHeight);
+      view = camera.getViewMatrix();
+      
       model = glm::mat4(1.0f);
       model = glm::translate(model, glm::vec3(1.0f, 1.0f, 1.0f));
       model = glm::scale(model, glm::vec3(1.0f));

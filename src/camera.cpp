@@ -73,3 +73,11 @@ void Camera::setPositionToCar(Car *car){
    this->right = glm::normalize(glm::cross(this->cameraFront, glm::vec3(0.0f, 1.0f, 0.0f)));
    this->up = glm::normalize(glm::cross(this->right, this->cameraFront));
 }
+
+glm::mat4 Camera::getViewMatrix() const {
+   return glm::lookAt(cameraPos, cameraPos + cameraFront, up);
+}
+
+glm::mat4 Camera::getProjectionMatrix(float aspect) const {
+   return glm::perspective(glm::radians(zoom), aspect, 0.1f, 1000.0f);
+}
