@@ -215,6 +215,8 @@ void Terrain::generateVertices(Physics &simulation){
    glm::vec3 pivot;
 
    std::vector<float> verticesSub;
+   std::vector<float> verticesLowSub;
+
    for (int i = 0; i < generatedPath.size() - 1; ++i){
 
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
@@ -254,6 +256,7 @@ void Terrain::generateVertices(Physics &simulation){
       subdivide(quadrilaterals, q1, horizontalTiles / 2);
       subdivide(quadrilaterals, q2, horizontalTiles / 2);
 
+      // Standard resolution terrain
       for (Quadrilateral &q: quadrilaterals){
          std::vector<Triangle> triangles;
 
@@ -293,16 +296,61 @@ void Terrain::generateVertices(Physics &simulation){
             }
          }
       }
+
+      // Generate a lower resolution terrain.
+      for (Quadrilateral &q: quadrilaterals){
+         std::vector<Triangle> triangles;
+
+         Triangle t1 = {q.a, q.b, q.c};
+         Triangle t2 = {q.b, q.c, q.d};
+         subdivide(triangles, t1, 1);
+         subdivide(triangles, t2, 1);
+
+         for (Triangle &t : triangles) {
+
+            for (glm::vec3 *p : {&t.a, &t.b, &t.c}){
+               // Change Y coordinate of the point according to the noise values
+               distanceToRoad = pointToSegmentDistance(*p, generatedPath[i], generatedPath[i + 1]);
+               noiseValue = noise.getNoise(p->x * noiseScale, 0.0, p->z * noiseScale);
+               multiplierValue = getNoiseMultiplierByDistance(terrainPathWidth / 2, distanceToRoad);
+               p->y += multiplierValue * noiseValue * amplitude;
+            }
+
+            normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
+         
+            for (glm::vec3 p : {t.a, t.b, t.c}) {
+               uCoord = glm::dot(p - generatedPath[i], v);
+               vCoord = glm::dot(p - generatedPath[i], w);
+
+               uCoord *= uvScale;
+               vCoord *= uvScale;
+    
+               verticesLowSub.push_back(p.x); 
+               verticesLowSub.push_back(p.y); 
+               verticesLowSub.push_back(p.z);
+               verticesLowSub.push_back(normal.x); 
+               verticesLowSub.push_back(normal.y); 
+               verticesLowSub.push_back(normal.z);
+               verticesLowSub.push_back(uCoord); 
+               verticesLowSub.push_back(vCoord);
+
+            }
+         }
+      }
       
       if (elements >= partitionSize){
          verticesTerrain.push_back(verticesSub);
+         verticesLowDetailsTerrain.push_back(verticesLowSub);
+
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
          pivots.push_back(pivot);
          
          elements = 0;
          lastIndex = i;
          verticesSub.clear();
+         verticesLowSub.clear();
       }
+
       elements++;
    }
 
@@ -312,6 +360,11 @@ void Terrain::generateVertices(Physics &simulation){
       pivots.push_back(pivot); 
       verticesTerrain.push_back(verticesSub);
    }
+
+   if (!verticesLowSub.empty()){
+      verticesLowDetailsTerrain.push_back(verticesLowSub);
+   }
+
 
 }
 
@@ -360,6 +413,28 @@ void Terrain::setUp(){
       glBindVertexArray(0);
    }
 
+   for (const auto& partition: verticesLowDetailsTerrain){
+      GLuint vaoPartition, vboPartition;
+      glGenVertexArrays(1, &vaoPartition);
+      glGenBuffers(1, &vboPartition);
+
+      lowVaos.push_back(vaoPartition);
+      lowVbos.push_back(vboPartition);
+
+      glBindVertexArray(vaoPartition);
+      glBindBuffer(GL_ARRAY_BUFFER, vboPartition);
+      glBufferData(GL_ARRAY_BUFFER, partition.size() * sizeof(float), partition.data(), GL_STATIC_DRAW);
+
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+      glEnableVertexAttribArray(1);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+      glEnableVertexAttribArray(2);
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+
+      glBindVertexArray(0);
+   }
+
 }
 
 void Terrain::render(Shader &shader, Camera &camera){
@@ -375,12 +450,20 @@ void Terrain::render(Shader &shader, Camera &camera){
    for (int i = 0; i < vaos.size(); ++i){
       length = glm::distance(camera.cameraPos, pivots[i]);
 
-      if (length < renderDistance){
-         glBindVertexArray(vaos[i]);
-         // Use drawArrays instead because all triangles were already defined.
-         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrain[i].size() / 8));
+      if (length < maxRenderDistance){
+         if (length < renderDistance){
+            glBindVertexArray(vaos[i]);
+            // Use drawArrays instead because all triangles were already defined.
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrain[i].size() / 8));
+         }
+         
+         glBindVertexArray(lowVaos[i]);
+         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesLowDetailsTerrain[i].size() / 8));
+      
       }
+
    }
+
 
    glBindVertexArray(0);
 }
@@ -396,6 +479,14 @@ void Terrain::cleanUpBuffers(){
 
    for (GLuint v: vbos){
       glDeleteBuffers(1, &v);
+   }
+
+   for (GLuint v: lowVaos){
+      glDeleteVertexArrays(1, &v);
+   }
+
+   for (GLuint v: lowVbos){
+      glDeleteVertexArrays(1, &v);
    }
 }
 

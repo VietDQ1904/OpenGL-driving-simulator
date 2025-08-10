@@ -32,10 +32,12 @@ class Terrain: public Spline{
       std::vector<float> vertices;
       std::vector<int> indices;
       std::vector<std::vector<float>> verticesTerrain;
+      std::vector<std::vector<float>> verticesLowDetailsTerrain;
       std::vector<glm::vec3> pivots;
 
       GLuint vao, vbo, ebo;
       std::vector<GLuint> vaos, vbos;
+      std::vector<GLuint> lowVaos, lowVbos;
 
       glm::mat4 model;
 
@@ -44,8 +46,9 @@ class Terrain: public Spline{
       float tileLength = roadPathWidth;
       int subdivision = 3;
       int horizontalTiles = static_cast<int>(terrainPathWidth / 5.0f);
-      int partitionSize = 25;
+      int partitionSize = 20;
       float renderDistance = 100.0f;
+      float maxRenderDistance = 350.0f;
 
       PerlinNoise noise;
       float amplitude = 10.0f;
