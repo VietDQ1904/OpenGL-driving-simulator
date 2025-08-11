@@ -14,8 +14,14 @@
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
+// enable NVIDIA GPU rendering
 extern "C" {
    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
+
+// enable AMD GPU rendering
+extern "C" {
+   __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height){
