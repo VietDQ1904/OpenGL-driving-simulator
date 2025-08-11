@@ -136,38 +136,41 @@ void Barrier::setUp(){
 
 }
 
-void Barrier::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
+void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
 
    barrierModel->modelShader.use();
    barrierModel->modelShader.setMat4("view", view);
    barrierModel->modelShader.setMat4("projection", projection);
-   barrierModel->modelShader.setVec3("viewPos", viewPos);
+   barrierModel->modelShader.setVec3("viewPos", camera.cameraPos);
 
    glEnable(GL_CULL_FACE);
    glCullFace(GL_BACK);
 
-
    float length;
    for (unsigned int pivot = 0; pivot < pivots.size(); ++pivot) {
-      length = glm::distance(viewPos, pivots[pivot]);
-      
-      if (length < renderDistance) {
-         for (unsigned int meshIndex = 0; meshIndex < barrierModel->meshes.size(); ++meshIndex) {
-            glBindVertexArray(barrierModel->meshes[meshIndex].vao);
-            glBindBuffer(GL_ARRAY_BUFFER, barrierBuffers[pivot]);
 
-            size_t matrixSegment = sizeof(glm::vec4);
-            glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
-            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
-            glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
-            glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
+      if (camera.isInFrustum(pivots[pivot], 100.0f)){
 
-            barrierModel->meshes[meshIndex].bindTextures(barrierModel->modelShader);
-            glDrawElementsInstanced(GL_TRIANGLES,
-                                    static_cast<unsigned int>(barrierModel->meshes[meshIndex].indices.size()),
-                                    GL_UNSIGNED_INT,
-                                    0,
-                                    modelMatricesList[pivot].size());
+         length = glm::distance(camera.cameraPos, pivots[pivot]);
+
+         if (length < renderDistance) {
+            for (unsigned int meshIndex = 0; meshIndex < barrierModel->meshes.size(); ++meshIndex) {
+               glBindVertexArray(barrierModel->meshes[meshIndex].vao);
+               glBindBuffer(GL_ARRAY_BUFFER, barrierBuffers[pivot]);
+
+               size_t matrixSegment = sizeof(glm::vec4);
+               glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
+               glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
+               glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+               glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
+
+               barrierModel->meshes[meshIndex].bindTextures(barrierModel->modelShader);
+               glDrawElementsInstanced(GL_TRIANGLES,
+                                       static_cast<unsigned int>(barrierModel->meshes[meshIndex].indices.size()),
+                                       GL_UNSIGNED_INT,
+                                       0,
+                                       modelMatricesList[pivot].size());
+            }
          }
       }
    }

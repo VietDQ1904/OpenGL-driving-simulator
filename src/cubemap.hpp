@@ -5,8 +5,8 @@
 #include <string>
 #include "shader.hpp"
 
-#ifndef GENERATE_CUBEMAP
-#define GENERATE_CUBEMAP
+#ifndef CUBEMAP
+#define CUBEMAP
 
 class Cubemap{
    

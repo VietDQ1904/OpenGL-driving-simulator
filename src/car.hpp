@@ -1,8 +1,8 @@
 #include "physics.hpp"
 #include "model.hpp"
 
-#ifndef CAR_PHYSICS
-#define CAR_PHYSICS
+#ifndef CAR_IMPLEMENTATION
+#define CAR_IMPLEMENTATION
 
 class Car{
    public:

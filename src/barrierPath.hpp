@@ -11,6 +11,7 @@
 #include "physics.hpp"
 #include "spline.hpp"
 #include "model.hpp"
+#include "camera.hpp"
 
 #ifndef BARRIER_PATH
 #define BARRIER_PATH
@@ -24,8 +25,8 @@ class Barrier: public Spline{
       float barrierHeight = 1.0f;
 
       std::vector<std::vector<glm::mat4>> modelMatricesList;
-      int partitionSize = 30;
-      float renderDistance = 100.0f;
+      int partitionSize = 20;
+      float renderDistance = 250.0f;
    
       std::vector<glm::vec3> pivots;
       std::vector<GLuint> barrierBuffers;
@@ -53,7 +54,7 @@ class Barrier: public Spline{
          delete barrierModel;
       }
 
-      void render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos);
+      void render(glm::mat4 view, glm::mat4 projection, Camera &camera);
       void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
       void cleanUpBuffers();
 

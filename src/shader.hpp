@@ -7,8 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#ifndef GEOMETRY_CLASS
-#define GEOMETRY_CLASS
+#ifndef SHADER
+#define SHADER
 
 enum ShaderType{
    VERTEX,

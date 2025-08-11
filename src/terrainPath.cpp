@@ -448,19 +448,23 @@ void Terrain::render(Shader &shader, Camera &camera){
 
    float length;
    for (int i = 0; i < vaos.size(); ++i){
-      length = glm::distance(camera.cameraPos, pivots[i]);
+      if (camera.isInFrustum(pivots[i], 100.0f)){
+         length = glm::distance(camera.cameraPos, pivots[i]);
 
-      if (length < maxRenderDistance){
+         if (length >= maxRenderDistance){
+            continue;
+         }
+         
          if (length < renderDistance){
             glBindVertexArray(vaos[i]);
             // Use drawArrays instead because all triangles were already defined.
             glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrain[i].size() / 8));
          }
-
+        
          glBindVertexArray(lowVaos[i]);
          glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesLowDetailsTerrain[i].size() / 8));
-      }
 
+      }
    }
 
    glBindVertexArray(0);
