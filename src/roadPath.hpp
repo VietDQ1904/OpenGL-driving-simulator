@@ -21,6 +21,7 @@ class Road: public Spline{
       GLuint vao, vbo, ebo;
       glm::mat4 model;
 
+      float roadPathWidth = pathWidth;
       //float alpha = 0.5f;
       //float roadPathWidth = 15.0f;
       // float tileLength = roadPathWidth;

@@ -1,41 +1,41 @@
 # Car Driving Project with OpenGL #
 
-This project demonstrates a car driving game using OpenGL, GLM, stb_image, Bullet Physics and Assimp. It has a 
-player-controlled car and procedural generated terrains using Perlin Noise.
+This project demonstrates a driving game using OpenGL, GLM, stb_image, Bullet Physics and Assimp. It has a 
+player-controlled car and procedural generated road and terrain.
 
 <a name="dependencies"></a>
 
 ### List of dependencies ###
 
-   1. MSYS2 MINGW64: compiler for C++. 
-   2. VSCode: main code editor.
-   3. CMake: building project.
-   4. OpenGL (using GLFW 3.4 and glad): rendering the scene.
-   5. Bullet Physics: physics implementation.
-   6. GLM: matrix and vector calculations.
-   7. stb_image: loading images. 
-   8. Assimp: loading 3D models.
+   - MSYS2 MINGW64: compiler for C++. 
+   - VSCode: main code editor.
+   - CMake: building project.
+   - OpenGL (using GLFW 3.4 and glad): rendering the scene.
+   - Bullet Physics: physics implementation.
+   - GLM: matrix and vector calculations.
+   - stb_image: loading images. 
+   - Assimp: loading 3D models.
 
 <a name = "instructions"></a>
 
 ### Instructions ###
-   1. Install the respository via the command:
+   - Install the respository via the command:
       ```
       git clone https://github.com/VietDQ1904/OpenGL-driving-game.git
       ```
    
-   2. Change directory to the project. Create a build folder, change your current directory to /build:
+   - Change directory to the project, create a build folder and change your current directory to /build:
       ```
       cd OpenGL-driving-game
       mkdir build
       cd build
       ```
    
-   3. Make sure that all dependencies are installed in MSYS2 MINGW64 (use pacman -Q inside MSYS2 to view installed
-   packages). Then build the project using the command: 
+   - Make sure that all dependencies are installed in MSYS2 MINGW64 before building (use pacman -Q inside MSYS2 to view 
+   installed packages). Build the project using the command: 
 
       ```
-      cmake -G "MinGW Makefiles" ..
+      cmake -G "MinGW Makefiles" .. 
       cmake --build .
       ```
 
@@ -46,9 +46,14 @@ player-controlled car and procedural generated terrains using Perlin Noise.
       cmake --build .
       ```
 
-      Alternatively, if you use VSCode, you can download CMake Tools extensions to automate the build process.
+      Alternatively, if you use VSCode, you can download CMake Tools extension to automate the build process.
    
-   4. After you build, you will have an executable file. Run it to start the game.
+   - After you build, you will have an executable file. Run it to start the game.
+
+<a name= "license"></a>
+
+### License ###
+   This project is licensed under MIT license - see [LICENSE.md](LICENSE.md) for more details.
    
    
 

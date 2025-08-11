@@ -5,7 +5,7 @@
 #include "physics.hpp"
 #include "car.hpp"
 #include "texture.hpp"
-//#include "terrain.hpp"
+#include "resourceManagement.hpp"
 #include "roadPath.hpp"
 #include "terrainPath.hpp"
 #include "barrierPath.hpp"
@@ -60,7 +60,6 @@ int main(int argc, char* argv[]){
    glm::mat4 projection;
 
    glEnable(GL_DEPTH_TEST);
-   glEnable(GL_MULTISAMPLE);
 
    float deltaTime = 0.0f;
    float lastTime = 0.0f;
@@ -69,16 +68,21 @@ int main(int argc, char* argv[]){
 
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-   Shader mainShader("../src/model.vert", "../src/model.frag", nullptr);
-   Shader cubemapShader("../src/cubemap.vert", "../src/cubemap.frag", nullptr);
-   Shader carShader("../src/model.vert", "../src/modelTexture.frag", nullptr);
-   Shader barrierShader("../src/barrier.vert", "../src/modelTexture.frag", nullptr);
+
+   //ResourceManagement::loadShader("carShader", "../src/model.vert", "../src/modelTexture.frag", nullptr);
+   ResourceManagement::loadShader("Main", "../src/model.vert", "../src/model.frag", nullptr);
+   ResourceManagement::loadTexture("Grass", "../assets/grass.png", false, false);
+   ResourceManagement::loadTexture("Asphalt", "../assets/asphalt.png", false, false);
+   ResourceManagement::loadShader("Cubemap", "../src/cubemap.vert", "../src/cubemap.frag", nullptr);
 
    Physics simulation;
 
    Car *car = new Car(simulation);
-   car->loadModels("../assets/car.obj", "../assets/wheelFront.obj", "../assets/wheelBack.obj");
-   
+   car->loadModels("../assets/Car/car.obj", "../assets/Car/wheelFront.obj", "../assets/Car/wheelBack.obj");
+   car->loadShaderCarBody("CarBodyShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderFrontWheels("CarFrontWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderBackWheels("CarBackWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
    std::array<std::string, 6> images = {"right.jpg",
                                         "left.jpg", 
@@ -89,10 +93,7 @@ int main(int argc, char* argv[]){
 
    Cubemap skyBox("../assets/Skybox/", images);
    
-   mainShader.use();
-
-   Model grass("../assets/grass.obj");
-   Model asphalt("../assets/asphalt.obj");
+   //mainShader.use();
 
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
    camera.setPositionToCar(car);
@@ -100,19 +101,13 @@ int main(int argc, char* argv[]){
    Road *road = new Road(simulation);
    Terrain *terrain = new Terrain(simulation);
    Barrier *barrier = new Barrier(simulation);
+   barrier->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
    
-   glActiveTexture(GL_TEXTURE0);
-   Texture texture1("", "../assets/mars.png");
-   glActiveTexture(GL_TEXTURE1);
-   Texture texture2("", "../assets/concrete.png");
-   glActiveTexture(GL_TEXTURE2);
-   Texture texture3("", "../assets/grass.png");
-   glActiveTexture(GL_TEXTURE3);
-   Texture texture4("", "../assets/asphalt.png");
-   glActiveTexture(GL_TEXTURE4);
-   Texture texture5("", "../assets/car.png");
-   glActiveTexture(GL_TEXTURE5);
-   Texture texture6("", "../assets/stripeBarrier.png");
+   Shader mainShader = ResourceManagement::getShader("Main");
+   mainShader.use();
+
+   Shader cubemapShader = ResourceManagement::getShader("Cubemap");
+   cubemapShader.use();
 
    //Terrain terrain;
 
@@ -153,36 +148,33 @@ int main(int argc, char* argv[]){
       car->update();
       simulation.dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime: maxSecPerFrame), 10);
 
-      projection = glm::perspective(glm::radians(camera.zoom), (float) windowWidth / windowHeight, 0.1f, 200.0f);
-      view = glm::mat4(1.0f);
-      view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.up);
+      projection = camera.getProjectionMatrix((float) windowWidth / windowHeight);
+      view = camera.getViewMatrix();
+      
+      camera.calculateFrustrumPlanes(projection * view, (float) windowWidth / windowHeight);
+
       model = glm::mat4(1.0f);
       model = glm::translate(model, glm::vec3(1.0f, 1.0f, 1.0f));
       model = glm::scale(model, glm::vec3(1.0f));
 
       mainShader.use();
 
+      glActiveTexture(GL_TEXTURE0);
+      ResourceManagement::getTexture("Grass").bindTexture();
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
-      mainShader.setInt("texture_diffuse1", 2);
+      mainShader.setInt("texture_diffuse1", 0);
       terrain->render(mainShader, camera);
 
+      glActiveTexture(GL_TEXTURE1);
+      ResourceManagement::getTexture("Asphalt").bindTexture();
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
-      mainShader.setInt("texture_diffuse1", 3);
+      mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader);
 
-      carShader.use();
-      carShader.setMat4("view", view);
-      carShader.setMat4("projection", projection);  
-      carShader.setInt("texture_diffuse1", 4);
-      car->render(carShader);
-
-      barrierShader.use();
-      barrierShader.setMat4("view", view);
-      barrierShader.setMat4("projection", projection);  
-      barrierShader.setInt("texture_diffuse1", 5);
-      barrier->render(barrierShader);
+      car->render(view, projection, camera.cameraPos);
+      barrier->render(view, projection, camera);
 
       skyBox.draw(cubemapShader, projection, view);
       

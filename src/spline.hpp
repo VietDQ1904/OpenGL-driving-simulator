@@ -32,8 +32,9 @@ class Spline{
 
       float alpha = 0.5f;
       int samplePerFragments = 20;
-      float roadPathWidth = 15.0f;
-      float terrainPathWidth = 30.0f;
+      float pathWidth = 15.0f;
+      //float roadPathWidth = 15.0f;
+      //float terrainPathWidth = 30.0f;
       std::vector<glm::vec3> generatedPath;
 
       glm::vec3 catmullRom(const glm::vec3 &p0, const glm::vec3 &p1,

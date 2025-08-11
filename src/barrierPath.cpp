@@ -11,12 +11,17 @@ void Barrier::generateVertices(Physics &simulation){
    glm::vec3 A2, B2, C2, D2; // the right side
 
    glm::vec3 normal;
-   glm::vec3 normal1, normal2;
    glm::vec3 midPoint1, midPoint2;
 
    float segmentLength;
    glm::mat4 modelMatrix;
    float angle;
+
+   int elements = 0;
+   int lastIndex = 0;
+
+   std::vector<glm::mat4> modelMatricesPartition;
+   glm::vec3 pivot;
 
    for (int i = 0; i < generatedPath.size() - 1; ++i){
 
@@ -56,69 +61,133 @@ void Barrier::generateVertices(Physics &simulation){
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, midPoint1);
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.1f, 1.0f, segmentLength / 2.1f));
-      modelMatrices.push_back(modelMatrix);
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 3.0f, 1.0f, segmentLength / 1.75f));
+      // modelMatrices.push_back(modelMatrix);
+      modelMatricesPartition.push_back(modelMatrix);
 
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, midPoint2);
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
       modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 2.1f, 1.0f, segmentLength / 2.1f));
-      modelMatrices.push_back(modelMatrix);
-
-
-      normal1 = glm::normalize(glm::cross(C1 - A1, B1 - A1));
-      normal2 = glm::normalize(glm::cross(C2 - A2, B2 - A2));
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / 3.0f, 1.0f, segmentLength / 1.75f));
+      // modelMatrices.push_back(modelMatrix);
+      modelMatricesPartition.push_back(modelMatrix);
 
       // Create a rigid body.
-      simulation.createRigidBody(A1, B1, C1, D1, normal1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
-      simulation.createRigidBody(A2, B2, C2, D2, normal2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+
+
+      if (elements >= partitionSize){
+         pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
+         pivots.push_back(pivot);
+         modelMatricesList.push_back(modelMatricesPartition);
+         modelMatricesPartition.clear();
+         elements = 0;
+         lastIndex = i;
+      }
+
+      elements++;
+   }
+
+   if (!modelMatricesPartition.empty()){
+      pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
+      pivots.push_back(pivot); 
+      modelMatricesList.push_back(modelMatricesPartition);
    }
 
 }
 
 void Barrier::setUp(){
 
-   glGenBuffers(1, &barrierBuffer);
-   glBindBuffer(GL_ARRAY_BUFFER, barrierBuffer);
-   glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data(), GL_STATIC_DRAW);
+   //glGenBuffers(1, &barrierBuffer);
+   // glBindBuffer(GL_ARRAY_BUFFER, barrierBuffer);
+   // glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data(), GL_STATIC_DRAW);
+
+   for (const auto &partition: modelMatricesList){
+      GLuint barrierPartitionBuffer;
+      glGenBuffers(1, &barrierPartitionBuffer);
+      glBindBuffer(GL_ARRAY_BUFFER, barrierPartitionBuffer);
+      glBufferData(GL_ARRAY_BUFFER, partition.size() * sizeof(glm::mat4), partition.data(), GL_STATIC_DRAW);
+      barrierBuffers.push_back(barrierPartitionBuffer);
+   }
 
    for (unsigned int i = 0; i < barrierModel->meshes.size(); ++i){
       GLuint meshVAO = barrierModel->meshes[i].vao;
+      size_t matrixSegment = sizeof(glm::vec4);
       glBindVertexArray(meshVAO);
 
-      size_t matrixSegment = sizeof(glm::vec4);
-
-      glEnableVertexAttribArray(3);
-      glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
-      glEnableVertexAttribArray(4);
-      glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
       glEnableVertexAttribArray(5);
-      glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+      glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
       glEnableVertexAttribArray(6);
-      glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
+      glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
+      glEnableVertexAttribArray(7);
+      glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+      glEnableVertexAttribArray(8);
+      glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
 
-      glVertexAttribDivisor(3, 1);
-      glVertexAttribDivisor(4, 1);
       glVertexAttribDivisor(5, 1);
       glVertexAttribDivisor(6, 1);
+      glVertexAttribDivisor(7, 1);
+      glVertexAttribDivisor(8, 1);
       
       glBindVertexArray(0);
    }
 
 }
 
-void Barrier::render(Shader &shader){
+void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
 
-   for (unsigned int i = 0; i < barrierModel->meshes.size(); ++i){
-      glBindVertexArray(barrierModel->meshes[i].vao);
-      glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(barrierModel->meshes[i].indices.size()), 
-      GL_UNSIGNED_INT, 0, modelMatrices.size());
-      glBindVertexArray(0);
+   barrierModel->modelShader.use();
+   barrierModel->modelShader.setMat4("view", view);
+   barrierModel->modelShader.setMat4("projection", projection);
+   barrierModel->modelShader.setVec3("viewPos", camera.cameraPos);
+
+   glEnable(GL_CULL_FACE);
+   glCullFace(GL_BACK);
+
+   float length;
+   for (unsigned int pivot = 0; pivot < pivots.size(); ++pivot) {
+
+      if (camera.isInFrustum(pivots[pivot], 100.0f)){
+
+         length = glm::distance(camera.cameraPos, pivots[pivot]);
+
+         if (length < renderDistance) {
+            for (unsigned int meshIndex = 0; meshIndex < barrierModel->meshes.size(); ++meshIndex) {
+               glBindVertexArray(barrierModel->meshes[meshIndex].vao);
+               glBindBuffer(GL_ARRAY_BUFFER, barrierBuffers[pivot]);
+
+               size_t matrixSegment = sizeof(glm::vec4);
+               glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
+               glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
+               glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+               glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
+
+               barrierModel->meshes[meshIndex].bindTextures(barrierModel->modelShader);
+               glDrawElementsInstanced(GL_TRIANGLES,
+                                       static_cast<unsigned int>(barrierModel->meshes[meshIndex].indices.size()),
+                                       GL_UNSIGNED_INT,
+                                       0,
+                                       modelMatricesList[pivot].size());
+            }
+         }
+      }
    }
 
+   glDisable(GL_CULL_FACE);
+}
+
+void Barrier::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
+   barrierModel->modelShader.use();
+   barrierModel->modelShader.setVec3("light.direction", direction);
+   barrierModel->modelShader.setVec3("light.color", lightColor);  
 }
 
 void Barrier::cleanUpBuffers(){
    glDeleteBuffers(1, &barrierBuffer);
+
+   for (GLuint buffer: barrierBuffers){
+      glDeleteBuffers(1, &buffer);
+   }
 }

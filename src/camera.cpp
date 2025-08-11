@@ -73,3 +73,61 @@ void Camera::setPositionToCar(Car *car){
    this->right = glm::normalize(glm::cross(this->cameraFront, glm::vec3(0.0f, 1.0f, 0.0f)));
    this->up = glm::normalize(glm::cross(this->right, this->cameraFront));
 }
+
+glm::mat4 Camera::getViewMatrix() const {
+   return glm::lookAt(cameraPos, cameraPos + cameraFront, up);
+}
+
+glm::mat4 Camera::getProjectionMatrix(float aspect) const {
+   return glm::perspective(glm::radians(zoom), aspect, nearPlane, farPlane);
+}
+
+void Camera::calculateFrustrumPlanes(const glm::mat4 &projectionView, float aspect){
+   // const float halfVSide = farPlane * glm::tan(zoom * 0.5f);
+   // const float halfHSide = halfVSide * aspect;
+   // glm::vec3 frontMultFar = farPlane * cameraFront;
+   glm::vec4 rowX = glm::vec4(projectionView[0][0], projectionView[1][0], projectionView[2][0], projectionView[3][0]);
+   glm::vec4 rowY = glm::vec4(projectionView[0][1], projectionView[1][1], projectionView[2][1], projectionView[3][1]);
+   glm::vec4 rowZ = glm::vec4(projectionView[0][2], projectionView[1][2], projectionView[2][2], projectionView[3][2]);
+   glm::vec4 rowW = glm::vec4(projectionView[0][3], projectionView[1][3], projectionView[2][3], projectionView[3][3]);
+
+   // Left
+   this->frustum[0].normal = glm::vec3(rowW + rowX);
+   this->frustum[0].distance = (rowW + rowX).w;
+
+   // Right
+   this->frustum[1].normal = glm::vec3(rowW - rowX);
+   this->frustum[1].distance = (rowW - rowX).w;
+
+   // Bottom
+   this->frustum[2].normal = glm::vec3(rowW + rowY);
+   this->frustum[2].distance = (rowW + rowY).w;
+
+   // Top
+   this->frustum[3].normal = glm::vec3(rowW - rowY);
+   this->frustum[3].distance = (rowW - rowY).w;
+
+   // Near
+   this->frustum[4].normal = glm::vec3(rowW + rowZ);
+   this->frustum[4].distance = (rowW + rowZ).w;
+
+   // Far
+   this->frustum[5].normal = glm::vec3(rowW - rowZ);
+   this->frustum[5].distance = (rowW - rowZ).w;
+
+   for (int i = 0; i < 6; ++i) {
+      float length = glm::length(frustum[i].normal);
+      frustum[i].normal /= length;
+      frustum[i].distance /= length;
+   }
+}
+
+bool Camera::isInFrustum(const glm::vec3& center, float radius) const {
+   for (int i = 0; i < 6; ++i) {
+      float dist = glm::dot(frustum[i].normal, center) + frustum[i].distance;
+      if (dist < -radius) {
+         return false; 
+      }
+   }
+   return true;
+}

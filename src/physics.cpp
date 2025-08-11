@@ -80,7 +80,7 @@ btRigidBody* Physics::createRigidBody(int type, glm::vec3 pos, glm::vec3 size, g
    return rigidBody;
 }
 
-btRigidBody* Physics::createRigidBody(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 D, glm::vec3 normal, float m,
+btRigidBody* Physics::createRigidBody(glm::vec3 A, glm::vec3 B, glm::vec3 C, glm::vec3 D, float m,
                                    float friction, float restitution, short group, short mask){
 
    btConvexHullShape* collisionShape = new btConvexHullShape();

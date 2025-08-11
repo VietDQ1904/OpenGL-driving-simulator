@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(Physics)
+project(DrivingGame)
 set(CMAKE_CXX_STANDARD 17)
 
 set (SOURCES src/main.cpp
@@ -14,6 +14,7 @@ set (SOURCES src/main.cpp
              src/roadPath.cpp
              src/terrainPath.cpp
              src/barrierPath.cpp
+             src/resourceManagement.cpp
             )
 
 
@@ -106,9 +107,9 @@ include_directories(
 add_library(glad STATIC ./lib/glad/src/glad.c)
 
 # ========= EXECUTABLE ==========
-add_executable(Physics ${SOURCES})
+add_executable(DrivingGame ${SOURCES})
 # ========= LINK LIBRARIES ==========
-target_link_libraries(Physics PRIVATE
+target_link_libraries(DrivingGame PRIVATE
     glad
     glfw3
     OpenGL::GL

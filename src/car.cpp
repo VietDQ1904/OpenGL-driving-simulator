@@ -68,6 +68,19 @@ void Car::loadModels(std::string carModelPath, std::string wheelModelPath_1, std
    this->carModel = new Model(carModelPath.c_str());
    this->wheelModel1 = new Model(wheelModelPath_1.c_str());
    this->wheelModel2 = new Model(wheelModelPath_2.c_str());
+
+}
+
+void Car::loadShaderCarBody(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile){
+   this->carModel->loadShader(shaderName, vertexFile, fragmentFile, geometryFile);
+}
+
+void Car::loadShaderFrontWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile){
+   this->wheelModel1->loadShader(shaderName, vertexFile, fragmentFile, geometryFile);
+}
+
+void Car::loadShaderBackWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile){
+   this->wheelModel2->loadShader(shaderName, vertexFile, fragmentFile, geometryFile);
 }
 
 void Car::update(){
@@ -311,38 +324,70 @@ void Car::setUp(){
    simulation.dynamicsWorld->addConstraint(springConst4);
 }
 
-void Car::render(Shader shader){
+void Car::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
+   carModel->modelShader.use();
+   carModel->modelShader.setVec3("light.direction", direction);
+   carModel->modelShader.setVec3("light.color", lightColor);
 
+   wheelModel1->modelShader.use();
+   wheelModel1->modelShader.setVec3("light.direction", direction);
+   wheelModel1->modelShader.setVec3("light.color", lightColor);
+
+   wheelModel2->modelShader.use();
+   wheelModel2->modelShader.setVec3("light.direction", direction);
+   wheelModel2->modelShader.setVec3("light.color", lightColor);
+}
+
+void Car::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
+   
+   carModel->modelShader.use();
    car->getMotionState()->getWorldTransform(transform);
    transform.getOpenGLMatrix(matrix);
    objectModelMatrix = glm::make_mat4(matrix);
-   shader.setMat4("model", objectModelMatrix);
-   carModel->draw(shader);
+   carModel->modelShader.setMat4("model", objectModelMatrix);
+   carModel->modelShader.setMat4("view", view);
+   carModel->modelShader.setMat4("projection", projection);
+   carModel->modelShader.setVec3("viewPos", viewPos);
+   carModel->draw();
 
-
+   wheelModel1->modelShader.use();
    wheel1->getMotionState()->getWorldTransform(transform);
    transform.getOpenGLMatrix(matrix);
    objectModelMatrix = glm::make_mat4(matrix);
-   shader.setMat4("model", objectModelMatrix);
-   wheelModel1->draw(shader);
+   wheelModel1->modelShader.setMat4("model", objectModelMatrix);
+   wheelModel1->modelShader.setMat4("view", view);
+   wheelModel1->modelShader.setMat4("projection", projection);
+   wheelModel1->modelShader.setVec3("viewPos", viewPos);
+   wheelModel1->draw();
 
+   wheelModel1->modelShader.use();
    wheel2->getMotionState()->getWorldTransform(transform);
    transform.getOpenGLMatrix(matrix);
    objectModelMatrix = glm::make_mat4(matrix);
-   shader.setMat4("model", objectModelMatrix);
-   wheelModel1->draw(shader);
+   wheelModel1->modelShader.setMat4("model", objectModelMatrix);
+   wheelModel1->modelShader.setMat4("view", view);
+   wheelModel1->modelShader.setMat4("projection", projection);
+   wheelModel1->modelShader.setVec3("viewPos", viewPos);
+   wheelModel1->draw();
 
+   wheelModel2->modelShader.use();
    wheel3->getMotionState()->getWorldTransform(transform);
    transform.getOpenGLMatrix(matrix);
    objectModelMatrix = glm::make_mat4(matrix);
-   shader.setMat4("model", objectModelMatrix);
-   wheelModel2->draw(shader);
+   wheelModel2->modelShader.setMat4("model", objectModelMatrix);
+   wheelModel2->modelShader.setMat4("view", view);
+   wheelModel2->modelShader.setMat4("projection", projection);
+   wheelModel2->modelShader.setVec3("viewPos", viewPos);
+   wheelModel2->draw();
 
+   wheelModel2->modelShader.use();
    wheel4->getMotionState()->getWorldTransform(transform);
    transform.getOpenGLMatrix(matrix);
    objectModelMatrix = glm::make_mat4(matrix);
-   shader.setMat4("model", objectModelMatrix);
-   wheelModel2->draw(shader);
-
+   wheelModel2->modelShader.setMat4("model", objectModelMatrix);
+   wheelModel2->modelShader.setMat4("view", view);
+   wheelModel2->modelShader.setMat4("projection", projection);
+   wheelModel2->modelShader.setVec3("viewPos", viewPos);
+   wheelModel2->draw();
 }
 
