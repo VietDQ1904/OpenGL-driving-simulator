@@ -116,6 +116,30 @@ void Barrier::setUp(){
       GLuint meshVAO = barrierModel->meshes[i].vao;
       size_t matrixSegment = sizeof(glm::vec4);
       glBindVertexArray(meshVAO);
+      barrierVAOs.push_back(meshVAO);
+
+      glEnableVertexAttribArray(5);
+      glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
+      glEnableVertexAttribArray(6);
+      glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
+      glEnableVertexAttribArray(7);
+      glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+      glEnableVertexAttribArray(8);
+      glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
+
+      glVertexAttribDivisor(5, 1);
+      glVertexAttribDivisor(6, 1);
+      glVertexAttribDivisor(7, 1);
+      glVertexAttribDivisor(8, 1);
+      
+      glBindVertexArray(0);
+   }
+
+   for (unsigned int i = 0; i < barrierLPModel->meshes.size(); ++i){
+      GLuint meshVAO = barrierLPModel->meshes[i].vao;
+      size_t matrixSegment = sizeof(glm::vec4);
+      glBindVertexArray(meshVAO);
+      barrierLPVAOs.push_back(meshVAO);
 
       glEnableVertexAttribArray(5);
       glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
@@ -142,6 +166,11 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
    barrierModel->modelShader.setMat4("view", view);
    barrierModel->modelShader.setMat4("projection", projection);
    barrierModel->modelShader.setVec3("viewPos", camera.cameraPos);
+
+   barrierLPModel->modelShader.use();
+   barrierLPModel->modelShader.setMat4("view", view);
+   barrierLPModel->modelShader.setMat4("projection", projection);
+   barrierLPModel->modelShader.setVec3("viewPos", camera.cameraPos);
 
    glEnable(GL_CULL_FACE);
    glCullFace(GL_BACK);
@@ -172,6 +201,26 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
                                        modelMatricesList[pivot].size());
             }
          }
+         
+         else{
+            for (unsigned int meshIndex = 0; meshIndex < barrierLPModel->meshes.size(); ++meshIndex) {
+               glBindVertexArray(barrierLPModel->meshes[meshIndex].vao);
+               glBindBuffer(GL_ARRAY_BUFFER, barrierBuffers[pivot]);
+
+               size_t matrixSegment = sizeof(glm::vec4);
+               glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
+               glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (matrixSegment));
+               glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (2 * matrixSegment));
+               glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) (3 * matrixSegment));
+
+               barrierLPModel->meshes[meshIndex].bindTextures(barrierLPModel->modelShader);
+               glDrawElementsInstanced(GL_TRIANGLES,
+                                       static_cast<unsigned int>(barrierLPModel->meshes[meshIndex].indices.size()),
+                                       GL_UNSIGNED_INT,
+                                       0,
+                                       modelMatricesList[pivot].size());
+            }
+         }
       }
    }
 
@@ -185,9 +234,16 @@ void Barrier::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
 }
 
 void Barrier::cleanUpBuffers(){
-   glDeleteBuffers(1, &barrierBuffer);
 
    for (GLuint buffer: barrierBuffers){
       glDeleteBuffers(1, &buffer);
+   }
+
+   for (GLuint vao: barrierVAOs){
+      glDeleteVertexArrays(1, &vao);
+   }
+
+   for (GLuint vao: barrierLPVAOs){
+      glDeleteVertexArrays(1, &vao);
    }
 }

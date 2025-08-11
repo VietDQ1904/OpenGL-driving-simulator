@@ -53,7 +53,7 @@ player-controlled car and procedural generated road and terrain.
 <a name= "license"></a>
 
 ### License ###
-   This project is licensed under MIT license - see [LICENSE.md](LICENSE.md) for more details.
+   This project is licensed under MIT license - see [LICENSE](LICENSE) for more details.
    
    
 

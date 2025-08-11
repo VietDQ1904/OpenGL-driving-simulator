@@ -93,7 +93,7 @@ void Car::update(){
       braking = 0;
    }
    else{
-
+      
       if (linearVelocity < maxVelocity / (1 + 9 * (acceleration < 0))){
          float torque = -maxAcceleration * acceleration * (1 - (std::abs(steering) * (linearVelocity > 10)) / 2);
          wheel1->applyTorque(rot * btVector3(torque, 0, 0));

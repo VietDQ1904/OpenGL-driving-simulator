@@ -14,6 +14,10 @@
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
+extern "C" {
+   __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
+
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height){
    glViewport(0, 0, width, height);
 }
@@ -34,10 +38,10 @@ int main(int argc, char* argv[]){
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
    glfwWindowHint(GLFW_SAMPLES, 4); // Add 4 subsamples for smoother edges. 
 
-   GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, "TestOpenGL", nullptr, nullptr);
+   GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, "DrivingGame", nullptr, nullptr);
 
    if (window == nullptr){
-      std::cout << "Cannot create window.\n";
+      std::cout << "OPENGL::CANNOT_INITIALIZE_GLFW\n";
       glfwTerminate();
       return -1;
    }
@@ -45,7 +49,7 @@ int main(int argc, char* argv[]){
    glfwMakeContextCurrent(window);
 
    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)){
-      std::cout << "Cannot initialize glad.\n";
+      std::cout << "OPENGL::CANNOT_INITIALIZE_GLAD.\n";
       return -1;
    }
 

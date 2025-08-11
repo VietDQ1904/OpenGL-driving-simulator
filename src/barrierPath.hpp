@@ -19,22 +19,23 @@
 class Barrier: public Spline{
    public:
 
-      GLuint barrierVAO, barrierBuffer;
       glm::mat4 model;
       float barrierOffset = pathWidth / 2.0f + 3.0f;
       float barrierHeight = 1.0f;
 
       std::vector<std::vector<glm::mat4>> modelMatricesList;
       int partitionSize = 20;
-      float renderDistance = 250.0f;
+      float renderDistance = 75.0f;
+      float maxRenderDistance = 250.0f;
    
       std::vector<glm::vec3> pivots;
       std::vector<GLuint> barrierBuffers;
+      std::vector<GLuint> barrierVAOs, barrierLPVAOs;
 
       glm::mat4 scale;
 
-      Model *barrierModel;
-
+      Model *barrierModel, *barrierLPModel;
+      
       Barrier(Physics &simulation){
          for (auto& point : points) {
             point *= 5.0f;
@@ -42,6 +43,8 @@ class Barrier: public Spline{
 
          barrierModel = new Model("../assets/Barrier/barrier.obj");
          barrierModel->loadShader("barrierShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
+         barrierLPModel = new Model("../assets/Barrier/barrierLowPoly.obj");
+         barrierLPModel->loadShader("barrierShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
 
          this->generateSpline();
          this->generateVertices(simulation);
@@ -51,7 +54,7 @@ class Barrier: public Spline{
 
       ~Barrier(){
          this->cleanUpBuffers();
-         delete barrierModel;
+         delete barrierModel, barrierLPModel;
       }
 
       void render(glm::mat4 view, glm::mat4 projection, Camera &camera);
