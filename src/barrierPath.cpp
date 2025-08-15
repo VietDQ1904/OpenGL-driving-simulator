@@ -201,7 +201,7 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
                                        modelMatricesList[pivot].size());
             }
          }
-         
+
          else{
             for (unsigned int meshIndex = 0; meshIndex < barrierLPModel->meshes.size(); ++meshIndex) {
                glBindVertexArray(barrierLPModel->meshes[meshIndex].vao);

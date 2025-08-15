@@ -3,20 +3,20 @@
 Car::Car(Physics& simulation): simulation(simulation){
 
    this->spawn = glm::vec3(10.0f, 3.0f, 1.0f);
-   this->carPos = glm::vec3(0.0f, 1.0f, 0.0f);
+   this->carPos = glm::vec3(0.0f, 0.9f, 0.0f);
    this->carSize = glm::vec3(1.0f, 0.6f, 3.0f);
    this->carRot = glm::vec3(0.0f, 0.0f, 0.0f);
-   this->wheelPos_1 = glm::vec3(-1.0f, 0.5f, -2.1f);
+   this->wheelPos_1 = glm::vec3(-1.1f, 0.35f, -1.85f);
    this->wheelSize_1 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_1 = glm::vec3(0.0f, 0.0f, glm::radians(-90.0f));
-   this->wheelPos_2 = glm::vec3(1.0f, 0.5f, -2.1f);
+   this->wheelPos_2 = glm::vec3(1.1f, 0.35f, -1.85f);
    this->wheelSize_2 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_2 = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
-   this->wheelPos_3 = glm::vec3(-1.0f, 0.5f, 1.6f);
-   this->wheelSize_3 = glm::vec3(0.45f, 0.4f, 0.4f);
+   this->wheelPos_3 = glm::vec3(-1.1f, 0.35f, 1.75f);
+   this->wheelSize_3 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_3 = glm::vec3(0.0f, 0.0f, glm::radians(-90.0f));
-   this->wheelPos_4 = glm::vec3(1.0f, 0.5f, 1.6f);
-   this->wheelSize_4 = glm::vec3(0.45f, 0.4f, 0.4f);
+   this->wheelPos_4 = glm::vec3(1.1f, 0.35f, 1.75f);
+   this->wheelSize_4 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_4 = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
 
    setUp();
@@ -93,7 +93,7 @@ void Car::update(){
       braking = 0;
    }
    else{
-      
+
       if (linearVelocity < maxVelocity / (1 + 9 * (acceleration < 0))){
          float torque = -maxAcceleration * acceleration * (1 - (std::abs(steering) * (linearVelocity > 10)) / 2);
          wheel1->applyTorque(rot * btVector3(torque, 0, 0));

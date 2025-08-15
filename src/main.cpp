@@ -14,15 +14,15 @@
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
-// enable NVIDIA GPU rendering
-extern "C" {
-   __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-}
+// // enable NVIDIA GPU rendering
+// extern "C" {
+//    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+// }
 
-// enable AMD GPU rendering
-extern "C" {
-   __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
+// // enable AMD GPU rendering
+// extern "C" {
+//    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+// }
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height){
    glViewport(0, 0, width, height);
@@ -75,9 +75,7 @@ int main(int argc, char* argv[]){
    float lastTime = 0.0f;
    const float radius = 10.0f;
 
-
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 
    //ResourceManagement::loadShader("carShader", "../src/model.vert", "../src/modelTexture.frag", nullptr);
    ResourceManagement::loadShader("Main", "../src/model.vert", "../src/model.frag", nullptr);
@@ -88,11 +86,12 @@ int main(int argc, char* argv[]){
    Physics simulation;
 
    Car *car = new Car(simulation);
-   car->loadModels("../assets/Car/car.obj", "../assets/Car/wheelFront.obj", "../assets/Car/wheelBack.obj");
+   car->loadModels("../assets/Car/carBody.obj", "../assets/Car/wheel.obj", "../assets/Car/wheel.obj");
    car->loadShaderCarBody("CarBodyShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
    car->loadShaderFrontWheels("CarFrontWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
    car->loadShaderBackWheels("CarBackWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
    car->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
 
    std::array<std::string, 6> images = {"right.jpg",
                                         "left.jpg", 

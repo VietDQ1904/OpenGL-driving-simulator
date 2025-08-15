@@ -83,9 +83,7 @@ glm::mat4 Camera::getProjectionMatrix(float aspect) const {
 }
 
 void Camera::calculateFrustrumPlanes(const glm::mat4 &projectionView, float aspect){
-   // const float halfVSide = farPlane * glm::tan(zoom * 0.5f);
-   // const float halfHSide = halfVSide * aspect;
-   // glm::vec3 frontMultFar = farPlane * cameraFront;
+
    glm::vec4 rowX = glm::vec4(projectionView[0][0], projectionView[1][0], projectionView[2][0], projectionView[3][0]);
    glm::vec4 rowY = glm::vec4(projectionView[0][1], projectionView[1][1], projectionView[2][1], projectionView[3][1]);
    glm::vec4 rowZ = glm::vec4(projectionView[0][2], projectionView[1][2], projectionView[2][2], projectionView[3][2]);
