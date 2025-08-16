@@ -44,7 +44,7 @@ class Barrier: public Spline{
          barrierModel = new Model("../assets/Barrier/barrier.obj");
          barrierModel->loadShader("barrierShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
          barrierLPModel = new Model("../assets/Barrier/barrierLowPoly.obj");
-         barrierLPModel->loadShader("barrierShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
+         barrierLPModel->loadShader("barrierLPShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
 
          this->generateSpline();
          this->generateVertices(simulation);
@@ -54,7 +54,10 @@ class Barrier: public Spline{
 
       ~Barrier(){
          this->cleanUpBuffers();
-         delete barrierModel, barrierLPModel;
+         barrierModel->cleanUpBuffers();
+         barrierLPModel->cleanUpBuffers();
+         delete barrierModel; 
+         delete barrierLPModel;
       }
 
       void render(glm::mat4 view, glm::mat4 projection, Camera &camera);

@@ -231,6 +231,9 @@ void Barrier::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
    barrierModel->modelShader.use();
    barrierModel->modelShader.setVec3("light.direction", direction);
    barrierModel->modelShader.setVec3("light.color", lightColor);  
+   barrierLPModel->modelShader.use();
+   barrierLPModel->modelShader.setVec3("light.direction", direction);
+   barrierLPModel->modelShader.setVec3("light.color", lightColor);  
 }
 
 void Barrier::cleanUpBuffers(){

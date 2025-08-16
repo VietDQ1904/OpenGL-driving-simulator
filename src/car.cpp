@@ -58,9 +58,18 @@ Car::~Car(){
    wheelModel1->cleanUpBuffers();
    wheelModel2->cleanUpBuffers();
 
-   delete car, wheel1, wheel2, wheel3, wheel4;
-   delete carModel, wheelModel1, wheelModel2;
-   delete springConst1, springConst2, springConst3, springConst4;
+   delete car;
+   delete wheel1;
+   delete wheel2;
+   delete wheel3; 
+   delete wheel4;
+   delete carModel;
+   delete wheelModel1;
+   delete wheelModel2;
+   delete springConst1;
+   delete springConst2;
+   delete springConst3;
+   delete springConst4;
 }
 
 void Car::loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2){

@@ -11,8 +11,8 @@ Texture::Texture():
    filterMax(GL_LINEAR),
    imageFormat(GL_RGB),
    internalFormat(GL_RGB)
-{ 
-   glGenTextures(1, &this->textureID);
+{
+   
 }
 
 void Texture::generateTexture(int width, int height, int nrChannels, unsigned char* data){

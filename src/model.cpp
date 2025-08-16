@@ -19,7 +19,7 @@ void Mesh::cleanUpBuffers(){
 }
 
 void Mesh::draw(Shader &shader){
-   glBindVertexArray(vao);
+   glBindVertexArray(this->vao);
    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
    glBindVertexArray(0);
 }   
@@ -215,7 +215,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
       
       Texture texture = ResourceManagement::loadTexture(textureName, textureFile.c_str(), true, (typeName == "texture_diffuse"));
       texture.type = typeName;
-
+      //std::cout << textureName << " | ID: " << texture.textureID << "\n";
       textures.push_back(texture);
    }
 
