@@ -100,7 +100,7 @@ void main(){
    // Gamma correct
    color = pow(color, vec3(1.0 / 2.2));
    // Brighten
-   color *= vec3(2.5);
+   color *= vec3(2.0);
 
    FragColor = vec4(color, 1.0);
 }

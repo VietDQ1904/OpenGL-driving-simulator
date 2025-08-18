@@ -60,7 +60,6 @@ class Car{
       void control(GLFWwindow *window, float &deltaTime);
       
    private:
-
       glm::mat4 objectModelMatrix;
       GLfloat matrix[16];
       btTransform transform;

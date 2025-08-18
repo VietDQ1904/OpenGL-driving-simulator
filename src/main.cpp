@@ -15,14 +15,14 @@ const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
 // enable NVIDIA GPU rendering
-extern "C" {
-   __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-}
+// extern "C" {
+//    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+// }
 
-// enable AMD GPU rendering
-extern "C" {
-   __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
+// // enable AMD GPU rendering
+// extern "C" {
+//    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+// }
 
 void frameBufferSizeCallback(GLFWwindow *window, int width, int height){
    glViewport(0, 0, width, height);
@@ -60,10 +60,6 @@ int main(int argc, char* argv[]){
    }
 
    glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
-   GLFWimage imageIcons[1];
-   imageIcons[0].pixels = stbi_load("../assets/racing-car.png", &imageIcons[0].width, &imageIcons[0].height, 0, 4);
-   glfwSetWindowIcon(window, 1, imageIcons);
-   stbi_image_free(imageIcons[0].pixels);
    
    glm::mat4 model = glm::mat4(0.0f);
    glm::mat4 view = glm::mat4(1.0f);
@@ -77,7 +73,6 @@ int main(int argc, char* argv[]){
 
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-   //ResourceManagement::loadShader("carShader", "../src/model.vert", "../src/modelTexture.frag", nullptr);
    ResourceManagement::loadShader("Main", "../src/model.vert", "../src/model.frag", nullptr);
    ResourceManagement::loadTexture("Grass", "../assets/grass.png", false, false);
    ResourceManagement::loadTexture("Asphalt", "../assets/asphalt.png", false, false);
@@ -100,9 +95,9 @@ int main(int argc, char* argv[]){
 
    Car *car = new Car(simulation);
    car->loadModels("../assets/Car/CarBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
-   car->loadShaderCarBody("CarShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
-   car->loadShaderFrontWheels("CarShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
-   car->loadShaderBackWheels("CarShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderCarBody("CarBodyShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderFrontWheels("CarFrontWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderBackWheels("CarBackWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
    car->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
@@ -113,8 +108,6 @@ int main(int argc, char* argv[]){
 
    Shader cubemapShader = ResourceManagement::getShader("Cubemap");
    cubemapShader.use();
-
-   //Terrain terrain;
 
    // glfwSetCursorPosCallback(window, mouseCallback); // When move the mouse
    // glfwSetScrollCallback(window, scrollCallback); // When scroll the mouse
@@ -134,7 +127,7 @@ int main(int argc, char* argv[]){
       }
    });
    
-   GLfloat maxSecPerFrame = 1.0f / 60.0f;
+   float maxSecPerFrame = 1.0f / 120.0f;
 
    while (!glfwWindowShouldClose(window)){
       
@@ -172,13 +165,12 @@ int main(int argc, char* argv[]){
       mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader);
 
-      barrier->render(view, projection, camera);
-      
       car->control(window, deltaTime);
       car->update();
       car->render(view, projection, camera.cameraPos);
 
-
+      barrier->render(view, projection, camera);
+      
       skyBox.draw(cubemapShader, projection, view);
       
       glfwSwapBuffers(window);
@@ -189,6 +181,7 @@ int main(int argc, char* argv[]){
    delete terrain;
    delete road;
    delete barrier;
+   skyBox.unbind();
    ResourceManagement::clearResources();
 
    glfwTerminate();

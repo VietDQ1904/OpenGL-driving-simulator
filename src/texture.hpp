@@ -17,7 +17,6 @@ class Texture{
       std::string type;
       std::string path;
 
-      Texture(std::string type, std::string path);
       Texture();
       void bindTexture();
       void generateTexture(int width, int height, int nrChannels, unsigned char* data);

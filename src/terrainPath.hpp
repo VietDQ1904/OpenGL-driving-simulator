@@ -1,15 +1,11 @@
-#include <vector>
 #include <iostream>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "shader.hpp"
 #include "physics.hpp"
 #include "spline.hpp"
 #include "camera.hpp"
 #include "perlinNoise.hpp"
+#include "vertices.hpp"
 
 #ifndef TERRAIN_PATH
 #define TERRAIN_PATH
@@ -31,14 +27,9 @@ class Terrain: public Spline{
    public:
       std::vector<float> vertices;
       std::vector<int> indices;
-      std::vector<std::vector<float>> verticesTerrain;
-      std::vector<std::vector<float>> verticesLowDetailsTerrain;
-      std::vector<glm::vec3> pivots;
+      Vertices verticeMaps;
 
       GLuint vao, vbo, ebo;
-      std::vector<GLuint> vaos, vbos;
-      std::vector<GLuint> lowVaos, lowVbos;
-
       glm::mat4 model;
 
       float terrainPathWidth = 30.0f;

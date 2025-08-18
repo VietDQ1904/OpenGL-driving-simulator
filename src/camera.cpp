@@ -120,10 +120,10 @@ void Camera::calculateFrustrumPlanes(const glm::mat4 &projectionView, float aspe
    }
 }
 
-bool Camera::isInFrustum(const glm::vec3& center, float radius) const {
+bool Camera::isInFrustum(const glm::vec3& point, float range) const {
    for (int i = 0; i < 6; ++i) {
-      float dist = glm::dot(frustum[i].normal, center) + frustum[i].distance;
-      if (dist < -radius) {
+      float dist = glm::dot(frustum[i].normal, point) + frustum[i].distance;
+      if (dist < -range) {
          return false; 
       }
    }

@@ -339,12 +339,13 @@ void Terrain::generateVertices(Physics &simulation){
       }
       
       if (elements >= partitionSize){
-         verticesTerrain.push_back(verticesSub);
-         verticesLowDetailsTerrain.push_back(verticesLowSub);
 
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
-         pivots.push_back(pivot);
-         
+
+         verticeMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
+         verticeMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
+         verticeMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
+
          elements = 0;
          lastIndex = i;
          verticesSub.clear();
@@ -357,14 +358,10 @@ void Terrain::generateVertices(Physics &simulation){
 
    if (!verticesSub.empty()){
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
-      pivots.push_back(pivot); 
-      verticesTerrain.push_back(verticesSub);
+      verticeMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
+      verticeMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
+      verticeMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
    }
-
-   if (!verticesLowSub.empty()){
-      verticesLowDetailsTerrain.push_back(verticesLowSub);
-   }
-
 
 }
 
@@ -391,17 +388,17 @@ void Terrain::setUp(){
    glBindVertexArray(0);
 
    
-   for (const auto& partition: verticesTerrain){
+   for (const auto& partition: verticeMaps.vertices){
       GLuint vaoPartition, vboPartition;
       glGenVertexArrays(1, &vaoPartition);
       glGenBuffers(1, &vboPartition);
 
-      vaos.push_back(vaoPartition);
-      vbos.push_back(vboPartition);
+      verticeMaps.insertVAO(partition.first, vaoPartition);
+      verticeMaps.insertVBO(partition.first, vboPartition);
 
       glBindVertexArray(vaoPartition);
       glBindBuffer(GL_ARRAY_BUFFER, vboPartition);
-      glBufferData(GL_ARRAY_BUFFER, partition.size() * sizeof(float), partition.data(), GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(float), partition.second.data(), GL_STATIC_DRAW);
 
       glEnableVertexAttribArray(0);
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
@@ -413,17 +410,17 @@ void Terrain::setUp(){
       glBindVertexArray(0);
    }
 
-   for (const auto& partition: verticesLowDetailsTerrain){
+   for (const auto& partition: verticeMaps.lowDetailVertices){
       GLuint vaoPartition, vboPartition;
       glGenVertexArrays(1, &vaoPartition);
       glGenBuffers(1, &vboPartition);
 
-      lowVaos.push_back(vaoPartition);
-      lowVbos.push_back(vboPartition);
+      verticeMaps.insertLDVAO(partition.first, vaoPartition);
+      verticeMaps.insertLDVBO(partition.first, vboPartition);
 
       glBindVertexArray(vaoPartition);
       glBindBuffer(GL_ARRAY_BUFFER, vboPartition);
-      glBufferData(GL_ARRAY_BUFFER, partition.size() * sizeof(float), partition.data(), GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(float), partition.second.data(), GL_STATIC_DRAW);
 
       glEnableVertexAttribArray(0);
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
@@ -447,23 +444,20 @@ void Terrain::render(Shader &shader, Camera &camera){
    glBindVertexArray(0);
 
    float length;
-   for (int i = 0; i < vaos.size(); ++i){
-      if (camera.isInFrustum(pivots[i], 100.0f)){
-         length = glm::distance(camera.cameraPos, pivots[i]);
+   std::vector<std::array<float, 3>> nearByPivots;
+   verticeMaps.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, maxRenderDistance,
+   nearByPivots);
 
-         if (length >= maxRenderDistance){
-            continue;
-         }
-         
+   for (auto pivot: nearByPivots){
+      if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), 100.0f)){
+         length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
          if (length < renderDistance){
-            glBindVertexArray(vaos[i]);
-            // Use drawArrays instead because all triangles were already defined.
-            glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrain[i].size() / 8));
+            glBindVertexArray(verticeMaps.vaos[pivot]);
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticeMaps.vertices[pivot].size() / 8));
          }
-        
-         glBindVertexArray(lowVaos[i]);
-         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesLowDetailsTerrain[i].size() / 8));
 
+         glBindVertexArray(verticeMaps.vaosLD[pivot]);
+         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticeMaps.lowDetailVertices[pivot].size() / 8));
       }
    }
 
@@ -475,21 +469,7 @@ void Terrain::cleanUpBuffers(){
    glDeleteBuffers(1, &vbo);
    glDeleteBuffers(1, &ebo);
 
-   for (GLuint v: vaos){
-      glDeleteVertexArrays(1, &v);
-   }
-
-   for (GLuint v: vbos){
-      glDeleteBuffers(1, &v);
-   }
-
-   for (GLuint v: lowVaos){
-      glDeleteVertexArrays(1, &v);
-   }
-
-   for (GLuint v: lowVbos){
-      glDeleteVertexArrays(1, &v);
-   }
+   verticeMaps.clearBuffers();
 }
 
 

@@ -8,7 +8,7 @@ Shader ResourceManagement::loadShader(std::string shaderName, const char* vertex
    if (shaders.find(shaderName) != shaders.end()){
       return shaders[shaderName];
    }
-   
+
    shaders[shaderName] = loadShaderFromFile(vertexFile, fragmentFile, geometryFile);
    return shaders[shaderName];
 }
@@ -102,11 +102,12 @@ Texture ResourceManagement::loadTextureFromFile(const char* fileName, bool isAlp
    return texture;
 }
 
+// Clear out all loaded shaders, textures.
 void ResourceManagement::clearResources(){
    for (auto &i: shaders){
       glDeleteProgram(i.second.shaderProgram);
    }
-   for (auto &i: textures){
+   for (auto i: textures){
       glDeleteTextures(1, &i.second.textureID);
    }
 }
