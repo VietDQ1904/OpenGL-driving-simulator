@@ -163,14 +163,13 @@ int main(int argc, char* argv[]){
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);  
       mainShader.setInt("texture_diffuse1", 1);
-      road->render(mainShader);
+      road->render(mainShader, camera);
 
       car->control(window, deltaTime);
       car->update();
       car->render(view, projection, camera.cameraPos);
 
       barrier->render(view, projection, camera);
-      
       skyBox.draw(cubemapShader, projection, view);
       
       glfwSwapBuffers(window);

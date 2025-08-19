@@ -38,28 +38,34 @@ struct ArrayEqual{
 };
 
 class Vertices{
-
    public:
       float cellSize = 20.0f;
 
       std::unordered_map<std::array<float, 3>, std::vector<float>, ArrayHash<3>, ArrayEqual<3>> vertices;
-      std::unordered_map<std::array<float, 3>, std::vector<float>, ArrayHash<3>, ArrayEqual<3>> lowDetailVertices;
-      std::unordered_map<std::array<float, 2>, std::array<float, 3>, ArrayHash<2>, ArrayEqual<2>> gridMap;
       std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vaos;
       std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vbos;
-      std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vaosLD;
-      std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vbosLD;
+      std::unordered_map<std::array<float, 2>, std::array<float, 3>, ArrayHash<2>, ArrayEqual<2>> gridMap;
 
-      Vertices(){
+      void clearBuffers(){
+         for (auto &i: vaos){
+            glDeleteVertexArrays(1, &i.second);
+         }
+         
+         for (auto &i: vbos){
+            glDeleteBuffers(1, &i.second);
+         }
+      }
 
-      };
-
-      void insertVertices(std::array<float, 3> const &key, std::vector<float> value){
+      void insertVertices(std::array<float, 3> const &key, std::vector<float> const &value){
          vertices[key] = value;
       }
 
-      void insertLowDetailVertices(std::array<float, 3> const &key, std::vector<float> value){
-         lowDetailVertices[key] = value;
+      void insertVAO(std::array<float, 3> const &key, GLuint const &value){
+         vaos[key] = value;
+      }
+      
+      void insertVBO(std::array<float, 3> const &key, GLuint const &value){
+         vbos[key] = value;
       }
 
       void insertGridMap(std::array<float, 3> pivot){
@@ -68,40 +74,6 @@ class Vertices{
          std::array<float, 2> cellKey = {static_cast<float>(cellX), static_cast<float>(cellZ)};
          
          gridMap[cellKey] = pivot;
-      }
-
-      void insertVAO(std::array<float, 3> const &key, GLuint value){
-         vaos[key] = value;
-      }
-      
-      void insertVBO(std::array<float, 3> const &key, GLuint value){
-         vbos[key] = value;
-      }
-
-      void insertLDVAO(std::array<float, 3> const &key, GLuint value){
-         vaosLD[key] = value;
-      }
-
-      void insertLDVBO(std::array<float, 3> const &key, GLuint value){
-         vbosLD[key] = value;
-      }
-
-      void clearBuffers(){
-         for (auto i: vaos){
-            glDeleteVertexArrays(1, &i.second);
-         }
-         
-         for (auto i: vbos){
-            glDeleteBuffers(1, &i.second);
-         }
-
-         for (auto i: vaosLD){
-            glDeleteVertexArrays(1, &i.second);
-         }
-
-         for (auto i: vbosLD){
-            glDeleteVertexArrays(1, &i.second);
-         }
       }
 
       void findPivotsByRange(const std::array<float, 3> point, float distance, std::vector<std::array<float, 3>> &nearbyPoints){
@@ -128,9 +100,85 @@ class Vertices{
                }
             }
          }
+      }
+};
 
+class VerticesWithLOD: public Vertices{
+   public:
+      std::unordered_map<std::array<float, 3>, std::vector<float>, ArrayHash<3>, ArrayEqual<3>> lowDetailVertices;
+      std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vaosLD;
+      std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vbosLD;
+
+      void insertLowDetailVertices(std::array<float, 3> const &key, std::vector<float> const &value){
+         lowDetailVertices[key] = value;
       }
 
+      void insertLDVAO(std::array<float, 3> const &key, GLuint const &value){
+         vaosLD[key] = value;
+      }
+
+      void insertLDVBO(std::array<float, 3> const &key, GLuint const &value){
+         vbosLD[key] = value;
+      }
+
+      void clearBuffers(){
+
+         Vertices::clearBuffers();
+         for (auto &i: vaosLD){
+            glDeleteVertexArrays(1, &i.second);
+         }
+
+         for (auto &i: vbosLD){
+            glDeleteVertexArrays(1, &i.second);
+         }
+      }
+
+};
+
+class ModelInstances: public Vertices{
+   public: 
+      std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList;
+      std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vaosLD;
+
+      void insertModelMatrices(std::array<float, 3> const &key, std::vector<glm::mat4> const &modelMatrices){
+         modelMatricesList[key] = modelMatrices;
+      }
+      
+      void insertLDVAO(std::array<float, 3> const &key, GLuint const &value){
+         vaosLD[key] = value;
+      }
+
+      void clearBuffers(){
+         Vertices::clearBuffers();
+
+         for (auto &i: vaosLD){
+            glDeleteVertexArrays(1, &i.second);
+         }
+      }
+};
+
+class VerticesWithIndices: public Vertices{
+   public:
+      std::unordered_map<std::array<float, 3>, std::vector<int>, ArrayHash<3>, ArrayEqual<3>> indices;
+      std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> ebos;
+
+      void insertIndices(std::array<float, 3> const &key, std::vector<int> const &value){
+         indices[key] = value;
+      } 
+
+      void insertEBO(std::array<float, 3> const &key, GLuint const &value){
+         ebos[key] = value;
+      }
+      
+      void clearBuffers(){
+         Vertices::clearBuffers();
+
+         for (auto &i: ebos){
+            glDeleteBuffers(1, &i.second);
+         }
+
+      }
+      
 };
 
 #endif

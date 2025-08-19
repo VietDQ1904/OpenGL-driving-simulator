@@ -80,9 +80,11 @@ void Barrier::generateVertices(Physics &simulation){
 
       if (elements >= partitionSize){
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
-         pivots.push_back(pivot);
-         modelMatricesList.push_back(modelMatricesPartition);
+         modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
+         modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
+
          modelMatricesPartition.clear();
+         
          elements = 0;
          lastIndex = i;
       }
@@ -92,24 +94,21 @@ void Barrier::generateVertices(Physics &simulation){
 
    if (!modelMatricesPartition.empty()){
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
-      pivots.push_back(pivot); 
-      modelMatricesList.push_back(modelMatricesPartition);
+
+      modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
+      modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
    }
 
 }
 
 void Barrier::setUp(){
 
-   //glGenBuffers(1, &barrierBuffer);
-   // glBindBuffer(GL_ARRAY_BUFFER, barrierBuffer);
-   // glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data(), GL_STATIC_DRAW);
-
-   for (const auto &partition: modelMatricesList){
+   for (const auto &partition: modelInstances.modelMatricesList){
       GLuint barrierPartitionBuffer;
       glGenBuffers(1, &barrierPartitionBuffer);
       glBindBuffer(GL_ARRAY_BUFFER, barrierPartitionBuffer);
-      glBufferData(GL_ARRAY_BUFFER, partition.size() * sizeof(glm::mat4), partition.data(), GL_STATIC_DRAW);
-      barrierBuffers.push_back(barrierPartitionBuffer);
+      glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(glm::mat4), partition.second.data(), GL_STATIC_DRAW);
+      modelInstances.insertVBO(partition.first, barrierPartitionBuffer);
    }
 
    for (unsigned int i = 0; i < barrierModel->meshes.size(); ++i){
@@ -176,16 +175,21 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
    glCullFace(GL_BACK);
 
    float length;
-   for (unsigned int pivot = 0; pivot < pivots.size(); ++pivot) {
+   std::vector<std::array<float, 3>> nearByPivots;
+   modelInstances.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, 
+                                    maxRenderDistance,
+                                    nearByPivots);
+   
 
-      if (camera.isInFrustum(pivots[pivot], 100.0f)){
+   for (auto &pivot: nearByPivots){
+      if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), 100.0f)){
 
-         length = glm::distance(camera.cameraPos, pivots[pivot]);
+         length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
 
          if (length < renderDistance) {
             for (unsigned int meshIndex = 0; meshIndex < barrierModel->meshes.size(); ++meshIndex) {
                glBindVertexArray(barrierModel->meshes[meshIndex].vao);
-               glBindBuffer(GL_ARRAY_BUFFER, barrierBuffers[pivot]);
+               glBindBuffer(GL_ARRAY_BUFFER, modelInstances.vbos[pivot]);
 
                size_t matrixSegment = sizeof(glm::vec4);
                glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
@@ -198,14 +202,14 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
                                        static_cast<unsigned int>(barrierModel->meshes[meshIndex].indices.size()),
                                        GL_UNSIGNED_INT,
                                        0,
-                                       modelMatricesList[pivot].size());
+                                       modelInstances.modelMatricesList[pivot].size());
             }
          }
 
          else{
             for (unsigned int meshIndex = 0; meshIndex < barrierLPModel->meshes.size(); ++meshIndex) {
                glBindVertexArray(barrierLPModel->meshes[meshIndex].vao);
-               glBindBuffer(GL_ARRAY_BUFFER, barrierBuffers[pivot]);
+               glBindBuffer(GL_ARRAY_BUFFER, modelInstances.vbos[pivot]);
 
                size_t matrixSegment = sizeof(glm::vec4);
                glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *) 0);
@@ -218,7 +222,7 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera){
                                        static_cast<unsigned int>(barrierLPModel->meshes[meshIndex].indices.size()),
                                        GL_UNSIGNED_INT,
                                        0,
-                                       modelMatricesList[pivot].size());
+                                       modelInstances.modelMatricesList[pivot].size());
             }
          }
       }
@@ -238,9 +242,7 @@ void Barrier::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
 
 void Barrier::cleanUpBuffers(){
 
-   for (GLuint buffer: barrierBuffers){
-      glDeleteBuffers(1, &buffer);
-   }
+   modelInstances.clearBuffers();
 
    for (GLuint vao: barrierVAOs){
       glDeleteVertexArrays(1, &vao);

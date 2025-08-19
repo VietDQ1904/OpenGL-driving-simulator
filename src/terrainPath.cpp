@@ -87,6 +87,15 @@ void Terrain::generateVertices(Physics &simulation){
    float uvScale = 0.2f;
 
    // Setup for grass path next to the road
+   std::vector<float> verticesPathSub;
+   std::vector<int> indicesPathSub;
+   int elements = 0;
+   int lastIndex = 0;
+   int startIndex = 0;
+   int totalVertices = 0;
+
+   glm::vec3 pivot;
+
    for (int i = 0; i < generatedPath.size() - 1; ++i){
 
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
@@ -122,98 +131,141 @@ void Terrain::generateVertices(Physics &simulation){
       segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
       
       // 1st vertex of the left side
-      vertices.push_back(A1.x); 
-      vertices.push_back(A1.y); 
-      vertices.push_back(A1.z);
-      vertices.push_back(normal1.x); 
-      vertices.push_back(normal1.y); 
-      vertices.push_back(normal1.z);
-      vertices.push_back(0.0f); 
-      vertices.push_back(0.2f * (pathWidth));
+      verticesPathSub.push_back(A1.x); 
+      verticesPathSub.push_back(A1.y); 
+      verticesPathSub.push_back(A1.z);
+      verticesPathSub.push_back(normal1.x); 
+      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.z);
+      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.2f * (pathWidth));
 
       // 2nd vertex of the left side 
-      vertices.push_back(B1.x);
-      vertices.push_back(B1.y);
-      vertices.push_back(B1.z);
-      vertices.push_back(normal1.x); 
-      vertices.push_back(normal1.y); 
-      vertices.push_back(normal1.z);
-      vertices.push_back(0.0f); 
-      vertices.push_back(0.0f);
+      verticesPathSub.push_back(B1.x);
+      verticesPathSub.push_back(B1.y);
+      verticesPathSub.push_back(B1.z);
+      verticesPathSub.push_back(normal1.x); 
+      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.z);
+      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.0f);
 
       // 3rd vertex of the left side
-      vertices.push_back(C1.x);
-      vertices.push_back(C1.y);
-      vertices.push_back(C1.z);
-      vertices.push_back(normal1.x); 
-      vertices.push_back(normal1.y); 
-      vertices.push_back(normal1.z);
-      vertices.push_back(0.2f * (segmentLength)); 
-      vertices.push_back(0.2f * (pathWidth));
+      verticesPathSub.push_back(C1.x);
+      verticesPathSub.push_back(C1.y);
+      verticesPathSub.push_back(C1.z);
+      verticesPathSub.push_back(normal1.x); 
+      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.z);
+      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.2f * (pathWidth));
 
       // 4th vertex of the left side
-      vertices.push_back(D1.x);
-      vertices.push_back(D1.y);
-      vertices.push_back(D1.z);
-      vertices.push_back(normal1.x); 
-      vertices.push_back(normal1.y); 
-      vertices.push_back(normal1.z);
-      vertices.push_back(0.2f * (segmentLength)); 
-      vertices.push_back(0.0f);
+      verticesPathSub.push_back(D1.x);
+      verticesPathSub.push_back(D1.y);
+      verticesPathSub.push_back(D1.z);
+      verticesPathSub.push_back(normal1.x); 
+      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.z);
+      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.0f);
 
       // 1st vertex of the right side
-      vertices.push_back(A2.x); 
-      vertices.push_back(A2.y); 
-      vertices.push_back(A2.z);
-      vertices.push_back(normal2.x); 
-      vertices.push_back(normal2.y); 
-      vertices.push_back(normal2.z);
-      vertices.push_back(0.0f); 
-      vertices.push_back(0.2f * (pathWidth));
+      verticesPathSub.push_back(A2.x); 
+      verticesPathSub.push_back(A2.y); 
+      verticesPathSub.push_back(A2.z);
+      verticesPathSub.push_back(normal2.x); 
+      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.z);
+      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.2f * (pathWidth));
 
       // 2nd vertex of the right side 
-      vertices.push_back(B2.x);
-      vertices.push_back(B2.y);
-      vertices.push_back(B2.z);
-      vertices.push_back(normal2.x); 
-      vertices.push_back(normal2.y); 
-      vertices.push_back(normal2.z);
-      vertices.push_back(0.0f); 
-      vertices.push_back(0.0f);
+      verticesPathSub.push_back(B2.x);
+      verticesPathSub.push_back(B2.y);
+      verticesPathSub.push_back(B2.z);
+      verticesPathSub.push_back(normal2.x); 
+      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.z);
+      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.0f);
 
       // 3rd vertex of the right side
-      vertices.push_back(C2.x);
-      vertices.push_back(C2.y);
-      vertices.push_back(C2.z);
-      vertices.push_back(normal2.x); 
-      vertices.push_back(normal2.y); 
-      vertices.push_back(normal2.z);
-      vertices.push_back(0.2f * (segmentLength)); 
-      vertices.push_back(0.2f * (pathWidth));
+      verticesPathSub.push_back(C2.x);
+      verticesPathSub.push_back(C2.y);
+      verticesPathSub.push_back(C2.z);
+      verticesPathSub.push_back(normal2.x); 
+      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.z);
+      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.2f * (pathWidth));
 
       // 4th vertex of the right side
-      vertices.push_back(D2.x);
-      vertices.push_back(D2.y);
-      vertices.push_back(D2.z);
-      vertices.push_back(normal2.x); 
-      vertices.push_back(normal2.y); 
-      vertices.push_back(normal2.z);
-      vertices.push_back(0.2f * (segmentLength)); 
-      vertices.push_back(0.0f);
+      verticesPathSub.push_back(D2.x);
+      verticesPathSub.push_back(D2.y);
+      verticesPathSub.push_back(D2.z);
+      verticesPathSub.push_back(normal2.x); 
+      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.z);
+      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.0f);
+
+      startIndex = totalVertices;    
+      indicesPathSub.push_back(startIndex + 0); 
+      indicesPathSub.push_back(startIndex + 1); 
+      indicesPathSub.push_back(startIndex + 2);
+
+      indicesPathSub.push_back(startIndex + 1);
+      indicesPathSub.push_back(startIndex + 2);
+      indicesPathSub.push_back(startIndex + 3);
+
+      indicesPathSub.push_back(startIndex + 4); 
+      indicesPathSub.push_back(startIndex + 5); 
+      indicesPathSub.push_back(startIndex + 6);
+
+      indicesPathSub.push_back(startIndex + 5);
+      indicesPathSub.push_back(startIndex + 6);
+      indicesPathSub.push_back(startIndex + 7);
+
+      totalVertices += 8;
+
+      if (elements >= partitionSize){
+         
+         pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
+         verticesPathMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
+         verticesPathMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesPathSub);
+         verticesPathMaps.insertIndices({pivot.x, pivot.y, pivot.z}, indicesPathSub);
+      
+         elements = 0;
+         totalVertices = 0;
+         lastIndex = i;
+         verticesPathSub.clear();
+         indicesPathSub.clear();
+      }
+
+      elements++;
 
       // Create a rigid body.
       simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
       simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
    }
 
+   if (!indicesPathSub.empty()){
+      pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
+      verticesPathMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
+      verticesPathMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesPathSub);
+      verticesPathMaps.insertIndices({pivot.x, pivot.y, pivot.z}, indicesPathSub);
+   }
+
    // Set up terrain.
-   int elements = 0;
    float noiseValue;
    float distanceToRoad;
    float multiplierValue;
-   int lastIndex = 0;
-   glm::vec3 pivot;
-
+   elements = 0;
+   lastIndex = 0;
+   startIndex = 0;
+   totalVertices = 0;
+   
    std::vector<float> verticesSub;
    std::vector<float> verticesLowSub;
 
@@ -339,12 +391,10 @@ void Terrain::generateVertices(Physics &simulation){
       }
       
       if (elements >= partitionSize){
-
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
-
-         verticeMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
-         verticeMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
-         verticeMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
+         verticesTerrainMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
+         verticesTerrainMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
+         verticesTerrainMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
 
          elements = 0;
          lastIndex = i;
@@ -358,43 +408,52 @@ void Terrain::generateVertices(Physics &simulation){
 
    if (!verticesSub.empty()){
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
-      verticeMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
-      verticeMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
-      verticeMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
+      verticesTerrainMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
+      verticesTerrainMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
+      verticesTerrainMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
    }
 
 }
 
 void Terrain::setUp(){
 
-   glGenVertexArrays(1, &vao);
-   glGenBuffers(1, &vbo);
-   glGenBuffers(1, &ebo);
+   for (auto &partition: verticesPathMaps.vertices){
+      GLuint vao, vbo, ebo;
 
-   glBindVertexArray(vao);
-   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-   glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+      glGenVertexArrays(1, &vao);
+      glGenBuffers(1, &vbo);
+      glGenBuffers(1, &ebo);
 
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
+      verticesPathMaps.insertVAO(partition.first, vao);
+      verticesPathMaps.insertVBO(partition.first, vbo);
+      verticesPathMaps.insertEBO(partition.first, ebo);
 
-   glEnableVertexAttribArray(0);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-   glEnableVertexAttribArray(1);
-   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
-   glEnableVertexAttribArray(2);
-   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+      glBindVertexArray(vao);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(float), partition.second.data(), GL_STATIC_DRAW);
 
-   glBindVertexArray(0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, verticesPathMaps.indices[partition.first].size() * sizeof(int), 
+                                            verticesPathMaps.indices[partition.first].data(), GL_STATIC_DRAW);
+
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+      glEnableVertexAttribArray(1);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+      glEnableVertexAttribArray(2);
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+
+      glBindVertexArray(0);
+   }
 
    
-   for (const auto& partition: verticeMaps.vertices){
+   for (const auto& partition: verticesTerrainMaps.vertices){
       GLuint vaoPartition, vboPartition;
       glGenVertexArrays(1, &vaoPartition);
       glGenBuffers(1, &vboPartition);
 
-      verticeMaps.insertVAO(partition.first, vaoPartition);
-      verticeMaps.insertVBO(partition.first, vboPartition);
+      verticesTerrainMaps.insertVAO(partition.first, vaoPartition);
+      verticesTerrainMaps.insertVBO(partition.first, vboPartition);
 
       glBindVertexArray(vaoPartition);
       glBindBuffer(GL_ARRAY_BUFFER, vboPartition);
@@ -410,13 +469,13 @@ void Terrain::setUp(){
       glBindVertexArray(0);
    }
 
-   for (const auto& partition: verticeMaps.lowDetailVertices){
+   for (const auto& partition: verticesTerrainMaps.lowDetailVertices){
       GLuint vaoPartition, vboPartition;
       glGenVertexArrays(1, &vaoPartition);
       glGenBuffers(1, &vboPartition);
 
-      verticeMaps.insertLDVAO(partition.first, vaoPartition);
-      verticeMaps.insertLDVBO(partition.first, vboPartition);
+      verticesTerrainMaps.insertLDVAO(partition.first, vaoPartition);
+      verticesTerrainMaps.insertLDVBO(partition.first, vboPartition);
 
       glBindVertexArray(vaoPartition);
       glBindBuffer(GL_ARRAY_BUFFER, vboPartition);
@@ -439,25 +498,33 @@ void Terrain::render(Shader &shader, Camera &camera){
    model = glm::mat4(1.0f);
    shader.setMat4("model", model);
 
-   glBindVertexArray(vao);
-   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+   std::vector<std::array<float, 3>> nearbyPivotsPath;
+   verticesPathMaps.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, maxRenderDistance,
+   nearbyPivotsPath);
+   
+   for (auto &pivot: nearbyPivotsPath){
+      if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), renderDistance)){
+         glBindVertexArray(verticesPathMaps.vaos[pivot]);
+         glDrawElements(GL_TRIANGLES, verticesPathMaps.indices[pivot].size(), GL_UNSIGNED_INT, 0);
+      }
+   }
+   
    glBindVertexArray(0);
 
-   float length;
-   std::vector<std::array<float, 3>> nearByPivots;
-   verticeMaps.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, maxRenderDistance,
-   nearByPivots);
+   std::vector<std::array<float, 3>> nearbyPivotsTerrain;
+   verticesTerrainMaps.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, maxRenderDistance,
+   nearbyPivotsTerrain);
 
-   for (auto pivot: nearByPivots){
+   for (auto pivot: nearbyPivotsTerrain){
       if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), 100.0f)){
-         length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
+         float length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
          if (length < renderDistance){
-            glBindVertexArray(verticeMaps.vaos[pivot]);
-            glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticeMaps.vertices[pivot].size() / 8));
+            glBindVertexArray(verticesTerrainMaps.vaos[pivot]);
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrainMaps.vertices[pivot].size() / 8));
          }
 
-         glBindVertexArray(verticeMaps.vaosLD[pivot]);
-         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticeMaps.lowDetailVertices[pivot].size() / 8));
+         glBindVertexArray(verticesTerrainMaps.vaosLD[pivot]);
+         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrainMaps.lowDetailVertices[pivot].size() / 8));
       }
    }
 
@@ -465,11 +532,9 @@ void Terrain::render(Shader &shader, Camera &camera){
 }
 
 void Terrain::cleanUpBuffers(){
-   glDeleteVertexArrays(1, &vao);
-   glDeleteBuffers(1, &vbo);
-   glDeleteBuffers(1, &ebo);
 
-   verticeMaps.clearBuffers();
+   verticesPathMaps.clearBuffers();
+   verticesTerrainMaps.clearBuffers();
 }
 
 

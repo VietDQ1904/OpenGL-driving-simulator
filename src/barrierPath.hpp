@@ -1,7 +1,6 @@
 #include <vector>
 #include <iostream>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,6 +11,7 @@
 #include "spline.hpp"
 #include "model.hpp"
 #include "camera.hpp"
+#include "vertices.hpp"
 
 #ifndef BARRIER_PATH
 #define BARRIER_PATH
@@ -19,19 +19,17 @@
 class Barrier: public Spline{
    public:
 
-      glm::mat4 model;
       float barrierOffset = pathWidth / 2.0f + 3.0f;
       float barrierHeight = 1.0f;
 
-      std::vector<std::vector<glm::mat4>> modelMatricesList;
       int partitionSize = 20;
       float renderDistance = 75.0f;
       float maxRenderDistance = 250.0f;
    
-      std::vector<glm::vec3> pivots;
-      std::vector<GLuint> barrierBuffers;
       std::vector<GLuint> barrierVAOs, barrierLPVAOs;
-
+      ModelInstances modelInstances;
+      
+      glm::mat4 model;
       glm::mat4 scale;
 
       Model *barrierModel, *barrierLPModel;

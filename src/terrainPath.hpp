@@ -27,9 +27,9 @@ class Terrain: public Spline{
    public:
       std::vector<float> vertices;
       std::vector<int> indices;
-      Vertices verticeMaps;
+      VerticesWithLOD verticesTerrainMaps;
+      VerticesWithIndices verticesPathMaps;
 
-      GLuint vao, vbo, ebo;
       glm::mat4 model;
 
       float terrainPathWidth = 30.0f;
@@ -53,7 +53,7 @@ class Terrain: public Spline{
 
          this->generateSpline();
          this->generateVertices(simulation);
-         this->generateIndices();
+         //this->generateIndices();
          this->setUp();
       } 
 
