@@ -20,24 +20,6 @@ float getNoiseMultiplierByDistance(float referenceDistance, float distance){
    return value;
 }
 
-void Terrain::generateIndices(){
-   int topLeft, bottomLeft, topRight, bottomRight;
-
-   for (int i = 0; i < vertices.size() / 3; i += 4){
-      // First triangle
-      indices.push_back(i);
-      indices.push_back(i + 1);
-      indices.push_back(i + 2);
-
-      // Second triangle
-      indices.push_back(i + 1);
-      indices.push_back(i + 2);
-      indices.push_back(i + 3);
-
-   }
-
-}
-
 void Terrain::subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth){
    if (depth == 0){
       triangles.push_back(triangle);
@@ -229,7 +211,7 @@ void Terrain::generateVertices(Physics &simulation){
 
       totalVertices += 8;
 
-      if (elements >= partitionSize){
+      if (elements++ >= partitionSize){
          
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
          verticesPathMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
@@ -242,8 +224,6 @@ void Terrain::generateVertices(Physics &simulation){
          verticesPathSub.clear();
          indicesPathSub.clear();
       }
-
-      elements++;
 
       // Create a rigid body.
       simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
@@ -390,7 +370,7 @@ void Terrain::generateVertices(Physics &simulation){
          }
       }
       
-      if (elements >= partitionSize){
+      if (elements++ >= partitionSize){
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
          verticesTerrainMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
          verticesTerrainMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
@@ -402,7 +382,6 @@ void Terrain::generateVertices(Physics &simulation){
          verticesLowSub.clear();
       }
 
-      elements++;
    }
 
 

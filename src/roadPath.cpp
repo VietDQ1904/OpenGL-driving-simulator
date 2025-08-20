@@ -99,7 +99,7 @@ void Road::generateVertices(Physics &simulation){
 
       totalVertices += 4;
 
-      if (elements >= partitionSize){
+      if (elements++ >= partitionSize){
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2];
 
          verticesWithIndices.insertGridMap({pivot.x, pivot.y, pivot.z});
@@ -115,7 +115,6 @@ void Road::generateVertices(Physics &simulation){
 
       // Create a rigid body.
       simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
-      elements++;
    }
 
    if (!subIndices.empty()){
@@ -163,7 +162,7 @@ void Road::render(Shader &shader, Camera &camera){
    model = glm::mat4(1.0f);
    shader.setMat4("model", model);
 
-   
+
    std::vector<std::array<float, 3>> nearbyPivots;
    verticesWithIndices.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, renderDistance,
    nearbyPivots);

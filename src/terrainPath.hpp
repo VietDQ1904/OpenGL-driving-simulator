@@ -53,7 +53,6 @@ class Terrain: public Spline{
 
          this->generateSpline();
          this->generateVertices(simulation);
-         //this->generateIndices();
          this->setUp();
       } 
 
@@ -65,7 +64,6 @@ class Terrain: public Spline{
       void cleanUpBuffers();
 
    private:
-      void generateIndices();
       void subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth);
       void subdivide(std::vector<Quadrilateral> &quadrilaterals, const Quadrilateral &quadrilateral, int depth);
       void generateVertices(Physics &simulation);

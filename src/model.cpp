@@ -212,7 +212,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
       std::string textureFile = directory + "/" + str.C_Str();
       std::string textureName = typeName + "_" + str.C_Str();
       
-      Texture texture = ResourceManagement::loadTexture(textureName, textureFile.c_str(), true, (typeName == "texture_diffuse"));
+      Texture texture = ResourceManagement::loadTexture(textureName, textureFile.c_str(), true, false);
       texture.type = typeName;
       textures.push_back(texture);
    }

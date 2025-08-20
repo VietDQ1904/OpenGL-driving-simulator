@@ -1,7 +1,7 @@
 #include "car.hpp"
 
-Car::Car(Physics& simulation): simulation(simulation){
-
+Car::Car(Physics& simulation): simulation(simulation)
+{
    this->spawn = glm::vec3(10.0f, 3.0f, 1.0f);
    this->carPos = glm::vec3(0.0f, 0.9f, 0.0f);
    this->carSize = glm::vec3(1.0f, 0.6f, 3.0f);
@@ -22,36 +22,43 @@ Car::Car(Physics& simulation): simulation(simulation){
    setUp();
 }
 
-void Car::initCarBody(glm::vec3 spawn, glm::vec3 carPos, glm::vec3 carSize, glm::vec3 carRot){
-   this->spawn = spawn;
-   this->carPos = carPos;
-   this->carSize = carSize;
-   this->carRot = carRot;
+Car::Car(Physics &simlation,
+         glm::vec3 spawn,
+         glm::vec3 carPos,
+         glm::vec3 carSize,
+         glm::vec3 carRot,
+         glm::vec3 wheelPos_1,
+         glm::vec3 wheelRot_1, 
+         glm::vec3 wheelSize_1,
+         glm::vec3 wheelPos_2,
+         glm::vec3 wheelRot_2,
+         glm::vec3 wheelSize_2,
+         glm::vec3 wheelPos_3,
+         glm::vec3 wheelRot_3,
+         glm::vec3 wheelSize_3,
+         glm::vec3 wheelPos_4,
+         glm::vec3 wheelRot_4,
+         glm::vec3 wheelSize_4): 
+   simulation(simlation),
+   spawn(spawn),
+   carSize(carSize),
+   carRot(carRot),
+   wheelPos_1(wheelPos_1),
+   wheelRot_1(wheelRot_1),
+   wheelSize_1(wheelSize_1),
+   wheelPos_2(wheelPos_2),
+   wheelRot_2(wheelRot_2),
+   wheelSize_2(wheelSize_2),
+   wheelPos_3(wheelPos_3),
+   wheelRot_3(wheelRot_3),
+   wheelSize_3(wheelSize_3),
+   wheelPos_4(wheelPos_4),
+   wheelRot_4(wheelRot_4),
+   wheelSize_4(wheelSize_4)
+{
+   setUp();
 }
 
-void Car::initWheel_1(glm::vec3 wheelPos_1, glm::vec3 wheelSize_1, glm::vec3 wheelRot_1){
-   this->wheelPos_1 = wheelPos_1;
-   this->wheelSize_1 = wheelSize_1;
-   this->wheelRot_1 = wheelRot_1;
-}
-
-void Car::initWheel_2(glm::vec3 wheelPos_2, glm::vec3 wheelSize_2, glm::vec3 wheelRot_2){
-   this->wheelPos_2 = wheelPos_2;
-   this->wheelSize_2 = wheelSize_2;
-   this->wheelRot_2 = wheelRot_2;
-}
-
-void Car::initWheel_3(glm::vec3 wheelPos_3, glm::vec3 wheelSize_3, glm::vec3 wheelRot_3){
-   this->wheelPos_3 = wheelPos_3;
-   this->wheelSize_3 = wheelSize_3;
-   this->wheelRot_3 = wheelRot_3;
-}
-
-void Car::initWheel_4(glm::vec3 wheelPos_4, glm::vec3 wheelSize_4, glm::vec3 wheelRot_4){
-   this->wheelPos_4 = wheelPos_4;
-   this->wheelSize_4 = wheelSize_4;
-   this->wheelRot_4 = wheelRot_4;
-}
 
 Car::~Car(){
    carModel->cleanUpBuffers();

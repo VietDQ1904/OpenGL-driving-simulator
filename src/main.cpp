@@ -14,10 +14,10 @@
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
-// enable NVIDIA GPU rendering
-// extern "C" {
-//    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-// }
+// // enable NVIDIA GPU rendering
+extern "C" {
+   __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
 
 // // enable AMD GPU rendering
 // extern "C" {
@@ -109,6 +109,9 @@ int main(int argc, char* argv[]){
    Shader cubemapShader = ResourceManagement::getShader("Cubemap");
    cubemapShader.use();
 
+   Model roadSign("../assets/RoadSign/roadSignTest.obj");
+   roadSign.loadShader("Test", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+
    // glfwSetCursorPosCallback(window, mouseCallback); // When move the mouse
    // glfwSetScrollCallback(window, scrollCallback); // When scroll the mouse
 
@@ -127,7 +130,7 @@ int main(int argc, char* argv[]){
       }
    });
    
-   float maxSecPerFrame = 1.0f / 120.0f;
+   float maxSecPerFrame = 1.0f / 60.0f;
 
    while (!glfwWindowShouldClose(window)){
       
@@ -144,10 +147,10 @@ int main(int argc, char* argv[]){
       
       simulation.dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime: maxSecPerFrame), 10);
 
-      projection = camera.getProjectionMatrix((float) windowWidth / windowHeight);
+      projection = camera.getProjectionMatrix(static_cast<float>(windowWidth / windowHeight));
       view = camera.getViewMatrix();
       
-      camera.calculateFrustrumPlanes(projection * view, (float) windowWidth / windowHeight);
+      camera.calculateFrustrumPlanes(projection * view, static_cast<float>(windowWidth / windowHeight));
 
       mainShader.use();
 
@@ -164,6 +167,17 @@ int main(int argc, char* argv[]){
       mainShader.setMat4("projection", projection);  
       mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader, camera);
+      
+      model = glm::mat4(1.0f);
+      model = glm::translate(model, glm::vec3(1.0f, -1.0f, 1.0f));
+      roadSign.modelShader.use();
+      roadSign.modelShader.setVec3("light.direction", glm::vec3(1.0f, 1.0f, 1.0f));
+      roadSign.modelShader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+      roadSign.modelShader.setMat4("view", view);
+      roadSign.modelShader.setMat4("projection", projection); 
+      roadSign.modelShader.setMat4("model", model);
+      roadSign.draw();
+      model = glm::mat4(1.0f);
 
       car->control(window, deltaTime);
       car->update();

@@ -78,7 +78,7 @@ void Barrier::generateVertices(Physics &simulation){
       simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
 
 
-      if (elements >= partitionSize){
+      if (elements++ >= partitionSize){
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
          modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
          modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
@@ -88,8 +88,7 @@ void Barrier::generateVertices(Physics &simulation){
          elements = 0;
          lastIndex = i;
       }
-
-      elements++;
+      
    }
 
    if (!modelMatricesPartition.empty()){

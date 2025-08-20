@@ -42,14 +42,25 @@ class Car{
       bool jump = false, jumped = false;
 
       Car(Physics& simulation);
+      Car(Physics &simlation,
+         glm::vec3 spawn,
+         glm::vec3 carPos,
+         glm::vec3 carSize,
+         glm::vec3 carRot,
+         glm::vec3 wheelPos_1,
+         glm::vec3 wheelRot_1, 
+         glm::vec3 wheelSize_1,
+         glm::vec3 wheelPos_2,
+         glm::vec3 wheelRot_2,
+         glm::vec3 wheelSize_2,
+         glm::vec3 wheelPos_3,
+         glm::vec3 wheelRot_3,
+         glm::vec3 wheelSize_3,
+         glm::vec3 wheelPos_4,
+         glm::vec3 wheelRot_4,
+         glm::vec3 wheelSize_4);
       ~Car();
       void loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2);
-      void initCarBody(glm::vec3 spawn, glm::vec3 carPos, glm::vec3 carSize, glm::vec3 carRot);
-      void initWheel_1(glm::vec3 wheelPos_1, glm::vec3 wheelSize_1, glm::vec3 wheelRot_1);
-      void initWheel_2(glm::vec3 wheelPos_2, glm::vec3 wheelSize_2, glm::vec3 wheelRot_2);
-      void initWheel_3(glm::vec3 wheelPos_3, glm::vec3 wheelSize_3, glm::vec3 wheelRot_3);
-      void initWheel_4(glm::vec3 wheelPos_4, glm::vec3 wheelSize_4, glm::vec3 wheelRot_4);
-      
       void loadShaderCarBody(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
       void loadShaderFrontWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
       void loadShaderBackWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);

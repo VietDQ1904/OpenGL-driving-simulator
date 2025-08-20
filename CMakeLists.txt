@@ -15,7 +15,7 @@ set (SOURCES src/main.cpp
              src/terrainPath.cpp
              src/barrierPath.cpp
              src/resourceManagement.cpp
-            )
+    )
 
 
 
