@@ -51,6 +51,7 @@ class Model{
       void loadShader(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile);
       void draw();
       void cleanUpBuffers();
+      void setDiffuseTexture(unsigned int materialIndex, const std::string &texturePath);
 
    private:
       void loadModel(std::string path);

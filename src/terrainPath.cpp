@@ -1,11 +1,13 @@
 #include "terrainPath.hpp"
 
-float roundToDecimal(float value, int decimals) {
+float roundToDecimal(float value, int decimals)
+{
    float factor = std::pow(10.0, decimals);
    return std::round(value * factor) / factor;
 }
 
-float pointToSegmentDistance(const glm::vec3& p, const glm::vec3& a, const glm::vec3& b) {
+float pointToSegmentDistance(const glm::vec3 &p, const glm::vec3 &a, const glm::vec3 &b)
+{
    glm::vec3 ab = b - a;
    glm::vec3 ap = p - a;
    float t = glm::dot(ap, ab) / glm::dot(ab, ab);
@@ -14,17 +16,20 @@ float pointToSegmentDistance(const glm::vec3& p, const glm::vec3& a, const glm::
    return glm::length(p - projection);
 }
 
-float getNoiseMultiplierByDistance(float referenceDistance, float distance){
+float getNoiseMultiplierByDistance(float referenceDistance, float distance)
+{
    float value = glm::clamp(distance / referenceDistance - 1.0f, 0.0f, 1.0f);
    value = roundToDecimal(std::pow(value, 5), 1) * 2.0f;
    return value;
 }
 
-void Terrain::subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth){
-   if (depth == 0){
+void Terrain::subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth)
+{
+   if (depth == 0)
+   {
       triangles.push_back(triangle);
       return;
-   }  
+   }
 
    // Find the mid point of every edge.
    glm::vec3 ab = (triangle.a + triangle.b) * 0.5f;
@@ -36,29 +41,32 @@ void Terrain::subdivide(std::vector<Triangle> &triangles, const Triangle &triang
    subdivide(triangles, {triangle.b, bc, ab}, depth - 1);
    subdivide(triangles, {triangle.c, ac, bc}, depth - 1);
    subdivide(triangles, {ab, bc, ac}, depth - 1);
-}  
+}
 
-void Terrain::subdivide(std::vector<Quadrilateral> &quadrilaterals, const Quadrilateral &quadrilateral, int depth){
-   if (depth == 0){
+void Terrain::subdivide(std::vector<Quadrilateral> &quadrilaterals, const Quadrilateral &quadrilateral, int depth)
+{
+   if (depth == 0)
+   {
       quadrilaterals.push_back(quadrilateral);
       return;
    }
 
    glm::vec3 ab = (quadrilateral.a + quadrilateral.b) * 0.5f;
-   glm::vec3 cd = (quadrilateral.c + quadrilateral.d) * 0.5f;  
+   glm::vec3 cd = (quadrilateral.c + quadrilateral.d) * 0.5f;
 
    subdivide(quadrilaterals, {quadrilateral.a, ab, quadrilateral.c, cd}, depth - 1);
    subdivide(quadrilaterals, {ab, quadrilateral.b, cd, quadrilateral.d}, depth - 1);
 }
 
-void Terrain::generateVertices(Physics &simulation){
+void Terrain::generateVertices(Physics &simulation)
+{
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
    glm::vec3 v;
    glm::vec3 w;
 
    glm::vec3 prevA1, prevB1, prevA2, prevB2;
 
-   glm::vec3 A1, B1, C1, D1; // the left side 
+   glm::vec3 A1, B1, C1, D1; // the left side
    glm::vec3 A2, B2, C2, D2; // the right side
 
    glm::vec3 normal;
@@ -78,18 +86,21 @@ void Terrain::generateVertices(Physics &simulation){
 
    glm::vec3 pivot;
 
-   for (int i = 0; i < generatedPath.size() - 1; ++i){
+   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   {
 
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
       w = glm::normalize(glm::cross(u, v));
 
-      if (i == 0){
+      if (i == 0)
+      {
          A1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
          B1 = w * (pathWidth / 2) + generatedPath[i];
          A2 = -w * (pathWidth / 2) + generatedPath[i];
          B2 = -w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
       }
-      else{
+      else
+      {
          A1 = prevA1;
          B1 = prevB1;
          A2 = prevA2;
@@ -111,98 +122,98 @@ void Terrain::generateVertices(Physics &simulation){
       normal2 = glm::normalize(glm::cross(C2 - A2, B2 - A2));
 
       segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
-      
+
       // 1st vertex of the left side
-      verticesPathSub.push_back(A1.x); 
-      verticesPathSub.push_back(A1.y); 
+      verticesPathSub.push_back(A1.x);
+      verticesPathSub.push_back(A1.y);
       verticesPathSub.push_back(A1.z);
-      verticesPathSub.push_back(normal1.x); 
-      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.x);
+      verticesPathSub.push_back(normal1.y);
       verticesPathSub.push_back(normal1.z);
-      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.0f);
       verticesPathSub.push_back(0.2f * (pathWidth));
 
-      // 2nd vertex of the left side 
+      // 2nd vertex of the left side
       verticesPathSub.push_back(B1.x);
       verticesPathSub.push_back(B1.y);
       verticesPathSub.push_back(B1.z);
-      verticesPathSub.push_back(normal1.x); 
-      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.x);
+      verticesPathSub.push_back(normal1.y);
       verticesPathSub.push_back(normal1.z);
-      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.0f);
       verticesPathSub.push_back(0.0f);
 
       // 3rd vertex of the left side
       verticesPathSub.push_back(C1.x);
       verticesPathSub.push_back(C1.y);
       verticesPathSub.push_back(C1.z);
-      verticesPathSub.push_back(normal1.x); 
-      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.x);
+      verticesPathSub.push_back(normal1.y);
       verticesPathSub.push_back(normal1.z);
-      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.2f * (segmentLength));
       verticesPathSub.push_back(0.2f * (pathWidth));
 
       // 4th vertex of the left side
       verticesPathSub.push_back(D1.x);
       verticesPathSub.push_back(D1.y);
       verticesPathSub.push_back(D1.z);
-      verticesPathSub.push_back(normal1.x); 
-      verticesPathSub.push_back(normal1.y); 
+      verticesPathSub.push_back(normal1.x);
+      verticesPathSub.push_back(normal1.y);
       verticesPathSub.push_back(normal1.z);
-      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.2f * (segmentLength));
       verticesPathSub.push_back(0.0f);
 
       // 1st vertex of the right side
-      verticesPathSub.push_back(A2.x); 
-      verticesPathSub.push_back(A2.y); 
+      verticesPathSub.push_back(A2.x);
+      verticesPathSub.push_back(A2.y);
       verticesPathSub.push_back(A2.z);
-      verticesPathSub.push_back(normal2.x); 
-      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.x);
+      verticesPathSub.push_back(normal2.y);
       verticesPathSub.push_back(normal2.z);
-      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.0f);
       verticesPathSub.push_back(0.2f * (pathWidth));
 
-      // 2nd vertex of the right side 
+      // 2nd vertex of the right side
       verticesPathSub.push_back(B2.x);
       verticesPathSub.push_back(B2.y);
       verticesPathSub.push_back(B2.z);
-      verticesPathSub.push_back(normal2.x); 
-      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.x);
+      verticesPathSub.push_back(normal2.y);
       verticesPathSub.push_back(normal2.z);
-      verticesPathSub.push_back(0.0f); 
+      verticesPathSub.push_back(0.0f);
       verticesPathSub.push_back(0.0f);
 
       // 3rd vertex of the right side
       verticesPathSub.push_back(C2.x);
       verticesPathSub.push_back(C2.y);
       verticesPathSub.push_back(C2.z);
-      verticesPathSub.push_back(normal2.x); 
-      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.x);
+      verticesPathSub.push_back(normal2.y);
       verticesPathSub.push_back(normal2.z);
-      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.2f * (segmentLength));
       verticesPathSub.push_back(0.2f * (pathWidth));
 
       // 4th vertex of the right side
       verticesPathSub.push_back(D2.x);
       verticesPathSub.push_back(D2.y);
       verticesPathSub.push_back(D2.z);
-      verticesPathSub.push_back(normal2.x); 
-      verticesPathSub.push_back(normal2.y); 
+      verticesPathSub.push_back(normal2.x);
+      verticesPathSub.push_back(normal2.y);
       verticesPathSub.push_back(normal2.z);
-      verticesPathSub.push_back(0.2f * (segmentLength)); 
+      verticesPathSub.push_back(0.2f * (segmentLength));
       verticesPathSub.push_back(0.0f);
 
-      startIndex = totalVertices;    
-      indicesPathSub.push_back(startIndex + 0); 
-      indicesPathSub.push_back(startIndex + 1); 
+      startIndex = totalVertices;
+      indicesPathSub.push_back(startIndex + 0);
+      indicesPathSub.push_back(startIndex + 1);
       indicesPathSub.push_back(startIndex + 2);
 
       indicesPathSub.push_back(startIndex + 1);
       indicesPathSub.push_back(startIndex + 2);
       indicesPathSub.push_back(startIndex + 3);
 
-      indicesPathSub.push_back(startIndex + 4); 
-      indicesPathSub.push_back(startIndex + 5); 
+      indicesPathSub.push_back(startIndex + 4);
+      indicesPathSub.push_back(startIndex + 5);
       indicesPathSub.push_back(startIndex + 6);
 
       indicesPathSub.push_back(startIndex + 5);
@@ -211,13 +222,14 @@ void Terrain::generateVertices(Physics &simulation){
 
       totalVertices += 8;
 
-      if (elements++ >= partitionSize){
-         
-         pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
+      if (elements++ >= partitionSize)
+      {
+
+         pivot = generatedPath[lastIndex + (i - lastIndex) / 2];
          verticesPathMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
          verticesPathMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesPathSub);
          verticesPathMaps.insertIndices({pivot.x, pivot.y, pivot.z}, indicesPathSub);
-      
+
          elements = 0;
          totalVertices = 0;
          lastIndex = i;
@@ -230,7 +242,8 @@ void Terrain::generateVertices(Physics &simulation){
       simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
    }
 
-   if (!indicesPathSub.empty()){
+   if (!indicesPathSub.empty())
+   {
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
       verticesPathMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
       verticesPathMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesPathSub);
@@ -245,22 +258,25 @@ void Terrain::generateVertices(Physics &simulation){
    lastIndex = 0;
    startIndex = 0;
    totalVertices = 0;
-   
+
    std::vector<float> verticesSub;
    std::vector<float> verticesLowSub;
 
-   for (int i = 0; i < generatedPath.size() - 1; ++i){
+   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   {
 
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
       w = glm::normalize(glm::cross(u, v));
 
-      if (i == 0){
+      if (i == 0)
+      {
          A1 = w * (pathWidth / 2 + terrainPathWidth) + generatedPath[i];
          B1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
          A2 = -w * (pathWidth / 2 + terrainPathWidth) + generatedPath[i];
          B2 = -w * (pathWidth / 2) + generatedPath[i];
       }
-      else{
+      else
+      {
          A1 = prevA1;
          B1 = prevB1;
          A2 = prevA2;
@@ -289,7 +305,8 @@ void Terrain::generateVertices(Physics &simulation){
       subdivide(quadrilaterals, q2, horizontalTiles / 2);
 
       // Standard resolution terrain
-      for (Quadrilateral &q: quadrilaterals){
+      for (Quadrilateral &q : quadrilaterals)
+      {
          std::vector<Triangle> triangles;
 
          Triangle t1 = {q.a, q.b, q.c};
@@ -297,9 +314,11 @@ void Terrain::generateVertices(Physics &simulation){
          subdivide(triangles, t1, subdivision);
          subdivide(triangles, t2, subdivision);
 
-         for (Triangle &t : triangles) {
+         for (Triangle &t : triangles)
+         {
 
-            for (glm::vec3 *p : {&t.a, &t.b, &t.c}){
+            for (glm::vec3 *p : {&t.a, &t.b, &t.c})
+            {
                // Change Y coordinate of the point according to the noise values
                distanceToRoad = pointToSegmentDistance(*p, generatedPath[i], generatedPath[i + 1]);
                noiseValue = noise.getNoise(p->x * noiseScale, 0.0, p->z * noiseScale);
@@ -308,29 +327,30 @@ void Terrain::generateVertices(Physics &simulation){
             }
 
             normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
-         
-            for (glm::vec3 p : {t.a, t.b, t.c}) {
+
+            for (glm::vec3 p : {t.a, t.b, t.c})
+            {
                uCoord = glm::dot(p - generatedPath[i], v);
                vCoord = glm::dot(p - generatedPath[i], w);
 
                uCoord *= uvScale;
                vCoord *= uvScale;
-    
-               verticesSub.push_back(p.x); 
-               verticesSub.push_back(p.y); 
-               verticesSub.push_back(p.z);
-               verticesSub.push_back(normal.x); 
-               verticesSub.push_back(normal.y); 
-               verticesSub.push_back(normal.z);
-               verticesSub.push_back(uCoord); 
-               verticesSub.push_back(vCoord);
 
+               verticesSub.push_back(p.x);
+               verticesSub.push_back(p.y);
+               verticesSub.push_back(p.z);
+               verticesSub.push_back(normal.x);
+               verticesSub.push_back(normal.y);
+               verticesSub.push_back(normal.z);
+               verticesSub.push_back(uCoord);
+               verticesSub.push_back(vCoord);
             }
          }
       }
 
       // Generate a lower resolution terrain.
-      for (Quadrilateral &q: quadrilaterals){
+      for (Quadrilateral &q : quadrilaterals)
+      {
          std::vector<Triangle> triangles;
 
          Triangle t1 = {q.a, q.b, q.c};
@@ -338,9 +358,11 @@ void Terrain::generateVertices(Physics &simulation){
          subdivide(triangles, t1, 1);
          subdivide(triangles, t2, 1);
 
-         for (Triangle &t : triangles) {
+         for (Triangle &t : triangles)
+         {
 
-            for (glm::vec3 *p : {&t.a, &t.b, &t.c}){
+            for (glm::vec3 *p : {&t.a, &t.b, &t.c})
+            {
                // Change Y coordinate of the point according to the noise values
                distanceToRoad = pointToSegmentDistance(*p, generatedPath[i], generatedPath[i + 1]);
                noiseValue = noise.getNoise(p->x * noiseScale, 0.0, p->z * noiseScale);
@@ -349,29 +371,30 @@ void Terrain::generateVertices(Physics &simulation){
             }
 
             normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
-         
-            for (glm::vec3 p : {t.a, t.b, t.c}) {
+
+            for (glm::vec3 p : {t.a, t.b, t.c})
+            {
                uCoord = glm::dot(p - generatedPath[i], v);
                vCoord = glm::dot(p - generatedPath[i], w);
 
                uCoord *= uvScale;
                vCoord *= uvScale;
-    
-               verticesLowSub.push_back(p.x); 
-               verticesLowSub.push_back(p.y); 
-               verticesLowSub.push_back(p.z);
-               verticesLowSub.push_back(normal.x); 
-               verticesLowSub.push_back(normal.y); 
-               verticesLowSub.push_back(normal.z);
-               verticesLowSub.push_back(uCoord); 
-               verticesLowSub.push_back(vCoord);
 
+               verticesLowSub.push_back(p.x);
+               verticesLowSub.push_back(p.y);
+               verticesLowSub.push_back(p.z);
+               verticesLowSub.push_back(normal.x);
+               verticesLowSub.push_back(normal.y);
+               verticesLowSub.push_back(normal.z);
+               verticesLowSub.push_back(uCoord);
+               verticesLowSub.push_back(vCoord);
             }
          }
       }
-      
-      if (elements++ >= partitionSize){
-         pivot = generatedPath[lastIndex + (i - lastIndex) / 2]; 
+
+      if (elements++ >= partitionSize)
+      {
+         pivot = generatedPath[lastIndex + (i - lastIndex) / 2];
          verticesTerrainMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
          verticesTerrainMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
          verticesTerrainMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
@@ -381,22 +404,22 @@ void Terrain::generateVertices(Physics &simulation){
          verticesSub.clear();
          verticesLowSub.clear();
       }
-
    }
 
-
-   if (!verticesSub.empty()){
+   if (!verticesSub.empty())
+   {
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
       verticesTerrainMaps.insertVertices({pivot.x, pivot.y, pivot.z}, verticesSub);
       verticesTerrainMaps.insertLowDetailVertices({pivot.x, pivot.y, pivot.z}, verticesLowSub);
       verticesTerrainMaps.insertGridMap({pivot.x, pivot.y, pivot.z});
    }
-
 }
 
-void Terrain::setUp(){
+void Terrain::setUp()
+{
 
-   for (auto &partition: verticesPathMaps.vertices){
+   for (auto &partition : verticesPathMaps.vertices)
+   {
       GLuint vao, vbo, ebo;
 
       glGenVertexArrays(1, &vao);
@@ -412,21 +435,21 @@ void Terrain::setUp(){
       glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(float), partition.second.data(), GL_STATIC_DRAW);
 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, verticesPathMaps.indices[partition.first].size() * sizeof(int), 
-                                            verticesPathMaps.indices[partition.first].data(), GL_STATIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, verticesPathMaps.indices[partition.first].size() * sizeof(int),
+                   verticesPathMaps.indices[partition.first].data(), GL_STATIC_DRAW);
 
       glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
       glEnableVertexAttribArray(1);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
       glEnableVertexAttribArray(2);
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 
       glBindVertexArray(0);
    }
 
-   
-   for (const auto& partition: verticesTerrainMaps.vertices){
+   for (const auto &partition : verticesTerrainMaps.vertices)
+   {
       GLuint vaoPartition, vboPartition;
       glGenVertexArrays(1, &vaoPartition);
       glGenBuffers(1, &vboPartition);
@@ -439,16 +462,17 @@ void Terrain::setUp(){
       glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(float), partition.second.data(), GL_STATIC_DRAW);
 
       glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
       glEnableVertexAttribArray(1);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
       glEnableVertexAttribArray(2);
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 
       glBindVertexArray(0);
    }
 
-   for (const auto& partition: verticesTerrainMaps.lowDetailVertices){
+   for (const auto &partition : verticesTerrainMaps.lowDetailVertices)
+   {
       GLuint vaoPartition, vboPartition;
       glGenVertexArrays(1, &vaoPartition);
       glGenBuffers(1, &vboPartition);
@@ -461,43 +485,48 @@ void Terrain::setUp(){
       glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(float), partition.second.data(), GL_STATIC_DRAW);
 
       glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
       glEnableVertexAttribArray(1);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
       glEnableVertexAttribArray(2);
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 
       glBindVertexArray(0);
    }
-
 }
 
-void Terrain::render(Shader &shader, Camera &camera){
+void Terrain::render(Shader &shader, Camera &camera)
+{
 
    model = glm::mat4(1.0f);
    shader.setMat4("model", model);
 
    std::vector<std::array<float, 3>> nearbyPivotsPath;
    verticesPathMaps.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, maxRenderDistance,
-   nearbyPivotsPath);
-   
-   for (auto &pivot: nearbyPivotsPath){
-      if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), renderDistance)){
+                                      nearbyPivotsPath);
+
+   for (auto &pivot : nearbyPivotsPath)
+   {
+      if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), renderDistance))
+      {
          glBindVertexArray(verticesPathMaps.vaos[pivot]);
          glDrawElements(GL_TRIANGLES, verticesPathMaps.indices[pivot].size(), GL_UNSIGNED_INT, 0);
       }
    }
-   
+
    glBindVertexArray(0);
 
    std::vector<std::array<float, 3>> nearbyPivotsTerrain;
    verticesTerrainMaps.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z}, maxRenderDistance,
-   nearbyPivotsTerrain);
+                                         nearbyPivotsTerrain);
 
-   for (auto pivot: nearbyPivotsTerrain){
-      if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), 100.0f)){
+   for (auto pivot : nearbyPivotsTerrain)
+   {
+      if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), 100.0f))
+      {
          float length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
-         if (length < renderDistance){
+         if (length < renderDistance)
+         {
             glBindVertexArray(verticesTerrainMaps.vaos[pivot]);
             glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrainMaps.vertices[pivot].size() / 8));
          }
@@ -510,10 +539,9 @@ void Terrain::render(Shader &shader, Camera &camera){
    glBindVertexArray(0);
 }
 
-void Terrain::cleanUpBuffers(){
+void Terrain::cleanUpBuffers()
+{
 
    verticesPathMaps.clearBuffers();
    verticesTerrainMaps.clearBuffers();
 }
-
-

@@ -13,7 +13,7 @@ illum 3
 map_Kd RoadPoleDiffuse.png
 map_Bump RoadPoleNormal.png
 map_Ks RoadPoleRoughness.png
-map_Ka RoadPoleMetalness.png
+map_Pm RoadPoleMetalness.png
 
 newmtl Material.001
 Ns 250.000000
@@ -23,7 +23,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 3
-map_Kd RoadSignDiffuse.png
+map_Kd RoadSignDiffuseRight.png
 map_Bump RoadSignNormal.png
 map_Ks RoadSignRoughness.png
-map_Ka RoadSignMetalness.png
+map_Pm RoadSignMetalness.png

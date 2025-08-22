@@ -7,13 +7,16 @@
 
 #ifndef CUBEMAP
 #define CUBEMAP
-
 class Cubemap{
-   
    public:
       Cubemap(std::string directory, std::array<std::string, 6> files);
+      ~Cubemap(){
+         glDeleteVertexArrays(1, &vao);
+         glDeleteBuffers(1, &vbo);
+      }
+      
       void draw(Shader &shader, glm::mat4 projection, glm::mat4 view);
-      void unbind();
+
    private:
       std::array<float, 36 * 3> cubeSkybox = {
          -1.0f,  1.0f, -1.0f,

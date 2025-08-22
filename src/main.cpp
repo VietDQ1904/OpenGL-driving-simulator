@@ -14,7 +14,7 @@
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
-// // enable NVIDIA GPU rendering
+// enable NVIDIA GPU rendering
 extern "C" {
    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 }
@@ -71,9 +71,11 @@ int main(int argc, char* argv[]){
    float lastTime = 0.0f;
    const float radius = 10.0f;
 
+   glm::vec3 lightDirection = glm::vec3(2.0f, -1.0f, 0.5f);
+
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-   ResourceManagement::loadShader("Main", "../src/model.vert", "../src/model.frag", nullptr);
+   ResourceManagement::loadShader("Main", "../src/terrain.vert", "../src/terrain.frag", nullptr);
    ResourceManagement::loadTexture("Grass", "../assets/grass.png", false, false);
    ResourceManagement::loadTexture("Asphalt", "../assets/asphalt.png", false, false);
    ResourceManagement::loadShader("Cubemap", "../src/cubemap.vert", "../src/cubemap.frag", nullptr);
@@ -85,23 +87,22 @@ int main(int argc, char* argv[]){
                                         "front.jpg",
                                         "back.jpg"};
 
-   Cubemap skyBox("../assets/Skybox/", images);
+   std::unique_ptr<Cubemap> skyBox = std::make_unique<Cubemap>("../assets/Skybox/", images);
+   std::unique_ptr<Physics> simulation = std::make_unique<Physics>();
+   std::unique_ptr<Road> road = std::make_unique<Road>(*simulation);
+   std::unique_ptr<Terrain> terrain = std::make_unique<Terrain>(*simulation);
+   std::unique_ptr<Barrier> barrier = std::make_unique<Barrier>(*simulation);
+   barrier->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
-   Physics simulation;
-   Road *road = new Road(simulation);
-   Terrain *terrain = new Terrain(simulation);
-   Barrier *barrier = new Barrier(simulation);
-   barrier->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-
-   Car *car = new Car(simulation);
+   std::unique_ptr<Car> car = std::make_unique<Car>(*simulation);
    car->loadModels("../assets/Car/CarBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
-   car->loadShaderCarBody("CarBodyShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
-   car->loadShaderFrontWheels("CarFrontWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
-   car->loadShaderBackWheels("CarBackWheelsShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
-   car->setEnvironmentLighting(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+   car->loadShaderCarBody("CarShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderFrontWheels("CarShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->loadShaderBackWheels("CarShader", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   car->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
-   camera.setPositionToCar(car);
+   camera.setPositionToCar(*car);
    
    Shader mainShader = ResourceManagement::getShader("Main");
    mainShader.use();
@@ -109,8 +110,12 @@ int main(int argc, char* argv[]){
    Shader cubemapShader = ResourceManagement::getShader("Cubemap");
    cubemapShader.use();
 
-   Model roadSign("../assets/RoadSign/roadSignTest.obj");
+   Model roadSign("../assets/RoadSign/roadSign.obj");
    roadSign.loadShader("Test", "../src/modelTexture.vert", "../src/modelTexture.frag", nullptr);
+   roadSign.setDiffuseTexture(0, "../assets/RoadSign/RoadSignDiffuseC.png");
+   roadSign.setDiffuseTexture(0, "../assets/RoadSign/RoadSignDiffuseD.png");
+   roadSign.setDiffuseTexture(0, "../assets/RoadSign/RoadSignDiffuseA.png");
+
 
    // glfwSetCursorPosCallback(window, mouseCallback); // When move the mouse
    // glfwSetScrollCallback(window, scrollCallback); // When scroll the mouse
@@ -145,7 +150,7 @@ int main(int argc, char* argv[]){
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f); 
       
-      simulation.dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime: maxSecPerFrame), 10);
+      simulation->dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime: maxSecPerFrame), 10);
 
       projection = camera.getProjectionMatrix(static_cast<float>(windowWidth / windowHeight));
       view = camera.getViewMatrix();
@@ -169,9 +174,24 @@ int main(int argc, char* argv[]){
       road->render(mainShader, camera);
       
       model = glm::mat4(1.0f);
-      model = glm::translate(model, glm::vec3(1.0f, -1.0f, 1.0f));
+      model = glm::translate(model, glm::vec3(10.0f, 0.0f, 1.0f));
+      model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
       roadSign.modelShader.use();
-      roadSign.modelShader.setVec3("light.direction", glm::vec3(1.0f, 1.0f, 1.0f));
+      roadSign.setDiffuseTexture(0, "../assets/RoadSign/RoadSignDiffuseC.png");
+      roadSign.modelShader.setVec3("light.direction", lightDirection);
+      roadSign.modelShader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+      roadSign.modelShader.setMat4("view", view);
+      roadSign.modelShader.setMat4("projection", projection); 
+      roadSign.modelShader.setMat4("model", model);
+      roadSign.draw();
+      model = glm::mat4(1.0f);
+
+      model = glm::mat4(1.0f);
+      model = glm::translate(model, glm::vec3(15.0f, 0.0f, 10.0f));
+      model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+      roadSign.modelShader.use();
+      roadSign.setDiffuseTexture(0, "../assets/RoadSign/RoadSignDiffuseD.png");
+      roadSign.modelShader.setVec3("light.direction", lightDirection);
       roadSign.modelShader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
       roadSign.modelShader.setMat4("view", view);
       roadSign.modelShader.setMat4("projection", projection); 
@@ -184,19 +204,13 @@ int main(int argc, char* argv[]){
       car->render(view, projection, camera.cameraPos);
 
       barrier->render(view, projection, camera);
-      skyBox.draw(cubemapShader, projection, view);
+      skyBox->draw(cubemapShader, projection, view);
       
       glfwSwapBuffers(window);
       glfwPollEvents();
    }
 
-   delete car;
-   delete terrain;
-   delete road;
-   delete barrier;
-   skyBox.unbind();
    ResourceManagement::clearResources();
-
    glfwTerminate();
 
    return 0;

@@ -192,11 +192,11 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene){
       aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
       std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
       textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-      std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_roughness");
-      textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+      std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_roughness");
+      textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
       std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
       textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-      std::vector<Texture> metalnessMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_metallic");
+      std::vector<Texture> metalnessMaps = loadMaterialTextures(material, aiTextureType_METALNESS, "texture_metallic");
       textures.insert(textures.end(), metalnessMaps.begin(), metalnessMaps.end());
    }
 
@@ -220,3 +220,19 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
    return textures;
 }
 
+void Model::setDiffuseTexture(unsigned int materialIndex, const std::string &texturePath){
+
+   Texture texture = ResourceManagement::loadTexture("texture_diffuse_" + texturePath, texturePath.c_str(), true, false);
+   texture.type = "texture_diffuse";
+
+   if (materialIndex >= meshes.size()){
+      std::cout << "SET_DIFFUSE_TEXTURE::INVALID_MATERIAL_INDEX" << std::endl;
+      return;
+   }
+
+   for (unsigned int i = 0; i < meshes[materialIndex].textures.size(); ++i){
+      if (meshes[materialIndex].textures[i].type == "texture_diffuse"){
+         meshes[materialIndex].textures[i] = texture;
+      }
+   }
+}
