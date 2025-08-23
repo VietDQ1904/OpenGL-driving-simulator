@@ -133,7 +133,6 @@ GLuint Shader::setUpShader(std::string path, enum ShaderType type)
    std::ifstream shaderFile;
 
    shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
    try
    {
       shaderFile.open(path);

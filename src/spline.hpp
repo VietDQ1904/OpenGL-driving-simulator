@@ -27,15 +27,11 @@ protected:
        glm::vec3(13.0f, 0.0f, -46.0f),
        glm::vec3(-2.0f, -0.5f, -34.0f),
        glm::vec3(-23.0f, -1.0f, -32.0f),
-       glm::vec3(-30.0f, -0.3f, -17.0f),
-       glm::vec3(-5.0f, 0.0f, -1.0f),
-   };
+       glm::vec3(0.0f, 0.0f, 0.0f)};
 
    float alpha = 1.0f;
    int samplePerFragments = 20;
    float pathWidth = 15.0f;
-   // float roadPathWidth = 15.0f;
-   // float terrainPathWidth = 30.0f;
    std::vector<glm::vec3> generatedPath;
 
    glm::vec3 catmullRom(const glm::vec3 &p0, const glm::vec3 &p1,

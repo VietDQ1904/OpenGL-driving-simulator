@@ -26,7 +26,6 @@ void Barrier::generateVertices(Physics &simulation)
 
    for (int i = 0; i < generatedPath.size() - 1; ++i)
    {
-
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
       w = glm::normalize(glm::cross(u, v));
 
@@ -98,7 +97,6 @@ void Barrier::generateVertices(Physics &simulation)
    if (!modelMatricesPartition.empty())
    {
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
-
       modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
       modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
    }
@@ -106,7 +104,6 @@ void Barrier::generateVertices(Physics &simulation)
 
 void Barrier::setUp()
 {
-
    for (const auto &partition : modelInstances.modelMatricesList)
    {
       GLuint barrierPartitionBuffer;
@@ -167,7 +164,6 @@ void Barrier::setUp()
 
 void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
 {
-
    barrierModel->modelShader.use();
    barrierModel->modelShader.setMat4("view", view);
    barrierModel->modelShader.setMat4("projection", projection);
@@ -191,9 +187,7 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
    {
       if (camera.isInFrustum(glm::vec3(pivot[0], pivot[1], pivot[2]), 100.0f))
       {
-
          length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
-
          if (length < renderDistance)
          {
             for (unsigned int meshIndex = 0; meshIndex < barrierModel->meshes.size(); ++meshIndex)
@@ -215,7 +209,6 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        modelInstances.modelMatricesList[pivot].size());
             }
          }
-
          else
          {
             for (unsigned int meshIndex = 0; meshIndex < barrierLPModel->meshes.size(); ++meshIndex)
@@ -255,7 +248,6 @@ void Barrier::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor)
 
 void Barrier::cleanUpBuffers()
 {
-
    modelInstances.clearBuffers();
 
    for (GLuint vao : barrierVAOs)
