@@ -1,56 +1,52 @@
 #include <vector>
 #include <iostream>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader.hpp"
 #include "physics.hpp"
 #include "spline.hpp"
+#include "vertices.hpp"
+#include "camera.hpp"
 
 #ifndef ROAD_PATH
 #define ROAD_PATH
 
-class Road: public Spline{
-   public:
+class Road : public Spline
+{
+public:
+   std::vector<float> vertices;
+   std::vector<int> indices;
 
-      std::vector<float> vertices;
-      std::vector<int> indices;
+   glm::mat4 model;
 
-      GLuint vao, vbo, ebo;
-      glm::mat4 model;
+   float roadPathWidth = pathWidth;
 
-      float roadPathWidth = pathWidth;
-      //float alpha = 0.5f;
-      //float roadPathWidth = 15.0f;
-      // float tileLength = roadPathWidth;
-      
-      Road(Physics &simulation){
-         for (auto& point : points) {
-            point *= 5.0f;
-         }
+   VerticesWithIndices verticesWithIndices;
+   int partitionSize = 50;
+   float renderDistance = 350.0f;
 
-         this->generateSpline();
-         this->generateVertices(simulation);
-         this->generateIndices();
-         
-         this->setUp();
-      } 
+   Road(Physics &simulation)
+   {
 
-      ~Road(){
-         this->cleanUpBuffers();
-      }
+      this->generateSpline();
+      this->generateVertices(simulation);
 
-      void render(Shader &shader);
-      void cleanUpBuffers();
+      this->setUp();
+   }
 
-   private:
-      void generateIndices();
-      void generateVertices(Physics &simulation);
-      void setUp();
+   ~Road()
+   {
+      this->cleanUpBuffers();
+   }
 
+   void render(Shader &shader, Camera &camera);
+   void cleanUpBuffers();
+
+private:
+   void generateVertices(Physics &simulation);
+   void setUp();
 };
-
 
 #endif

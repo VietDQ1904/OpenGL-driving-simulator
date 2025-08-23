@@ -1,9 +1,10 @@
 #include "camera.hpp"
 
+void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos)
+{
 
-void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos){
-   
-   if (this->firstMouse){
+   if (this->firstMouse)
+   {
       this->lastX = xpos;
       this->lastY = ypos;
       this->firstMouse = false;
@@ -23,7 +24,7 @@ void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos){
    this->yaw += offsetX;
    // Add constraints to pitch (so that you cannot rotate up 360 degrees)
    this->pitch = std::max(std::min(this->pitch + offsetY, 90.0f), -0.0f);
-   
+
    glm::vec3 direction;
    direction.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
    direction.y = sin(glm::radians(this->pitch));
@@ -34,11 +35,13 @@ void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos){
    this->up = glm::normalize(glm::cross(this->right, this->cameraFront));
 }
 
-void Camera::scrollCallback(GLFWwindow *window, double offsetX, double offsetY){
-   this->zoom = std::max(std::min(this->zoom - (float) offsetY, 45.0f), 1.0f);
+void Camera::scrollCallback(GLFWwindow *window, double offsetX, double offsetY)
+{
+   this->zoom = std::max(std::min(this->zoom - (float)offsetY, 45.0f), 1.0f);
 }
 
-void Camera::updateFollowCamera(btRigidBody* car) {
+void Camera::updateFollowCamera(btRigidBody *car)
+{
    btTransform carTransform;
    car->getMotionState()->getWorldTransform(carTransform);
 
@@ -59,33 +62,35 @@ void Camera::updateFollowCamera(btRigidBody* car) {
 
    this->cameraPos = carPosition + camWorldOffset;
    // Prevents the camera from seeing from the underground.
-   this->cameraPos.y = std::max(carPosition.y + camWorldOffset.y, carPosition.y); 
+   this->cameraPos.y = std::max(carPosition.y + camWorldOffset.y, carPosition.y);
 
    this->cameraFront = glm::normalize(carPosition - this->cameraPos);
    this->right = glm::normalize(glm::cross(this->cameraFront, glm::vec3(0.0f, 1.0f, 0.0f)));
    this->up = glm::normalize(glm::cross(this->right, this->cameraFront));
 }
 
-void Camera::setPositionToCar(Car *car){
-   glm::vec3 offsetBehind = car->carRot * glm::vec3(0.0f, 3.0f, 8.0f); 
-   this->cameraPos = car->carPos + offsetBehind;
-   this->cameraFront = glm::normalize(car->carPos - this->cameraPos);
+void Camera::setPositionToCar(Car &car)
+{
+   glm::vec3 offsetBehind = car.carRot * glm::vec3(0.0f, 3.0f, 8.0f);
+   this->cameraPos = car.carPos + offsetBehind;
+   this->cameraFront = glm::normalize(car.carPos - this->cameraPos);
    this->right = glm::normalize(glm::cross(this->cameraFront, glm::vec3(0.0f, 1.0f, 0.0f)));
    this->up = glm::normalize(glm::cross(this->right, this->cameraFront));
 }
 
-glm::mat4 Camera::getViewMatrix() const {
+glm::mat4 Camera::getViewMatrix() const
+{
    return glm::lookAt(cameraPos, cameraPos + cameraFront, up);
 }
 
-glm::mat4 Camera::getProjectionMatrix(float aspect) const {
+glm::mat4 Camera::getProjectionMatrix(float aspect) const
+{
    return glm::perspective(glm::radians(zoom), aspect, nearPlane, farPlane);
 }
 
-void Camera::calculateFrustrumPlanes(const glm::mat4 &projectionView, float aspect){
-   // const float halfVSide = farPlane * glm::tan(zoom * 0.5f);
-   // const float halfHSide = halfVSide * aspect;
-   // glm::vec3 frontMultFar = farPlane * cameraFront;
+void Camera::calculateFrustrumPlanes(const glm::mat4 &projectionView, float aspect)
+{
+
    glm::vec4 rowX = glm::vec4(projectionView[0][0], projectionView[1][0], projectionView[2][0], projectionView[3][0]);
    glm::vec4 rowY = glm::vec4(projectionView[0][1], projectionView[1][1], projectionView[2][1], projectionView[3][1]);
    glm::vec4 rowZ = glm::vec4(projectionView[0][2], projectionView[1][2], projectionView[2][2], projectionView[3][2]);
@@ -115,18 +120,22 @@ void Camera::calculateFrustrumPlanes(const glm::mat4 &projectionView, float aspe
    this->frustum[5].normal = glm::vec3(rowW - rowZ);
    this->frustum[5].distance = (rowW - rowZ).w;
 
-   for (int i = 0; i < 6; ++i) {
+   for (int i = 0; i < 6; ++i)
+   {
       float length = glm::length(frustum[i].normal);
       frustum[i].normal /= length;
       frustum[i].distance /= length;
    }
 }
 
-bool Camera::isInFrustum(const glm::vec3& center, float radius) const {
-   for (int i = 0; i < 6; ++i) {
-      float dist = glm::dot(frustum[i].normal, center) + frustum[i].distance;
-      if (dist < -radius) {
-         return false; 
+bool Camera::isInFrustum(const glm::vec3 &point, float range) const
+{
+   for (int i = 0; i < 6; ++i)
+   {
+      float dist = glm::dot(frustum[i].normal, point) + frustum[i].distance;
+      if (dist < -range)
+      {
+         return false;
       }
    }
    return true;

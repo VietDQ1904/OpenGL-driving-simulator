@@ -1,217 +1,249 @@
 #include "car.hpp"
 
-Car::Car(Physics& simulation): simulation(simulation){
-
+Car::Car(Physics &simulation)
+{
    this->spawn = glm::vec3(10.0f, 3.0f, 1.0f);
-   this->carPos = glm::vec3(0.0f, 1.0f, 0.0f);
+   this->carPos = glm::vec3(0.0f, 0.9f, 0.0f);
    this->carSize = glm::vec3(1.0f, 0.6f, 3.0f);
    this->carRot = glm::vec3(0.0f, 0.0f, 0.0f);
-   this->wheelPos_1 = glm::vec3(-1.0f, 0.5f, -2.1f);
+   this->wheelPos_1 = glm::vec3(-1.1f, 0.35f, -1.85f);
    this->wheelSize_1 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_1 = glm::vec3(0.0f, 0.0f, glm::radians(-90.0f));
-   this->wheelPos_2 = glm::vec3(1.0f, 0.5f, -2.1f);
+   this->wheelPos_2 = glm::vec3(1.1f, 0.35f, -1.85f);
    this->wheelSize_2 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_2 = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
-   this->wheelPos_3 = glm::vec3(-1.0f, 0.5f, 1.6f);
-   this->wheelSize_3 = glm::vec3(0.45f, 0.4f, 0.4f);
+   this->wheelPos_3 = glm::vec3(-1.1f, 0.35f, 1.75f);
+   this->wheelSize_3 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_3 = glm::vec3(0.0f, 0.0f, glm::radians(-90.0f));
-   this->wheelPos_4 = glm::vec3(1.0f, 0.5f, 1.6f);
-   this->wheelSize_4 = glm::vec3(0.45f, 0.4f, 0.4f);
+   this->wheelPos_4 = glm::vec3(1.1f, 0.35f, 1.75f);
+   this->wheelSize_4 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_4 = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
 
-   setUp();
+   setUp(simulation);
 }
 
-void Car::initCarBody(glm::vec3 spawn, glm::vec3 carPos, glm::vec3 carSize, glm::vec3 carRot){
-   this->spawn = spawn;
-   this->carPos = carPos;
-   this->carSize = carSize;
-   this->carRot = carRot;
+Car::Car(Physics &simulation,
+         glm::vec3 spawn,
+         glm::vec3 carPos,
+         glm::vec3 carSize,
+         glm::vec3 carRot,
+         glm::vec3 wheelPos_1,
+         glm::vec3 wheelRot_1,
+         glm::vec3 wheelSize_1,
+         glm::vec3 wheelPos_2,
+         glm::vec3 wheelRot_2,
+         glm::vec3 wheelSize_2,
+         glm::vec3 wheelPos_3,
+         glm::vec3 wheelRot_3,
+         glm::vec3 wheelSize_3,
+         glm::vec3 wheelPos_4,
+         glm::vec3 wheelRot_4,
+         glm::vec3 wheelSize_4) : spawn(spawn),
+                                  carSize(carSize),
+                                  carRot(carRot),
+                                  wheelPos_1(wheelPos_1),
+                                  wheelRot_1(wheelRot_1),
+                                  wheelSize_1(wheelSize_1),
+                                  wheelPos_2(wheelPos_2),
+                                  wheelRot_2(wheelRot_2),
+                                  wheelSize_2(wheelSize_2),
+                                  wheelPos_3(wheelPos_3),
+                                  wheelRot_3(wheelRot_3),
+                                  wheelSize_3(wheelSize_3),
+                                  wheelPos_4(wheelPos_4),
+                                  wheelRot_4(wheelRot_4),
+                                  wheelSize_4(wheelSize_4)
+{
+   setUp(simulation);
 }
 
-void Car::initWheel_1(glm::vec3 wheelPos_1, glm::vec3 wheelSize_1, glm::vec3 wheelRot_1){
-   this->wheelPos_1 = wheelPos_1;
-   this->wheelSize_1 = wheelSize_1;
-   this->wheelRot_1 = wheelRot_1;
-}
-
-void Car::initWheel_2(glm::vec3 wheelPos_2, glm::vec3 wheelSize_2, glm::vec3 wheelRot_2){
-   this->wheelPos_2 = wheelPos_2;
-   this->wheelSize_2 = wheelSize_2;
-   this->wheelRot_2 = wheelRot_2;
-}
-
-void Car::initWheel_3(glm::vec3 wheelPos_3, glm::vec3 wheelSize_3, glm::vec3 wheelRot_3){
-   this->wheelPos_3 = wheelPos_3;
-   this->wheelSize_3 = wheelSize_3;
-   this->wheelRot_3 = wheelRot_3;
-}
-
-void Car::initWheel_4(glm::vec3 wheelPos_4, glm::vec3 wheelSize_4, glm::vec3 wheelRot_4){
-   this->wheelPos_4 = wheelPos_4;
-   this->wheelSize_4 = wheelSize_4;
-   this->wheelRot_4 = wheelRot_4;
-}
-
-Car::~Car(){
+Car::~Car()
+{
    carModel->cleanUpBuffers();
    wheelModel1->cleanUpBuffers();
    wheelModel2->cleanUpBuffers();
-
-   delete car, wheel1, wheel2, wheel3, wheel4;
-   delete carModel, wheelModel1, wheelModel2;
-   delete springConst1, springConst2, springConst3, springConst4;
 }
 
-void Car::loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2){
+void Car::loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2)
+{
 
-   this->carModel = new Model(carModelPath.c_str());
-   this->wheelModel1 = new Model(wheelModelPath_1.c_str());
-   this->wheelModel2 = new Model(wheelModelPath_2.c_str());
-
+   this->carModel = std::make_unique<Model>(carModelPath.c_str());
+   this->wheelModel1 = std::make_unique<Model>(wheelModelPath_1.c_str());
+   this->wheelModel2 = std::make_unique<Model>(wheelModelPath_2.c_str());
 }
 
-void Car::loadShaderCarBody(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile){
+void Car::loadShaderCarBody(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile)
+{
    this->carModel->loadShader(shaderName, vertexFile, fragmentFile, geometryFile);
 }
 
-void Car::loadShaderFrontWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile){
+void Car::loadShaderFrontWheels(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile)
+{
    this->wheelModel1->loadShader(shaderName, vertexFile, fragmentFile, geometryFile);
 }
 
-void Car::loadShaderBackWheels(std::string shaderName, const char* vertexFile, const char* fragmentFile, const char* geometryFile){
+void Car::loadShaderBackWheels(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile)
+{
    this->wheelModel2->loadShader(shaderName, vertexFile, fragmentFile, geometryFile);
 }
 
-void Car::update(){
+void Car::update()
+{
    btMatrix3x3 rot = car->getWorldTransform().getBasis();
    short braking = 1;
 
    float linearVelocity = car->getLinearVelocity().length();
 
-   if (acceleration < 0 && movingForward){
+   if (acceleration < 0 && movingForward)
+   {
       braking = 0;
    }
-   else{
+   else
+   {
 
-      if (linearVelocity < maxVelocity / (1 + 9 * (acceleration < 0))){
+      if (linearVelocity < maxVelocity / (1 + 9 * (acceleration < 0)))
+      {
          float torque = -maxAcceleration * acceleration * (1 - (std::abs(steering) * (linearVelocity > 10)) / 2);
          wheel1->applyTorque(rot * btVector3(torque, 0, 0));
          wheel2->applyTorque(rot * btVector3(torque, 0, 0));
-         if (!handbrake){
+         if (!handbrake)
+         {
             wheel3->applyTorque(rot * btVector3(torque, 0, 0));
             wheel4->applyTorque(rot * btVector3(torque, 0, 0));
          }
       }
    }
-   
+
    springConst1->setAngularLowerLimit(btVector3(braking, wheelSteeringAngle * steering, 0.0));
    springConst1->setAngularUpperLimit(btVector3(-braking, wheelSteeringAngle * steering, 0.0));
    springConst2->setAngularLowerLimit(btVector3(braking, wheelSteeringAngle * steering, 0.0));
    springConst2->setAngularUpperLimit(btVector3(-braking, wheelSteeringAngle * steering, 0.0));
 
-   if (handbrake){
+   if (handbrake)
+   {
       springConst3->setAngularLowerLimit(btVector3(0.0, 0.0, 0.0));
       springConst3->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
       springConst4->setAngularLowerLimit(btVector3(0.0, 0.0, 0.0));
       springConst4->setAngularUpperLimit(btVector3(0.0, 0.0, 0.0));
    }
-   else{
+   else
+   {
       springConst3->setAngularLowerLimit(btVector3(braking, 0.0, 0.0));
       springConst3->setAngularUpperLimit(btVector3(-braking, 0.0, 0.0));
       springConst4->setAngularLowerLimit(btVector3(braking, 0.0, 0.0));
       springConst4->setAngularUpperLimit(btVector3(-braking, 0.0, 0.0));
    }
 
-   if (getUp){
+   if (getUp)
+   {
       car->applyTorqueImpulse(rot * btVector3(0.0, 0.0, 10000.0));
    }
 
-   if (jump){
+   if (jump)
+   {
       car->applyCentralImpulse(btVector3(0.0, 10000.0, 0.0));
    }
-
 }
 
-void Car::control(GLFWwindow *window, float &deltaTime){
+void Car::control(GLFWwindow *window, float &deltaTime)
+{
 
    float steeringLimit = 1.0f;
    float steeringSpeed = 0.05f;
 
-   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+   {
       if (steering > -steeringLimit)
          steering -= steeringSpeed;
-   } 
-   else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+   }
+   else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+   {
       if (steering < steeringLimit)
          steering += steeringSpeed;
-   } 
-   else {
+   }
+   else
+   {
       steering -= steeringSpeed * ((steering > 0) - (steering < 0));
       if (steering < steeringSpeed && steering > -steeringSpeed)
          steering = 0.0f;
    }
 
-   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+   {
       acceleration = 1;
-   } 
-   else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+   }
+   else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+   {
       acceleration = -1;
-   } 
-   else {
+   }
+   else
+   {
       acceleration = 0;
       handbrake = true;
    }
 
    // Car controls - handbrake
-   if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+   if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+   {
       handbrake = true;
-   } else {
+   }
+   else
+   {
       handbrake = false;
    }
 
    // Car controls - get up
-   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !gotUp) {
+   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !gotUp)
+   {
       getUp = true;
       gotUp = true;
-   } 
-   else {
+   }
+   else
+   {
       getUp = false;
    }
 
-   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE) {
+   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE)
+   {
       gotUp = false;
    }
 
    // Car controls - jump upwards
-   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !jumped) {
+   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !jumped)
+   {
       jump = true;
       jumped = true;
-   } 
-   else {
+   }
+   else
+   {
       jump = false;
    }
 
-   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE) {
+   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
+   {
       jumped = false;
    }
 
    // Reverse car
-   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+   {
       acceleration = -1;
       movingForward = false;
    }
-   else{
+   else
+   {
       movingForward = true;
    }
-
 }
 
-void Car::setUp(){
-   
+void Car::setUp(Physics &simulation)
+{
+
    // Car
-   car = simulation.createRigidBody(BOX, this->carPos + this->spawn, this->carSize, this->carRot, carMass, 1.75f, 0.2f,
-   COLLISION_CHASSIS, COLLISION_ELSE ^ COLLISION_CAR);
+   car = simulation.createRigidBody(BOX,
+                                    this->carPos + this->spawn, this->carSize, this->carRot, carMass, 1.75f, 0.2f,
+                                    COLLISION_CHASSIS, COLLISION_ELSE ^ COLLISION_CAR);
+
    car->setSleepingThresholds(0.0f, 0.0f);
    car->setDamping(carLinearDamp * assist, carAngularDamp * assist);
 
@@ -219,12 +251,12 @@ void Car::setUp(){
    btTransform frameA, frameB;
 
    // Wheel 1
-   wheel1 = simulation.createRigidBody(CYLINDER, this->wheelPos_1 + this->spawn, 
-                                                 this->wheelSize_1, this->wheelRot_1, wheelMass_1,
-   wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
+   wheel1 = simulation.createRigidBody(CYLINDER, this->wheelPos_1 + this->spawn,
+                                       this->wheelSize_1, this->wheelRot_1, wheelMass_1,
+                                       wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
    wheel1->setSleepingThresholds(0.0f, 0.0f);
    wheel1->setDamping(wheelLinearDamp * assist, wheelAngularDamp * assist);
-   
+
    frameA = btTransform::getIdentity();
    frameB = btTransform::getIdentity();
 
@@ -244,12 +276,12 @@ void Car::setUp(){
    springConst1->setEquilibriumPoint();
 
    // Wheel 2
-   wheel2 = simulation.createRigidBody(CYLINDER, this->wheelPos_2 + this->spawn, 
-                                                 this->wheelSize_2, this->wheelRot_2, wheelMass_1,
-   wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
+   wheel2 = simulation.createRigidBody(CYLINDER, this->wheelPos_2 + this->spawn,
+                                       this->wheelSize_2, this->wheelRot_2, wheelMass_1,
+                                       wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
    wheel2->setSleepingThresholds(0.0f, 0.0f);
    wheel2->setDamping(wheelLinearDamp * assist, wheelAngularDamp * assist);
-   
+
    frameA = btTransform::getIdentity();
    frameB = btTransform::getIdentity();
 
@@ -269,12 +301,12 @@ void Car::setUp(){
    springConst2->setEquilibriumPoint();
 
    // Wheel 3
-   wheel3 = simulation.createRigidBody(CYLINDER, this->wheelPos_3 + this->spawn, 
-                                                 this->wheelSize_3, this->wheelRot_3, wheelMass_2,
-   wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
+   wheel3 = simulation.createRigidBody(CYLINDER, this->wheelPos_3 + this->spawn,
+                                       this->wheelSize_3, this->wheelRot_3, wheelMass_2,
+                                       wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
    wheel3->setSleepingThresholds(0.0f, 0.0f);
    wheel3->setDamping(wheelLinearDamp * assist, wheelAngularDamp * assist);
-   
+
    frameA = btTransform::getIdentity();
    frameB = btTransform::getIdentity();
 
@@ -294,12 +326,12 @@ void Car::setUp(){
    springConst3->setEquilibriumPoint();
 
    // Wheel 4
-   wheel4 = simulation.createRigidBody(CYLINDER, this->wheelPos_4 + this->spawn, 
-                                                 this->wheelSize_4, this->wheelRot_4, wheelMass_2,
-   wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
+   wheel4 = simulation.createRigidBody(CYLINDER, this->wheelPos_4 + this->spawn,
+                                       this->wheelSize_4, this->wheelRot_4, wheelMass_2,
+                                       wheelFriction, 0.0f, COLLISION_WHEEL, COLLISION_ELSE ^ COLLISION_CAR);
    wheel4->setSleepingThresholds(0.0f, 0.0f);
    wheel4->setDamping(wheelLinearDamp * assist, wheelAngularDamp * assist);
-   
+
    frameA = btTransform::getIdentity();
    frameB = btTransform::getIdentity();
 
@@ -324,7 +356,8 @@ void Car::setUp(){
    simulation.dynamicsWorld->addConstraint(springConst4);
 }
 
-void Car::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
+void Car::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor)
+{
    carModel->modelShader.use();
    carModel->modelShader.setVec3("light.direction", direction);
    carModel->modelShader.setVec3("light.color", lightColor);
@@ -338,8 +371,9 @@ void Car::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor){
    wheelModel2->modelShader.setVec3("light.color", lightColor);
 }
 
-void Car::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
-   
+void Car::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos)
+{
+
    carModel->modelShader.use();
    car->getMotionState()->getWorldTransform(transform);
    transform.getOpenGLMatrix(matrix);
@@ -390,4 +424,3 @@ void Car::render(glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos){
    wheelModel2->modelShader.setVec3("viewPos", viewPos);
    wheelModel2->draw();
 }
-
