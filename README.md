@@ -1,13 +1,12 @@
-# Car Driving Project with OpenGL #
+# Driving simulator with OpenGL #
 
-This project demonstrates a driving game using OpenGL, GLM, stb_image, Bullet Physics and Assimp. It has a 
-player-controlled car and procedural generated road and terrain.
+This project demonstrates a driving simulator using OpenGL. It has a user-controlled car, procedurally generated road path, terrain and road signs.
 
 <a name="dependencies"></a>
 
 ### List of dependencies ###
 
-   - MSYS2 MINGW64: compiler for C++. 
+   - MSYS2 MINGW W-64: compiler for C++. 
    - VSCode: main code editor.
    - CMake: building project.
    - OpenGL (using GLFW 3.4 and glad): rendering the scene.
@@ -21,25 +20,25 @@ player-controlled car and procedural generated road and terrain.
 ### Instructions ###
    - Install the respository via the command:
       ```
-      git clone https://github.com/VietDQ1904/OpenGL-driving-game.git
+      git clone https://github.com/VietDQ1904/OpenGL-driving-simulator.git
       ```
    
    - Change directory to the project, create a build folder and change your current directory to /build:
       ```
-      cd OpenGL-driving-game
+      cd OpenGL-driving-simulator
       mkdir build
       cd build
       ```
    
-   - Make sure that all dependencies are installed in MSYS2 MINGW64 before building (use pacman -Q inside MSYS2 to view 
-   installed packages). Build the project using the command: 
+   - Make sure all dependencies are installed before building (use pacman -Q inside MSYS2 to view 
+   installed packages). Build the project using the command (for G++ compiler): 
 
       ```
       cmake -G "MinGW Makefiles" .. 
       cmake --build .
       ```
 
-      If you already used MINGW64 as your main compiler, you don't need to specify it:
+      If you already have a default compiler, you don't need to specify it:
 
       ```
       cmake -G ..
@@ -48,7 +47,7 @@ player-controlled car and procedural generated road and terrain.
 
       Alternatively, if you use VSCode, you can download CMake Tools extension to automate the build process.
    
-   - After you build, you will have an executable file. Run it to start the game.
+   - After you build, you will have an executable file (DrivingSimulator.exe). Run it to start the game.
 
 <a name= "license"></a>
 
