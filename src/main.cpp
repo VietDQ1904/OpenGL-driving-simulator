@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
    // glfwWindowHint(GLFW_SAMPLES, 4); // Add 4 subsamples for smoother edges.
 
-   GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, "DrivingGame", nullptr, nullptr);
+   GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, "Driving Simulator", nullptr, nullptr);
 
    if (window == nullptr)
    {
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
          cam->scrollCallback(window, scroll_x, scroll_y);
       } });
 
-   float maxSecPerFrame = 1.0f / 120.0f;
+   float maxSecPerFrame = 1.0f / 60.0f;
 
    while (!glfwWindowShouldClose(window))
    {

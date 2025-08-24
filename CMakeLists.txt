@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(DrivingGame)
+project(DrivingSimulator)
 set(CMAKE_CXX_STANDARD 17)
 
 set (SOURCES src/main.cpp
@@ -108,9 +108,9 @@ include_directories(
 add_library(glad STATIC ./lib/glad/src/glad.c)
 
 # ========= EXECUTABLE ==========
-add_executable(DrivingGame ${SOURCES})
+add_executable(DrivingSimulator ${SOURCES})
 # ========= LINK LIBRARIES ==========
-target_link_libraries(DrivingGame PRIVATE
+target_link_libraries(DrivingSimulator PRIVATE
     glad
     glfw3
     OpenGL::GL
