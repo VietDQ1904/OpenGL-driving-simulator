@@ -37,12 +37,11 @@ public:
 
    float terrainPathWidth = 30.0f;
    float alpha = 0.5f;
-   int samplePerFragments = 20;
    float tileLength = pathWidth;
    int subdivision = 3;
    int horizontalTiles = static_cast<int>(terrainPathWidth / 5.0f);
    int partitionSize = 20;
-   float renderDistance = 100.0f;
+   float renderDistance = 150.0f;
    float maxRenderDistance = 350.0f;
 
    PerlinNoise noise;

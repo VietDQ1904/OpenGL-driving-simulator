@@ -24,7 +24,7 @@ public:
    float roadPathWidth = pathWidth;
 
    VerticesWithIndices verticesWithIndices;
-   int partitionSize = 50;
+   int partitionSize = 20;
    float renderDistance = 350.0f;
 
    Road(Physics &simulation)

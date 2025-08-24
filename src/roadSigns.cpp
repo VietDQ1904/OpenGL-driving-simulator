@@ -21,17 +21,15 @@ void RoadSigns::generateModels()
    glm::vec3 mid;
    glm::vec3 w;
 
-   glm::vec3 dir_1;
+   glm::vec3 dir;
    glm::vec3 dir_2;
 
-   glm::vec3 pos_1;
+   glm::vec3 pos;
    glm::vec3 pos_2;
 
    glm::mat4 modelMatrix;
    std::vector<glm::mat4> modelMatrices;
 
-   int curveDirection = STRAIGHT;
-   float firstCurve;
    float angle;
    int elements = 0;
    int lastIndex = 0;
@@ -41,6 +39,7 @@ void RoadSigns::generateModels()
    std::vector<std::array<float, 3>> pivots(points.size(), {0.0f, 0.0f, 0.0f});
    std::vector<std::array<float, 3>> pivots2(points.size(), {0.0f, 0.0f, 0.0f});
 
+   // Set up for the right side.
    for (int i = 0; i < points.size() - 2; ++i)
    {
       current = points[i + 1] - points[i];
@@ -77,32 +76,23 @@ void RoadSigns::generateModels()
          }
          else if (directions[i - 1] == LEFT_CURVE && directions[i] == LEFT_CURVE)
          {
+            directions[i] = STRAIGHT;
             if (std::abs(angle) >= 60.0f)
             {
-               directions[i] = STRAIGHT;
                directions[i - 1] = SHARP_LEFT_CURVE;
-            }
-            else
-            {
-               directions[i] = STRAIGHT;
-               directions[i - 1] = LEFT_CURVE;
             }
          }
          else if (directions[i - 1] == RIGHT_CURVE && directions[i] == RIGHT_CURVE)
          {
+            directions[i] = STRAIGHT;
             if (std::abs(angle) >= 60.0f)
             {
-               directions[i] = STRAIGHT;
                directions[i - 1] = SHARP_RIGHT_CURVE;
-            }
-            else
-            {
-               directions[i] = STRAIGHT;
-               directions[i - 1] = RIGHT_CURVE;
             }
          }
       }
 
+      // No road sign on the segment if direction is straight.
       if (directions[i] == STRAIGHT)
       {
          continue;
@@ -111,15 +101,15 @@ void RoadSigns::generateModels()
       int mid_indx = static_cast<int>((i * (points.size() - 3) + (i + 1) * (points.size() - 3)) * 0.5f);
       mid = generatedPath[mid_indx];
 
-      dir_1 = glm::normalize(glm::cross(glm::normalize(generatedPath[mid_indx + 1] - generatedPath[mid_indx]), up));
-      pos_1 = dir_1 * (pathWidth / 2.0f + offset) + mid;
+      dir = glm::normalize(glm::cross(glm::normalize(generatedPath[mid_indx + 1] - generatedPath[mid_indx]), up));
+      pos = dir * (pathWidth / 2.0f + offset) + mid;
 
       modelMatrix = glm::mat4(1.0f);
-      modelMatrix = glm::translate(modelMatrix, pos_1);
-      modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(1.0f, 0.0f, 0.0f), dir_1));
+      modelMatrix = glm::translate(modelMatrix, pos);
+      modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(1.0f, 0.0f, 0.0f), dir));
       modelMatrices.push_back(modelMatrix);
 
-      std::array<float, 3> pivot = {pos_1.x, pos_1.y, pos_1.z};
+      std::array<float, 3> pivot = {pos.x, pos.y, pos.z};
       pivots[i] = pivot;
 
       modelInstances.insertModelMatrices(pivot, modelMatrices);
@@ -127,6 +117,7 @@ void RoadSigns::generateModels()
       modelMatrices.clear();
    }
 
+   // Set up for the left side
    for (int i = points.size() - 1; i >= 2; --i)
    {
       current = points[i] - points[i - 1];
@@ -149,7 +140,7 @@ void RoadSigns::generateModels()
          directions2[i] = RIGHT_CURVE;
       }
 
-      if (i > 0)
+      if (i < points.size() - 1)
       {
          if (directions2[i + 1] == LEFT_CURVE && directions2[i] == RIGHT_CURVE)
          {
@@ -163,49 +154,40 @@ void RoadSigns::generateModels()
          }
          else if (directions2[i + 1] == LEFT_CURVE && directions2[i] == LEFT_CURVE)
          {
+            directions2[i] = STRAIGHT;
             if (std::abs(angle) >= 60.0f)
             {
-               directions2[i] = STRAIGHT;
                directions2[i + 1] = SHARP_LEFT_CURVE;
-            }
-            else
-            {
-               directions2[i] = STRAIGHT;
-               directions2[i + 1] = LEFT_CURVE;
             }
          }
          else if (directions2[i + 1] == RIGHT_CURVE && directions2[i] == RIGHT_CURVE)
          {
+            directions2[i] = STRAIGHT;
             if (std::abs(angle) >= 60.0f)
             {
-               directions2[i] = STRAIGHT;
                directions2[i + 1] = SHARP_RIGHT_CURVE;
-            }
-            else
-            {
-               directions2[i] = STRAIGHT;
-               directions2[i + 1] = RIGHT_CURVE;
             }
          }
       }
 
+      // No road sign on the segment if direction is straight.
       if (directions2[i] == STRAIGHT)
       {
          continue;
       }
 
-      int mid_indx = static_cast<int>((i * (points.size() - 3) + (i + 1) * (points.size() - 3)) * 0.5f);
+      int mid_indx = static_cast<int>((i * (points.size() - 3) + (i - 1) * (points.size() - 3)) * 0.5f);
       mid = generatedPath[mid_indx];
 
-      dir_1 = glm::normalize(glm::cross(glm::normalize(generatedPath[mid_indx] - generatedPath[mid_indx + 1]), up));
-      pos_1 = dir_1 * (pathWidth / 2.0f + offset) + mid;
+      dir = glm::normalize(glm::cross(glm::normalize(generatedPath[mid_indx] - generatedPath[mid_indx + 1]), up));
+      pos = dir * (pathWidth / 2.0f + offset) + mid;
 
       modelMatrix = glm::mat4(1.0f);
-      modelMatrix = glm::translate(modelMatrix, pos_1);
-      modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(1.0f, 0.0f, 0.0f), dir_1));
+      modelMatrix = glm::translate(modelMatrix, pos);
+      modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(1.0f, 0.0f, 0.0f), dir));
       modelMatrices.push_back(modelMatrix);
 
-      std::array<float, 3> pivot = {pos_1.x, pos_1.y, pos_1.z};
+      std::array<float, 3> pivot = {pos.x, pos.y, pos.z};
       pivots2[i] = pivot;
 
       modelInstances.insertModelMatrices(pivot, modelMatrices);
@@ -236,11 +218,11 @@ void RoadSigns::setUp()
 {
    for (const auto &partition : modelInstances.modelMatricesList)
    {
-      GLuint barrierPartitionBuffer;
-      glGenBuffers(1, &barrierPartitionBuffer);
-      glBindBuffer(GL_ARRAY_BUFFER, barrierPartitionBuffer);
+      GLuint roadSignBuffer;
+      glGenBuffers(1, &roadSignBuffer);
+      glBindBuffer(GL_ARRAY_BUFFER, roadSignBuffer);
       glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(glm::mat4), partition.second.data(), GL_STATIC_DRAW);
-      modelInstances.insertVBO(partition.first, barrierPartitionBuffer);
+      modelInstances.insertVBO(partition.first, roadSignBuffer);
    }
 
    for (unsigned int i = 0; i < signModel->meshes.size(); ++i)
@@ -378,12 +360,12 @@ void RoadSigns::cleanUpBuffers()
 {
    modelInstances.clearBuffers();
 
-   for (GLuint vao : signVAOs)
+   for (GLuint &vao : signVAOs)
    {
       glDeleteVertexArrays(1, &vao);
    }
 
-   for (GLuint vao : signLPVAOs)
+   for (GLuint &vao : signLPVAOs)
    {
       glDeleteVertexArrays(1, &vao);
    }
