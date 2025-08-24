@@ -541,7 +541,6 @@ void Terrain::render(Shader &shader, Camera &camera)
 
 void Terrain::cleanUpBuffers()
 {
-
    verticesPathMaps.clearBuffers();
    verticesTerrainMaps.clearBuffers();
 }

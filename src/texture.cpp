@@ -15,7 +15,6 @@ Texture::Texture() : width(0),
 
 void Texture::generateTexture(int width, int height, int nrChannels, unsigned char *data)
 {
-
    glGenTextures(1, &this->textureID);
    glBindTexture(GL_TEXTURE_2D, this->textureID);
    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, width, height, 0, this->imageFormat, GL_UNSIGNED_BYTE, data);

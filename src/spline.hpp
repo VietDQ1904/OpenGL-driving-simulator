@@ -13,24 +13,26 @@ class Spline
 {
 protected:
    std::vector<glm::vec3> points = {
-       glm::vec3(0.0f, 0.0f, 0.0f),
-       glm::vec3(21.0f, 0.5f, -3.0f),
-       glm::vec3(36.0f, 0.0f, -12.0f),
-       glm::vec3(51.0f, 0.5f, -2.0f),
-       glm::vec3(65.0f, 0.5f, -5.0f),
-       glm::vec3(76.0f, 0.8f, -13.0f),
-       glm::vec3(66.0f, 0.9f, -25.0f),
-       glm::vec3(73.0f, 1.2f, -38.0f),
-       glm::vec3(56.0f, 0.5f, -45.0f),
-       glm::vec3(38.0f, 0.5f, -55.0f),
-       glm::vec3(31.0f, 0.5f, -41.0f),
-       glm::vec3(13.0f, 0.0f, -46.0f),
-       glm::vec3(-2.0f, -0.5f, -34.0f),
-       glm::vec3(-23.0f, -1.0f, -32.0f),
-       glm::vec3(0.0f, 0.0f, 0.0f)};
+       glm::vec3(-62.0f, 0.0f, 8.5f),
+       glm::vec3(-43.0f, 0.5f, 9.0f),
+       glm::vec3(-23.0f, 1.0f, 10.0f),
+       glm::vec3(-4.3f, 1.5f, 10.0f),
+       glm::vec3(10.0f, 2.0f, 1.0f),
+       glm::vec3(19.8f, 2.0f, -10.0f),
+       glm::vec3(33.0f, 2.5f, -16.0f),
+       glm::vec3(44.0f, 3.0f, -6.0f),
+       glm::vec3(45.0f, 3.5f, 10.0f),
+       glm::vec3(50.0f, 4.0f, 25.0f),
+       glm::vec3(59.0f, 4.8f, 34.0f),
+       glm::vec3(73.0f, 5.6f, 36.0f),
+       glm::vec3(87.0f, 6.5f, 28.0f),
+       glm::vec3(100.0f, 7.0f, 40.0f),
+       glm::vec3(114.0f, 7.5f, 31.0f),
+       glm::vec3(123.0f, 8.2f, 19.3f),
+       glm::vec3(130.0f, 9.0f, 6.3f)};
 
    float alpha = 1.0f;
-   int samplePerFragments = 20;
+   int samplePerFragments = 15;
    float pathWidth = 15.0f;
    std::vector<glm::vec3> generatedPath;
 
@@ -76,10 +78,6 @@ protected:
       {
          return;
       }
-
-      points.insert(points.begin(), points[points.size() - 2]);
-      points.push_back(points[1]);
-      points.push_back(points[2]);
 
       // Generate Catmull-Rom spline points.
       for (size_t i = 1; i < points.size() - 2; ++i)

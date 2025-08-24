@@ -12,11 +12,11 @@
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
-// enable NVIDIA GPU rendering
-// extern "C"
-// {
-//    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-// }
+// // enable NVIDIA GPU rendering
+extern "C"
+{
+   __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
 
 // // enable AMD GPU rendering
 // extern "C" {
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-   glfwWindowHint(GLFW_SAMPLES, 4); // Add 4 subsamples for smoother edges.
+   // glfwWindowHint(GLFW_SAMPLES, 4); // Add 4 subsamples for smoother edges.
 
    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, "DrivingGame", nullptr, nullptr);
 
@@ -70,14 +70,13 @@ int main(int argc, char *argv[])
    glm::mat4 projection;
 
    glEnable(GL_DEPTH_TEST);
+   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
    float deltaTime = 0.0f;
    float lastTime = 0.0f;
    const float radius = 10.0f;
 
-   glm::vec3 lightDirection = glm::vec3(2.0f, -1.0f, 0.5f);
-
-   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+   glm::vec3 lightDirection = glm::vec3(1.0f, -2.0f, -1.0f);
 
    ResourceManagement::loadShader("Main", "../src/terrain.vert", "../src/terrain.frag", nullptr);
    ResourceManagement::loadTexture("Grass", "../assets/grass.png", false, false);
