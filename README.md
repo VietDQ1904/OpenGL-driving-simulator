@@ -1,15 +1,16 @@
-# Driving simulator with OpenGL #
+# Driving simulator #
 
-This project demonstrates a driving simulator using OpenGL. It has a user-controlled car, procedurally generated road path, terrain and road signs.
+This project demonstrates a driving simulator using OpenGL, Bullet Physics and other libraries. It has a user-controlled car, procedurally generated road path, terrain and road signs.
 
 <a name="dependencies"></a>
 
 ### List of dependencies ###
 
-   - MSYS2 MINGW W-64: compiler for C++. 
+   - MSYS2 MINGW-W64: compiler for C++. 
    - VSCode: main code editor.
    - CMake: building project.
-   - OpenGL (using GLFW 3.4 and glad): rendering the scene.
+   - GLAD: loading OpenGL specifications.
+   - GLFW 3.4: creating window, handle events.
    - Bullet Physics: physics implementation.
    - GLM: matrix and vector calculations.
    - stb_image: loading images. 
@@ -30,7 +31,7 @@ This project demonstrates a driving simulator using OpenGL. It has a user-contro
       cd build
       ```
    
-   - Make sure all dependencies are installed before building (use pacman -Q inside MSYS2 to view 
+   - Make sure all dependencies are installed before building (use "pacman -Q" inside MSYS2 terminal to view 
    installed packages). Build the project using the command (for G++ compiler): 
 
       ```
@@ -47,7 +48,7 @@ This project demonstrates a driving simulator using OpenGL. It has a user-contro
 
       Alternatively, if you use VSCode, you can download CMake Tools extension to automate the build process.
    
-   - After you build, you will have an executable file (DrivingSimulator.exe). Run it to start the game.
+   - After you build, you will have an executable file (DrivingSimulator.exe). Run it to start the program.
 
 <a name= "license"></a>
 

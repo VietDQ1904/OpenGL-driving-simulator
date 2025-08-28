@@ -8,7 +8,6 @@
 
 #ifndef SPLINE
 #define SPLINE
-
 class Spline
 {
 protected:
@@ -31,10 +30,11 @@ protected:
        glm::vec3(123.0f, 8.2f, 19.3f),
        glm::vec3(130.0f, 9.0f, 6.3f)};
 
-   float alpha = 1.0f;
-   int samplePerFragments = 15;
-   float pathWidth = 15.0f;
-   std::vector<glm::vec3> generatedPath;
+   const float alpha = 1.0f;
+   const int samplePerFragments = 15;
+   const float pathWidth = 15.0f;
+   static std::vector<glm::vec3> generatedPath;
+   static bool splineGenerated;
 
    glm::vec3 catmullRom(const glm::vec3 &p0, const glm::vec3 &p1,
                         const glm::vec3 &p2, const glm::vec3 &p3,
@@ -67,7 +67,6 @@ protected:
 
    void generateSpline()
    {
-
       for (auto &point : points)
       {
          point *= 5.0f;
@@ -94,6 +93,9 @@ protected:
             generatedPath.push_back(point);
          }
       }
+
+      // Only generate spline once
+      splineGenerated = true;
    }
 };
 

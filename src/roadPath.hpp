@@ -1,9 +1,6 @@
 #include <vector>
 #include <iostream>
 #include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "shader.hpp"
 #include "physics.hpp"
 #include "spline.hpp"
@@ -29,8 +26,10 @@ public:
 
    Road(Physics &simulation)
    {
-
-      this->generateSpline();
+      if (!splineGenerated)
+      {
+         this->generateSpline();
+      }
       this->generateVertices(simulation);
 
       this->setUp();

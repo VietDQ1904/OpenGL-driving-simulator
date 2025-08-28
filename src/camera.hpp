@@ -31,6 +31,7 @@ public:
    float farPlane = 300.0f;
 
    Camera(glm::vec3 cameraPos) : cameraPos(cameraPos) {}
+   void control(GLFWwindow *window, float deltaTime);
    void mouseCallback(GLFWwindow *window, double xpos, double ypos);
    void scrollCallback(GLFWwindow *window, double offsetX, double offsetY);
    void updateFollowCamera(btRigidBody *car);

@@ -69,11 +69,6 @@ void main(){
    vec3 N = getNormalFromMap();
    vec3 V = normalize(viewPos - fs_in.FragPos);
    vec3 L = normalize(-light.direction);
-
-   float cosTheta = dot(N, L);
-   float lightAngle = acos(cosTheta);
-   float intensity = 1.0 - smoothstep(30.0, 120.0, lightAngle);
-
    vec3 H = normalize(V + L);
 
    // F0 blend between dielectric and metallic
@@ -97,7 +92,7 @@ void main(){
    vec3 Lo = (kD * albedo / 3.14159265 + specular) * light.color * NdotL;
 
    // Ambient
-   vec3 ambient = 0.05 * intensity * albedo;
+   vec3 ambient = 0.1 * albedo;
 
    vec3 color = ambient + Lo;
    // HDR tonemapping

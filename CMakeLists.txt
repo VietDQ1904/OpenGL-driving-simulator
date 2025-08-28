@@ -11,11 +11,13 @@ set (SOURCES src/main.cpp
              src/texture.cpp
              src/camera.cpp
              src/perlinNoise.cpp
+             src/spline.cpp
              src/roadPath.cpp
              src/terrainPath.cpp
              src/barrierPath.cpp
              src/resourceManagement.cpp
              src/roadSigns.cpp
+             src/grass.cpp
     )
 
 

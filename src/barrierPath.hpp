@@ -31,21 +31,20 @@ public:
    std::vector<GLuint> barrierVAOs, barrierLPVAOs;
    ModelInstances modelInstances;
 
-   glm::mat4 model;
-   glm::mat4 scale;
-
    std::unique_ptr<Model> barrierModel;
    std::unique_ptr<Model> barrierLPModel;
 
    Barrier(Physics &simulation)
    {
-
       barrierModel = std::make_unique<Model>("../assets/Barrier/Model2/BarrierModel.obj");
-      barrierModel->loadShader("barrierShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
+      barrierModel->loadShader("barrierShader", "../src/Shaders/instanceModel.vert", "../src/Shaders/instanceModel.frag", nullptr);
       barrierLPModel = std::make_unique<Model>("../assets/Barrier/Model2/BarrierModel.obj");
-      barrierLPModel->loadShader("barrierLPShader", "../src/barrier.vert", "../src/barrier.frag", nullptr);
+      barrierLPModel->loadShader("barrierLPShader", "../src/Shaders/instanceModel.vert", "../src/Shaders/instanceModel.frag", nullptr);
 
-      this->generateSpline();
+      if (!splineGenerated)
+      {
+         this->generateSpline();
+      }
       this->generateVertices(simulation);
       this->setUp();
    }

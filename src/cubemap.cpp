@@ -4,13 +4,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Cubemap::Cubemap(std::string directory, std::array<std::string, 6> files)
+Cubemap::Cubemap()
 {
-   this->textureID = generateCubemap(directory, files);
+   this->textureID = generateCubemap();
    setUpCubemap();
 }
 
-GLuint Cubemap::generateCubemap(std::string directory, std::array<std::string, 6> files)
+GLuint Cubemap::generateCubemap()
 {
    GLuint textureID;
    glGenTextures(1, &textureID);
@@ -20,9 +20,9 @@ GLuint Cubemap::generateCubemap(std::string directory, std::array<std::string, 6
    unsigned char *data;
 
    // Axis loading order: +x -> -x -> +y -> -y -> +z -> -z
-   for (int i = 0; i < files.size(); ++i)
+   for (int i = 0; i < images.size(); ++i)
    {
-      std::string file = directory + "/" + files[i];
+      std::string file = images[i];
       data = stbi_load(file.c_str(), &width, &height, &nrChannels, 0);
 
       if (!data)
