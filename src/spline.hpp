@@ -28,10 +28,16 @@ protected:
        glm::vec3(100.0f, 7.0f, 20.0f),
        glm::vec3(114.0f, 7.5f, 18.0f),
        glm::vec3(127.0f, 8.2f, 25.3f),
-       glm::vec3(140.0f, 9.0f, 33.3f)};
+       glm::vec3(140.0f, 9.0f, 33.3f),
+       glm::vec3(153.0f, 9.6f, 39.0f),
+       glm::vec3(168.0f, 9.6f, 35.0f),
+       glm::vec3(183.2f, 9.6f, 43.0f),
+       glm::vec3(196.0f, 9.6f, 52.5f),
+       glm::vec3(206.8f, 9.6f, 61.8f),
+       glm::vec3(214.6f, 9.6f, 74.8f)};
 
    const float alpha = 1.0f;
-   const int samplesPerFragment = 15;
+   const int samplesPerFragment = 20;
    const float pathWidth = 15.0f;
    static std::vector<glm::vec3> generatedPath;
    static bool splineGenerated;

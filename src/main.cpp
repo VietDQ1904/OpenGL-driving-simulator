@@ -98,15 +98,15 @@ int main(int argc, char *argv[])
    std::unique_ptr<GrassBlades> grassBlades = std::make_unique<GrassBlades>();
    grassBlades->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
-   std::unique_ptr<Car> car = std::make_unique<Car>(*simulation);
-   car->loadModels("../assets/Car/CarBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
-   car->loadShaderCarBody("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   car->loadShaderFrontWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   car->loadShaderBackWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   car->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
+   // std::unique_ptr<Car> car = std::make_unique<Car>(*simulation);
+   // car->loadModels("../assets/Car/CarBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
+   // car->loadShaderCarBody("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
+   // car->loadShaderFrontWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
+   // car->loadShaderBackWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
+   // car->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
-   camera.setPositionToCar(*car);
+   // camera.setPositionToCar(*car);
 
    Shader mainShader = ResourceManagement::getShader("Main");
    mainShader.use();
@@ -144,8 +144,8 @@ int main(int argc, char *argv[])
 
       processInput(window, deltaTime);
 
-      camera.updateFollowCamera(car->car);
-      // camera.control(window, deltaTime);
+      // camera.updateFollowCamera(car->car);
+      camera.control(window, deltaTime);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -173,9 +173,9 @@ int main(int argc, char *argv[])
       mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader, camera);
 
-      car->control(window, deltaTime);
-      car->update();
-      car->render(view, projection, camera.cameraPos);
+      // car->control(window, deltaTime);
+      // car->update();
+      // car->render(view, projection, camera.cameraPos);
 
       barrier->render(view, projection, camera);
       roadSigns->render(view, projection, camera);

@@ -13,19 +13,43 @@ float getOrientedAngle(glm::vec3 v1, glm::vec3 v2, glm::vec3 u)
    return angle;
 }
 
+glm::vec3 catmullRomValue(const glm::vec3 &p0, const glm::vec3 &p1,
+                          const glm::vec3 &p2, const glm::vec3 &p3,
+                          float t)
+{
+   float t2 = t * t;
+   float t3 = t2 * t;
+
+   return 0.5f * ((2.0f * p1) +
+                  (-p0 + p2) * t +
+                  (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * t2 +
+                  (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3);
+}
+
+glm::vec3 catmullRomTangent(const glm::vec3 &p0, const glm::vec3 &p1,
+                            const glm::vec3 &p2, const glm::vec3 &p3,
+                            float t)
+{
+   float t2 = t * t;
+
+   return 0.5f * ((-p0 + p2) +
+                  2.0f * (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * t +
+                  3.0f * (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t2);
+}
+
 void RoadSigns::generateModels()
 {
    glm::vec3 current;
    glm::vec3 next;
    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-   glm::vec3 mid;
    glm::vec3 w;
 
    glm::vec3 dir;
-   glm::vec3 dir_2;
-
    glm::vec3 pos;
-   glm::vec3 pos_2;
+
+   glm::vec3 mid;
+   glm::vec3 tangent;
+   glm::vec3 right;
 
    glm::mat4 modelMatrix;
    std::vector<glm::mat4> modelMatrices;
@@ -40,7 +64,7 @@ void RoadSigns::generateModels()
    std::vector<std::array<float, 3>> pivots2(points.size(), {0.0f, 0.0f, 0.0f});
 
    // Set up for the right side.
-   for (int i = 0; i < points.size() - 2; ++i)
+   for (int i = 1; i < points.size() - 2; ++i)
    {
       current = points[i + 1] - points[i];
       next = points[i + 2] - points[i + 1];
@@ -98,11 +122,11 @@ void RoadSigns::generateModels()
          continue;
       }
 
-      int mid_indx = static_cast<int>((i * (points.size() - 3) + (i + 1) * (points.size() - 3)) * 0.5f);
-      mid = generatedPath[mid_indx];
+      mid = catmullRomValue(points[i - 1], points[i], points[i + 1], points[i + 2], 0.5f);
+      tangent = catmullRomTangent(points[i - 1], points[i], points[i + 1], points[i + 2], 0.5f);
 
-      dir = glm::normalize(glm::cross(glm::normalize(generatedPath[mid_indx + 1] - generatedPath[mid_indx]), up));
-      pos = dir * (pathWidth / 2.0f + offset) + mid;
+      dir = glm::normalize(glm::cross(glm::normalize(tangent), up));
+      pos = dir * (pathWidth / 2.0f + offset) + mid * 5.0f;
 
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, pos);
@@ -176,11 +200,11 @@ void RoadSigns::generateModels()
          continue;
       }
 
-      int mid_indx = static_cast<int>((i * (points.size() - 3) + (i - 1) * (points.size() - 3)) * 0.5f);
-      mid = generatedPath[mid_indx];
+      mid = catmullRomValue(points[i + 1], points[i], points[i - 1], points[i - 2], 0.5f);
+      tangent = catmullRomTangent(points[i + 1], points[i], points[i - 1], points[i - 2], 0.5f);
 
-      dir = glm::normalize(glm::cross(glm::normalize(generatedPath[mid_indx] - generatedPath[mid_indx + 1]), up));
-      pos = dir * (pathWidth / 2.0f + offset) + mid;
+      dir = glm::normalize(glm::cross(glm::normalize(tangent), up));
+      pos = dir * (pathWidth / 2.0f + offset) + mid * 5.0f;
 
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, pos);
