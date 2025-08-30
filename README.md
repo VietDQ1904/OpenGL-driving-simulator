@@ -5,9 +5,7 @@ This project demonstrates a driving simulator using OpenGL, Bullet Physics and o
 <a name="dependencies"></a>
 
 ### List of dependencies ###
-
-   - MSYS2 MINGW-W64: compiler for C++. 
-   - VSCode: main code editor.
+   - C++17 or newer compiler.
    - CMake: building project.
    - GLAD: loading OpenGL specifications.
    - GLFW 3.4: creating window, handle events.
@@ -23,31 +21,21 @@ This project demonstrates a driving simulator using OpenGL, Bullet Physics and o
       ```
       git clone https://github.com/VietDQ1904/OpenGL-driving-simulator.git
       ```
-   
-   - Change directory to the project, create a build folder and change your current directory to /build:
+   - Change the directory to the project:
       ```
       cd OpenGL-driving-simulator
+      ```
+   - Create a folder for libraries, add every required packages inside the folder.
+   - Change directory to the project, create a build folder and change your current directory to /build:
+      ```
       mkdir build
       cd build
       ```
-   
-   - Make sure all dependencies are installed before building (use "pacman -Q" inside MSYS2 terminal to view 
-   installed packages). Build the project using the command (for G++ compiler): 
-
-      ```
-      cmake -G "MinGW Makefiles" .. 
-      cmake --build .
-      ```
-
-      If you already have a default compiler, you don't need to specify it:
-
+   - Make sure all dependencies are installed before building. Build the project using the command (modify the command to make it works for your system): 
       ```
       cmake -G ..
       cmake --build .
       ```
-
-      Alternatively, if you use VSCode, you can download CMake Tools extension to automate the build process.
-   
    - After you build, you will have an executable file (DrivingSimulator.exe). Run it to start the program.
 
 <a name= "license"></a>

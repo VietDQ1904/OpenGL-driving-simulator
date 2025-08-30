@@ -64,6 +64,7 @@ public:
          point *= 5.0f;
       }
 
+      // Create two parallel paths.
       generatedLeftPath = this->generateSpline(leftPoints);
       generatedRightPath = this->generateSpline(rightPoints);
 

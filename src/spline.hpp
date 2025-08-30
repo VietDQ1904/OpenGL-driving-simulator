@@ -25,10 +25,10 @@ protected:
        glm::vec3(59.0f, 4.8f, 34.0f),
        glm::vec3(73.0f, 5.6f, 36.0f),
        glm::vec3(87.0f, 6.5f, 28.0f),
-       glm::vec3(100.0f, 7.0f, 40.0f),
-       glm::vec3(114.0f, 7.5f, 31.0f),
-       glm::vec3(123.0f, 8.2f, 19.3f),
-       glm::vec3(130.0f, 9.0f, 6.3f)};
+       glm::vec3(100.0f, 7.0f, 20.0f),
+       glm::vec3(114.0f, 7.5f, 18.0f),
+       glm::vec3(127.0f, 8.2f, 25.3f),
+       glm::vec3(140.0f, 9.0f, 33.3f)};
 
    const float alpha = 1.0f;
    const int samplesPerFragment = 15;
