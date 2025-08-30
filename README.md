@@ -51,7 +51,7 @@ This project demonstrates a driving simulator using OpenGL, Bullet Physics and o
       cmake -G "Ninja" ..
       ```
       
-      You can also specify your compiler:
+      You can also specify your compiler for example:
       ```bash
       cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
       ```
