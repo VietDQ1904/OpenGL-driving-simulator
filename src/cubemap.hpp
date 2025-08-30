@@ -7,66 +7,74 @@
 
 #ifndef CUBEMAP
 #define CUBEMAP
-class Cubemap{
-   public:
-      Cubemap(std::string directory, std::array<std::string, 6> files);
-      ~Cubemap(){
-         glDeleteVertexArrays(1, &vao);
-         glDeleteBuffers(1, &vbo);
-      }
-      
-      void draw(Shader &shader, glm::mat4 projection, glm::mat4 view);
+class Cubemap
+{
+public:
+   Cubemap();
+   ~Cubemap()
+   {
+      glDeleteVertexArrays(1, &vao);
+      glDeleteBuffers(1, &vbo);
+   }
 
-   private:
-      std::array<float, 36 * 3> cubeSkybox = {
-         -1.0f,  1.0f, -1.0f,
-         -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         -1.0f,  1.0f, -1.0f,
+   void draw(Shader &shader, glm::mat4 projection, glm::mat4 view);
 
-         -1.0f, -1.0f,  1.0f,
-         -1.0f, -1.0f, -1.0f,
-         -1.0f,  1.0f, -1.0f,
-         -1.0f,  1.0f, -1.0f,
-         -1.0f,  1.0f,  1.0f,
-         -1.0f, -1.0f,  1.0f,
+private:
+   std::array<float, 36 * 3> cubeSkybox = {
+       -1.0f, 1.0f, -1.0f,
+       -1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
+       1.0f, 1.0f, -1.0f,
+       -1.0f, 1.0f, -1.0f,
 
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
+       -1.0f, -1.0f, 1.0f,
+       -1.0f, -1.0f, -1.0f,
+       -1.0f, 1.0f, -1.0f,
+       -1.0f, 1.0f, -1.0f,
+       -1.0f, 1.0f, 1.0f,
+       -1.0f, -1.0f, 1.0f,
 
-         -1.0f, -1.0f,  1.0f,
-         -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-         -1.0f, -1.0f,  1.0f,
+       1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f, 1.0f,
+       1.0f, 1.0f, 1.0f,
+       1.0f, 1.0f, 1.0f,
+       1.0f, 1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
 
-         -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         -1.0f,  1.0f,  1.0f,
-         -1.0f,  1.0f, -1.0f,
+       -1.0f, -1.0f, 1.0f,
+       -1.0f, 1.0f, 1.0f,
+       1.0f, 1.0f, 1.0f,
+       1.0f, 1.0f, 1.0f,
+       1.0f, -1.0f, 1.0f,
+       -1.0f, -1.0f, 1.0f,
 
-         -1.0f, -1.0f, -1.0f,
-         -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f
-      };
+       -1.0f, 1.0f, -1.0f,
+       1.0f, 1.0f, -1.0f,
+       1.0f, 1.0f, 1.0f,
+       1.0f, 1.0f, 1.0f,
+       -1.0f, 1.0f, 1.0f,
+       -1.0f, 1.0f, -1.0f,
 
-      GLuint vao, vbo;
-      GLuint textureID;
+       -1.0f, -1.0f, -1.0f,
+       -1.0f, -1.0f, 1.0f,
+       1.0f, -1.0f, -1.0f,
+       1.0f, -1.0f, -1.0f,
+       -1.0f, -1.0f, 1.0f,
+       1.0f, -1.0f, 1.0f};
 
-      void setUpCubemap();
-      GLuint generateCubemap(std::string directory, std::array<std::string, 6> files);
+   std::array<std::string, 6> images = {"../assets/Skybox/right.jpg",
+                                        "../assets/Skybox/left.jpg",
+                                        "../assets/Skybox/top.jpg",
+                                        "../assets/Skybox/bottom.jpg",
+                                        "../assets/Skybox/front.jpg",
+                                        "../assets/Skybox/back.jpg"};
+
+   GLuint vao, vbo;
+   GLuint textureID;
+
+   void setUpCubemap();
+   GLuint generateCubemap();
 };
 
 #endif

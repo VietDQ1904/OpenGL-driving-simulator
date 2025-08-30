@@ -1,15 +1,14 @@
-# Driving simulator with OpenGL #
+# Driving simulator #
 
-This project demonstrates a driving simulator using OpenGL. It has a user-controlled car, procedurally generated road path, terrain and road signs.
+This project demonstrates a driving simulator using OpenGL, Bullet Physics and other libraries. It has a user-controlled car, procedurally generated road path, terrain and road signs.
 
 <a name="dependencies"></a>
 
 ### List of dependencies ###
-
-   - MSYS2 MINGW W-64: compiler for C++. 
-   - VSCode: main code editor.
+   - C++17 or newer compiler.
    - CMake: building project.
-   - OpenGL (using GLFW 3.4 and glad): rendering the scene.
+   - GLAD: loading OpenGL specifications.
+   - GLFW 3.4: creating window, handle events.
    - Bullet Physics: physics implementation.
    - GLM: matrix and vector calculations.
    - stb_image: loading images. 
@@ -19,35 +18,50 @@ This project demonstrates a driving simulator using OpenGL. It has a user-contro
 
 ### Instructions ###
    - Install the respository via the command:
-      ```
+      ```bash
       git clone https://github.com/VietDQ1904/OpenGL-driving-simulator.git
       ```
-   
-   - Change directory to the project, create a build folder and change your current directory to /build:
-      ```
+
+   - Change the directory to the project:
+      ```bash
       cd OpenGL-driving-simulator
+      ```
+
+   - Create a folder for libraries, add every required packages inside the folder. The folder must match the expected structure of CMakeLists.txt.
+
+   - Change directory to the project, create a build folder and change your current directory to /build:
+      ```bash
       mkdir build
       cd build
       ```
-   
-   - Make sure all dependencies are installed before building (use pacman -Q inside MSYS2 to view 
-   installed packages). Build the project using the command (for G++ compiler): 
 
+   - Make sure all dependencies are installed before building. Use the command below to configure a CMake generator (specify the generator to make it works for your system):
+      + For Windows: 
+      ```bash
+      cmake -G "MinGW Makefiles" ..
       ```
-      cmake -G "MinGW Makefiles" .. 
+      
+      + For Unix:
+      ```bash
+      cmake -G "Unix Makefiles" ..  
+      ```
+
+      + For Ninja: 
+      ```bash
+      cmake -G "Ninja" ..
+      ```
+      
+      You can also specify your compiler for example:
+      ```bash
+      cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+      ```
+
+   - Build the project with the command: 
+      ```bash
       cmake --build .
       ```
 
-      If you already have a default compiler, you don't need to specify it:
-
-      ```
-      cmake -G ..
-      cmake --build .
-      ```
-
-      Alternatively, if you use VSCode, you can download CMake Tools extension to automate the build process.
-   
-   - After you build, you will have an executable file (DrivingSimulator.exe). Run it to start the game.
+   - After you build, you will have an executable file (DrivingSimulator.exe). Run it to start the program.
 
 <a name= "license"></a>
 

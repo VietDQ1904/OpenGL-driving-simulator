@@ -6,6 +6,7 @@
 #include "camera.hpp"
 #include "perlinNoise.hpp"
 #include "vertices.hpp"
+#include "noiseMultipliers.hpp"
 
 #ifndef TERRAIN_PATH
 #define TERRAIN_PATH
@@ -50,8 +51,10 @@ public:
 
    Terrain(Physics &simulation)
    {
-
-      this->generateSpline();
+      if (!splineGenerated)
+      {
+         this->generateSpline();
+      }
       this->generateVertices(simulation);
       this->setUp();
    }
