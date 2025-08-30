@@ -1,20 +1,73 @@
 #include "barrierPath.hpp"
 
+glm::vec3 getCrossVector(glm::vec3 v1, glm::vec3 v2)
+{
+   glm::vec3 cross = glm::cross(glm::normalize(v1), glm::normalize(v2));
+   float length = glm::length(cross);
+   return (length > 1e-5f) ? glm::normalize(cross) : glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
+glm::vec3 getNormalVector(std::vector<glm::vec3> &points, glm::vec3 u, size_t index)
+{
+   if (index == 0)
+   {
+      glm::vec3 edge = points[1] - points[0];
+      return getCrossVector(edge, u);
+   }
+   else if (index == points.size() - 1)
+   {
+      glm::vec3 edge = points[index] - points[index - 1];
+      return getCrossVector(edge, u);
+   }
+   else
+   {
+      glm::vec3 prevEdge = points[index] - points[index - 1];
+      glm::vec3 nextEdge = points[index + 1] - points[index];
+
+      glm::vec3 prevNormal = getCrossVector(prevEdge, u);
+      glm::vec3 nextNormal = getCrossVector(nextEdge, u);
+
+      glm::vec3 avgNormal = prevNormal + nextNormal;
+      return (glm::length(avgNormal) > 1e-5f) ? glm::normalize(avgNormal) : prevNormal;
+   }
+}
+
+void Barrier::offsetPaths()
+{
+   glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
+   glm::vec3 normal;
+
+   if (points.size() < 2)
+   {
+      return;
+   }
+
+   leftPoints.reserve(points.size());
+   rightPoints.reserve(points.size());
+
+   for (size_t i = 0; i < points.size(); ++i)
+   {
+      normal = getNormalVector(points, u, i);
+      glm::vec3 parallelLeftPoint = points[i] - normal * barrierOffset * 0.85f;
+      glm::vec3 parallelRightPoint = points[i] + normal * barrierOffset * 1.35f;
+      leftPoints.push_back(parallelLeftPoint);
+      rightPoints.push_back(parallelRightPoint);
+   }
+}
+
 void Barrier::generateVertices(Physics &simulation)
 {
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
    glm::vec3 v;
    glm::vec3 w;
 
-   glm::vec3 prevA1, prevB1, prevA2, prevB2;
-
-   glm::vec3 A1, B1, C1, D1; // the left side
-   glm::vec3 A2, B2, C2, D2; // the right side
+   glm::vec3 prevA, prevB;
+   glm::vec3 A, B, C, D;
 
    glm::vec3 normal;
    glm::vec3 midPoint1, midPoint2;
 
-   float segmentLength1, segmentLength2;
+   float segmentLength;
    glm::mat4 modelMatrix;
    float angle;
 
@@ -24,66 +77,44 @@ void Barrier::generateVertices(Physics &simulation)
    std::vector<glm::mat4> modelMatricesPartition;
    glm::vec3 pivot;
 
-   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   for (size_t i = 0; i < generatedLeftPath.size() - 1; ++i)
    {
-      v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
+      v = glm::normalize(generatedLeftPath[i + 1] - generatedLeftPath[i]);
       w = glm::normalize(glm::cross(u, v));
-
       if (i == 0)
       {
-         A1 = w * barrierOffset + generatedPath[i] + u * barrierHeight;
-         B1 = w * barrierOffset + generatedPath[i];
-         A2 = -w * barrierOffset + generatedPath[i] + u * barrierHeight;
-         B2 = -w * barrierOffset + generatedPath[i];
+         A = w * barrierOffset + generatedLeftPath[i] + u * barrierHeight;
+         B = w * barrierOffset + generatedLeftPath[i];
       }
       else
       {
-         A1 = prevA1;
-         B1 = prevB1;
-         A2 = prevA2;
-         B2 = prevB2;
+         A = prevA;
+         B = prevB;
       }
 
-      C1 = w * barrierOffset + generatedPath[i + 1] + u * barrierHeight;
-      D1 = w * barrierOffset + generatedPath[i + 1];
-      C2 = -w * barrierOffset + generatedPath[i + 1] + u * barrierHeight;
-      D2 = -w * barrierOffset + generatedPath[i + 1];
+      C = w * barrierOffset + generatedLeftPath[i + 1] + u * barrierHeight;
+      D = w * barrierOffset + generatedLeftPath[i + 1];
 
-      // Save point C1, D1 of the current iteration.
-      prevA1 = C1;
-      prevB1 = D1;
-      prevA2 = C2;
-      prevB2 = D2;
+      // Save point C, D of the current iteration.
+      prevA = C;
+      prevB = D;
 
-      midPoint1 = (B1 + D1) / 2.0f;
-      midPoint2 = (B2 + D2) / 2.0f;
+      midPoint1 = (B + D) / 2.0f;
 
-      segmentLength1 = glm::length(C1 - A1);
-      segmentLength2 = glm::length(C2 - A2);
+      segmentLength = glm::length(C - A);
       angle = std::acos(glm::clamp(glm::dot(v, glm::vec3(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f));
 
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, midPoint1);
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength1 / modelScale, 1.0f, segmentLength1 / modelScale));
-      // modelMatrices.push_back(modelMatrix);
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / modelScale, 1.0f, segmentLength / modelScale));
       modelMatricesPartition.push_back(modelMatrix);
 
-      modelMatrix = glm::mat4(1.0f);
-      modelMatrix = glm::translate(modelMatrix, midPoint2);
-      modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
-      modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength2 / modelScale, 1.0f, segmentLength2 / modelScale));
-      // modelMatrices.push_back(modelMatrix);
-      modelMatricesPartition.push_back(modelMatrix);
-
-      // Create a rigid body.
-      simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
-      simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
 
       if (elements++ >= partitionSize)
       {
-         pivot = generatedPath[lastIndex + (i - lastIndex) / 2];
+         pivot = generatedLeftPath[lastIndex + (i - lastIndex) / 2];
          modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
          modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
 
@@ -96,7 +127,65 @@ void Barrier::generateVertices(Physics &simulation)
 
    if (!modelMatricesPartition.empty())
    {
-      pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
+      pivot = generatedLeftPath[lastIndex + (generatedLeftPath.size() - 1 - lastIndex) / 2];
+      modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
+      modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
+   }
+
+   elements = 0;
+   lastIndex = 0;
+
+   for (size_t i = 0; i < generatedRightPath.size() - 1; ++i)
+   {
+      v = glm::normalize(generatedRightPath[i + 1] - generatedRightPath[i]);
+      w = glm::normalize(glm::cross(u, v));
+      if (i == 0)
+      {
+         A = w * barrierOffset + generatedRightPath[i] + u * barrierHeight;
+         B = w * barrierOffset + generatedRightPath[i];
+      }
+      else
+      {
+         A = prevA;
+         B = prevB;
+      }
+
+      C = w * barrierOffset + generatedRightPath[i + 1] + u * barrierHeight;
+      D = w * barrierOffset + generatedRightPath[i + 1];
+
+      // Save point C, D of the current iteration.
+      prevA = C;
+      prevB = D;
+
+      midPoint1 = (B + D) / 2.0f;
+
+      segmentLength = glm::length(C - A);
+
+      modelMatrix = glm::mat4(1.0f);
+      modelMatrix = glm::translate(modelMatrix, midPoint1);
+      modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
+      modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+      modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / modelScale, 1.0f, segmentLength / modelScale));
+      modelMatricesPartition.push_back(modelMatrix);
+
+      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+
+      if (elements++ >= partitionSize)
+      {
+         pivot = generatedRightPath[lastIndex + (i - lastIndex) / 2];
+         modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
+         modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
+
+         modelMatricesPartition.clear();
+
+         elements = 0;
+         lastIndex = i;
+      }
+   }
+
+   if (!modelMatricesPartition.empty())
+   {
+      pivot = generatedRightPath[lastIndex + (generatedRightPath.size() - 1 - lastIndex) / 2];
       modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatricesPartition);
       modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
    }

@@ -144,8 +144,8 @@ int main(int argc, char *argv[])
 
       processInput(window, deltaTime);
 
-      // camera.updateFollowCamera(car->car);
-      camera.control(window, deltaTime);
+      camera.updateFollowCamera(car->car);
+      // camera.control(window, deltaTime);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
       mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader, camera);
 
-      // car->control(window, deltaTime);
+      car->control(window, deltaTime);
       car->update();
       car->render(view, projection, camera.cameraPos);
 

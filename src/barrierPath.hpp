@@ -20,7 +20,7 @@
 class Barrier : public Spline
 {
 public:
-   float barrierOffset = pathWidth / 2.0f + 3.0f;
+   float barrierOffset = (pathWidth / 2.0f + 2.0f) / 5.0f;
    float barrierHeight = 1.0f;
 
    int partitionSize = 20;
@@ -34,6 +34,12 @@ public:
    std::unique_ptr<Model> barrierModel;
    std::unique_ptr<Model> barrierLPModel;
 
+   std::vector<glm::vec3> leftPoints;
+   std::vector<glm::vec3> rightPoints;
+
+   std::vector<glm::vec3> generatedLeftPath;
+   std::vector<glm::vec3> generatedRightPath;
+
    Barrier(Physics &simulation)
    {
       barrierModel = std::make_unique<Model>("../assets/Barrier/Model2/BarrierModel.obj");
@@ -45,6 +51,22 @@ public:
       {
          this->generateSpline();
       }
+
+      this->offsetPaths();
+
+      for (auto &point : leftPoints)
+      {
+         point *= 5.0f;
+      }
+
+      for (auto &point : rightPoints)
+      {
+         point *= 5.0f;
+      }
+
+      generatedLeftPath = this->generateSpline(leftPoints);
+      generatedRightPath = this->generateSpline(rightPoints);
+
       this->generateVertices(simulation);
       this->setUp();
    }
@@ -63,6 +85,7 @@ public:
 private:
    void generateVertices(Physics &simulation);
    void setUp();
+   void offsetPaths();
 };
 
 #endif
