@@ -6,23 +6,11 @@ glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t)
    return c;
 }
 
-float getRandomAngle(float value)
+float getRandomNumber(std::mt19937 &engine, float start, float end, unsigned int seed)
 {
-   float angle = 3.0f * std::abs(std::sin(value)) - 3.0f * std::abs(std::sin(value * 2)) + 3.0f * std::abs(std::sin(value * 4));
-   if (angle >= 3.14159265)
-   {
-      angle -= 3.14159265;
-   }
-
-   return glm::degrees(angle);
-}
-
-float getRandomScale(float value)
-{
-   float scale = 0.5f * std::abs(std::sin(value)) + 0.25f * std::abs(std::sin(value * 2)) + 0.75f * std::abs(std::sin(value * 4));
-   scale = std::pow(scale, 3);
-   scale = glm::clamp(scale, 0.5f, 1.5f);
-   return scale;
+   std::uniform_real_distribution<float> distribution(start, end);
+   float rand = distribution(engine);
+   return rand;
 }
 
 void GrassBlades::generateGrassModels()
@@ -48,6 +36,8 @@ void GrassBlades::generateGrassModels()
    std::vector<glm::mat4> modelMatrices;
    glm::mat4 modelMatrix;
    glm::vec3 pivot;
+
+   std::mt19937 engine(seed);
 
    for (int i = 0; i < generatedPath.size(); ++i)
    {
@@ -83,16 +73,19 @@ void GrassBlades::generateGrassModels()
       normal1 = glm::normalize(glm::cross(C1 - A1, B1 - A1));
 
       // Left side
-      for (int x = 1; x < grassWidthSize; ++x)
+      for (int x = 0; x < grassWidthSize; ++x)
       {
-         for (int z = 1; z < grassHeightSize; ++z)
+         for (int z = 0; z < grassHeightSize; ++z)
          {
             float tx = static_cast<float>(x) / static_cast<float>(grassWidthSize);
-            float tz = static_cast<float>(z) / static_cast<float>(grassHeightSize);
+            float tz = static_cast<float>(z / zScale) / static_cast<float>(grassHeightSize);
 
             glm::vec3 P1 = lerp(B1, D1, tx);
             glm::vec3 P2 = lerp(A1, C1, tx);
             glm::vec3 grassPos = lerp(P1, P2, tz);
+
+            grassPos.x += getRandomNumber(engine, -1.0f, 1.0f, seed);
+            grassPos.z += getRandomNumber(engine, -1.0f, 1.0f, seed);
 
             float distanceToRoad = pointToSegmentDistance(grassPos, generatedPath[i], generatedPath[i + 1]);
             float noiseValue = noise.getNoise(grassPos.x * noiseScale, 0.0, grassPos.z * noiseScale);
@@ -102,10 +95,13 @@ void GrassBlades::generateGrassModels()
             modelMatrix = glm::mat4(1.0f);
             modelMatrix = glm::translate(modelMatrix, grassPos);
             modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, -1.0f, 0.0f), normal1));
-            modelMatrix = glm::rotate(modelMatrix, getRandomAngle(noiseValue * amplitude), glm::vec3(0.0f, 1.0f, 0.0f));
-            modelMatrix = glm::scale(modelMatrix, glm::vec3(getRandomScale(noiseValue),
-                                                            getRandomScale(noiseValue),
-                                                            getRandomScale(noiseValue)));
+            modelMatrix = glm::rotate(modelMatrix, getRandomNumber(engine, 0.0f, 180.0f, seed),
+                                      glm::vec3(0.0f, 1.0f, 0.0f));
+
+            float randomScale = getRandomNumber(engine, 0.75f, 1.5f, seed);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(randomScale,
+                                                            randomScale,
+                                                            randomScale));
             modelMatrices.push_back(modelMatrix);
          }
       }

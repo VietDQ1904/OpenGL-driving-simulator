@@ -2,6 +2,7 @@
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <random>
 #include "model.hpp"
 #include "spline.hpp"
 #include "camera.hpp"
@@ -15,7 +16,7 @@
 class GrassBlades : Spline
 {
 public:
-   const float grassPathWidth = 30.0f;
+   const float grassPathWidth = 40.0f;
    const float grassWidthSize = 16;
    const float grassHeightSize = 60;
    const float renderDistance = 100.0f;
@@ -24,6 +25,8 @@ public:
    const int partitionSize = 5;
    const float amplitude = 10.0f;
    const float noiseScale = 0.15f;
+   const float zScale = 1.25f;
+   const unsigned int seed = 255;
 
    std::unique_ptr<Model> grassBladeModel1;
    std::unique_ptr<Model> grassBladeModel2;

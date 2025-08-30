@@ -36,7 +36,7 @@ public:
 
    glm::mat4 model;
 
-   float terrainPathWidth = 30.0f;
+   float terrainPathWidth = 40.0f;
    float alpha = 0.5f;
    float tileLength = pathWidth;
    int subdivision = 3;
