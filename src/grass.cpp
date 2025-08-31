@@ -25,9 +25,6 @@ void GrassBlades::generateGrassModels()
    glm::vec3 A2, B2, C2, D2; // the right side
 
    glm::vec3 normal1, normal2;
-   glm::vec3 midPoint1, midPoint2;
-
-   float segmentLength1, segmentLength2;
    float angle;
 
    int elements = 0;
@@ -35,7 +32,6 @@ void GrassBlades::generateGrassModels()
 
    std::vector<glm::mat4> modelMatrices;
    glm::mat4 modelMatrix;
-   glm::mat4 rotationMatrix;
    glm::vec3 pivot;
 
    std::mt19937 engine(seed);
@@ -142,8 +138,8 @@ void GrassBlades::generateGrassModels()
       if (elements++ >= partitionSize)
       {
          pivot = generatedPath[lastIndex + (i - lastIndex) / 2];
-         modelInstances1.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatrices);
-         modelInstances1.insertGridMap({pivot.x, pivot.y, pivot.z});
+         modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatrices);
+         modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
          modelMatrices.clear();
 
          lastIndex = i;
@@ -154,20 +150,20 @@ void GrassBlades::generateGrassModels()
    if (!modelMatrices.empty())
    {
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
-      modelInstances1.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatrices);
-      modelInstances1.insertGridMap({pivot.x, pivot.y, pivot.z});
+      modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatrices);
+      modelInstances.insertGridMap({pivot.x, pivot.y, pivot.z});
    }
 }
 
 void GrassBlades::setUp()
 {
-   for (const auto &partition : modelInstances1.modelMatricesList)
+   for (const auto &partition : modelInstances.modelMatricesList)
    {
       GLuint grassPartitionBuffer;
       glGenBuffers(1, &grassPartitionBuffer);
       glBindBuffer(GL_ARRAY_BUFFER, grassPartitionBuffer);
       glBufferData(GL_ARRAY_BUFFER, partition.second.size() * sizeof(glm::mat4), partition.second.data(), GL_STATIC_DRAW);
-      modelInstances1.insertVBO(partition.first, grassPartitionBuffer);
+      modelInstances.insertVBO(partition.first, grassPartitionBuffer);
    }
 
    for (unsigned int i = 0; i < grassBladeModel1->meshes.size(); ++i)
@@ -232,9 +228,9 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
 
    float length;
    std::vector<std::array<float, 3>> nearByPivots;
-   modelInstances1.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z},
-                                     maxRenderDistance,
-                                     nearByPivots);
+   modelInstances.findPivotsByRange({camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z},
+                                    maxRenderDistance,
+                                    nearByPivots);
 
    for (auto &pivot : nearByPivots)
    {
@@ -247,7 +243,7 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
             for (unsigned int meshIndex = 0; meshIndex < grassBladeModel1->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(grassBladeModel1->meshes[meshIndex].vao);
-               glBindBuffer(GL_ARRAY_BUFFER, modelInstances1.vbos[pivot]);
+               glBindBuffer(GL_ARRAY_BUFFER, modelInstances.vbos[pivot]);
 
                size_t matrixSegment = sizeof(glm::vec4);
                glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *)0);
@@ -260,7 +256,7 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        static_cast<unsigned int>(grassBladeModel1->meshes[meshIndex].indices.size()),
                                        GL_UNSIGNED_INT,
                                        0,
-                                       modelInstances1.modelMatricesList[pivot].size());
+                                       modelInstances.modelMatricesList[pivot].size());
             }
             glBindVertexArray(0);
          }
@@ -270,7 +266,7 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
             for (unsigned int meshIndex = 0; meshIndex < grassBladeModelLP1->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(grassBladeModelLP1->meshes[meshIndex].vao);
-               glBindBuffer(GL_ARRAY_BUFFER, modelInstances1.vbos[pivot]);
+               glBindBuffer(GL_ARRAY_BUFFER, modelInstances.vbos[pivot]);
 
                size_t matrixSegment = sizeof(glm::vec4);
                glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * matrixSegment, (void *)0);
@@ -283,7 +279,7 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        static_cast<unsigned int>(grassBladeModelLP1->meshes[meshIndex].indices.size()),
                                        GL_UNSIGNED_INT,
                                        0,
-                                       modelInstances1.modelMatricesList[pivot].size());
+                                       modelInstances.modelMatricesList[pivot].size());
             }
             glBindVertexArray(0);
          }
@@ -307,6 +303,57 @@ void GrassBlades::setWindParameters(float time, glm::vec3 windDirection, float w
    grassBladeModel1->modelShader.setFloat("time", time);
    grassBladeModel1->modelShader.setVec3("windDirection", windDirection);
    grassBladeModel1->modelShader.setFloat("windStrength", windStrength);
+}
+
+void GrassBlades::loadResources()
+{
+   grassBladeModel1 = std::make_unique<Model>("../assets/Grass/grassBladeA.obj");
+   grassBladeModel2 = std::make_unique<Model>("../assets/Grass/grassBladeB.obj");
+   grassBladeModel3 = std::make_unique<Model>("../assets/Grass/grassBladeC.obj");
+
+   grassBladeModelLP1 = std::make_unique<Model>("../assets/Grass/grassBladeLP_A.obj");
+   grassBladeModelLP2 = std::make_unique<Model>("../assets/Grass/grassBladeLP_B.obj");
+   grassBladeModelLP3 = std::make_unique<Model>("../assets/Grass/grassBladeLP_C.obj");
+
+   grassBladeModel1->loadTextures();
+   grassBladeModel2->loadTextures();
+   grassBladeModel3->loadTextures();
+
+   grassBladeModel1->loadShader("GrassBladeShader1",
+                                "../src/Shaders/grassModel.vert",
+                                "../src/Shaders/instanceModel.frag",
+                                nullptr);
+
+   grassBladeModel2->loadShader("GrassBladeShader2",
+                                "../src/Shaders/grassModel.vert",
+                                "../src/Shaders/instanceModel.frag",
+                                nullptr);
+
+   grassBladeModel3->loadShader("GrassBladeShader3",
+                                "../src/Shaders/grassModel.vert",
+                                "../src/Shaders/instanceModel.frag",
+                                nullptr);
+
+   grassBladeModelLP1->loadTextures();
+   grassBladeModelLP2->loadTextures();
+   grassBladeModelLP3->loadTextures();
+
+   grassBladeModelLP1->loadShader("GrassBladeShaderLP1",
+                                  "../src/Shaders/instanceModel.vert",
+                                  "../src/Shaders/instanceModel.frag",
+                                  nullptr);
+
+   grassBladeModelLP2->loadShader("GrassBladeShaderLP1",
+                                  "../src/Shaders/instanceModel.vert",
+                                  "../src/Shaders/instanceModel.frag",
+                                  nullptr);
+
+   grassBladeModelLP3->loadShader("GrassBladeShaderLP1",
+                                  "../src/Shaders/instanceModel.vert",
+                                  "../src/Shaders/instanceModel.frag",
+                                  nullptr);
+
+   this->setUp();
 }
 
 void GrassBlades::unbindBuffers()

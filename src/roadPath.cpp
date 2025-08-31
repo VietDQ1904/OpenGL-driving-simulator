@@ -1,7 +1,48 @@
 #include "roadPath.hpp"
 #include "camera.hpp"
 
-void Road::generateVertices(Physics &simulation)
+void Road::addRigidBodies(Physics &simulation)
+{
+   glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
+   glm::vec3 v;
+   glm::vec3 w;
+
+   glm::vec3 prevA, prevB;
+
+   glm::vec3 A;
+   glm::vec3 B;
+   glm::vec3 C;
+   glm::vec3 D;
+
+   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   {
+      v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
+      w = glm::normalize(glm::cross(u, v));
+
+      if (i == 0)
+      { // Only calculate A and B for the first iteration
+         A = w * (roadPathWidth / 2) + generatedPath[i];
+         B = -w * (roadPathWidth / 2) + generatedPath[i];
+      }
+      else
+      { // Assign the previous points of C and D.
+         A = prevA;
+         B = prevB;
+      }
+
+      C = w * (roadPathWidth / 2) + generatedPath[i + 1];
+      D = -w * (roadPathWidth / 2) + generatedPath[i + 1];
+
+      // Save point C, D of the current iteration.
+      prevA = C;
+      prevB = D;
+
+      // Create a rigid body.
+      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+   }
+}
+
+void Road::generateVertices()
 {
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
    glm::vec3 v;
@@ -25,6 +66,10 @@ void Road::generateVertices(Physics &simulation)
    int lastIndex = 0;
    int startIndex = 0;
    int totalVertices = 0;
+
+   subVertices.reserve((partitionSize * 4) * 8);
+   subIndices.reserve(partitionSize * 6);
+
    for (int i = 0; i < generatedPath.size() - 1; ++i)
    {
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
@@ -112,13 +157,14 @@ void Road::generateVertices(Physics &simulation)
 
          subVertices.clear();
          subIndices.clear();
+
+         subVertices.reserve((partitionSize * 4) * 8);
+         subIndices.reserve(partitionSize * 6);
+
          lastIndex = i;
          elements = 0;
          totalVertices = 0;
       }
-
-      // Create a rigid body.
-      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
    }
 
    if (!subIndices.empty())

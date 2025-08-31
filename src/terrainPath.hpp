@@ -48,14 +48,10 @@ public:
    float amplitude = 10.0f;
    float noiseScale = 0.15f;
 
-   Terrain(Physics &simulation)
+   Terrain()
    {
-      if (!splineGenerated)
-      {
-         this->generateSpline();
-      }
-      this->generateVertices(simulation);
-      this->setUp();
+      this->generateSpline();
+      this->generateVertices();
    }
 
    ~Terrain()
@@ -63,14 +59,15 @@ public:
       this->cleanUpBuffers();
    }
 
+   void setUp();
+   void addRigidBodies(Physics &simulation);
    void render(Shader &shader, Camera &camera);
    void cleanUpBuffers();
 
 private:
    void subdivide(std::vector<Triangle> &triangles, const Triangle &triangle, int depth);
    void subdivide(std::vector<Quadrilateral> &quadrilaterals, const Quadrilateral &quadrilateral, int depth);
-   void generateVertices(Physics &simulation);
-   void setUp();
+   void generateVertices();
 };
 
 #endif

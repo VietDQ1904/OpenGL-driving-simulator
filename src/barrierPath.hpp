@@ -20,7 +20,7 @@
 class Barrier : public Spline
 {
 public:
-   float barrierOffset = (pathWidth / 2.0f + 2.0f) / 5.0f;
+   float barrierOffset = (pathWidth / 2.0f);
    float barrierHeight = 1.0f;
 
    int partitionSize = 20;
@@ -40,36 +40,16 @@ public:
    std::vector<glm::vec3> generatedLeftPath;
    std::vector<glm::vec3> generatedRightPath;
 
-   Barrier(Physics &simulation)
+   Barrier()
    {
-      barrierModel = std::make_unique<Model>("../assets/Barrier/Model2/BarrierModel.obj");
-      barrierModel->loadShader("barrierShader", "../src/Shaders/instanceModel.vert", "../src/Shaders/instanceModel.frag", nullptr);
-      barrierLPModel = std::make_unique<Model>("../assets/Barrier/Model2/BarrierModel.obj");
-      barrierLPModel->loadShader("barrierLPShader", "../src/Shaders/instanceModel.vert", "../src/Shaders/instanceModel.frag", nullptr);
-
-      if (!splineGenerated)
-      {
-         this->generateSpline();
-      }
-
+      this->generateSpline();
       this->offsetPaths();
-
-      for (auto &point : leftPoints)
-      {
-         point *= 5.0f;
-      }
-
-      for (auto &point : rightPoints)
-      {
-         point *= 5.0f;
-      }
 
       // Create two parallel paths.
       generatedLeftPath = this->generateSpline(leftPoints);
       generatedRightPath = this->generateSpline(rightPoints);
 
-      this->generateVertices(simulation);
-      this->setUp();
+      this->generateVertices();
    }
 
    ~Barrier()
@@ -79,12 +59,14 @@ public:
       barrierLPModel->cleanUpBuffers();
    }
 
+   void loadResources();
+   void addRigidBodies(Physics &simulation);
    void render(glm::mat4 view, glm::mat4 projection, Camera &camera);
    void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
    void cleanUpBuffers();
 
 private:
-   void generateVertices(Physics &simulation);
+   void generateVertices();
    void setUp();
    void offsetPaths();
 };

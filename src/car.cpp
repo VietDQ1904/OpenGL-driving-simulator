@@ -1,6 +1,6 @@
 #include "car.hpp"
 
-Car::Car(Physics &simulation)
+Car::Car()
 {
    this->spawn = glm::vec3(10.0f * 5.0f, 5.0f * 5.0f + 2.0f, 1.0f * 5.0f);
    this->carPos = glm::vec3(0.0f, 0.9f, 0.0f);
@@ -18,12 +18,9 @@ Car::Car(Physics &simulation)
    this->wheelPos_4 = glm::vec3(1.1f, 0.35f, 1.75f);
    this->wheelSize_4 = glm::vec3(0.4f, 0.35f, 0.35f);
    this->wheelRot_4 = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
-
-   setUp(simulation);
 }
 
-Car::Car(Physics &simulation,
-         glm::vec3 spawn,
+Car::Car(glm::vec3 spawn,
          glm::vec3 carPos,
          glm::vec3 carSize,
          glm::vec3 carRot,
@@ -54,7 +51,6 @@ Car::Car(Physics &simulation,
                                   wheelRot_4(wheelRot_4),
                                   wheelSize_4(wheelSize_4)
 {
-   setUp(simulation);
 }
 
 Car::~Car()
@@ -66,10 +62,16 @@ Car::~Car()
 
 void Car::loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2)
 {
-
    this->carModel = std::make_unique<Model>(carModelPath.c_str());
    this->wheelModel1 = std::make_unique<Model>(wheelModelPath_1.c_str());
    this->wheelModel2 = std::make_unique<Model>(wheelModelPath_2.c_str());
+}
+
+void Car::loadTextures()
+{
+   this->carModel->loadTextures();
+   this->wheelModel1->loadTextures();
+   this->wheelModel2->loadTextures();
 }
 
 void Car::loadShaderCarBody(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile)

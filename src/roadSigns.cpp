@@ -384,6 +384,25 @@ void RoadSigns::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor
    signModelLP->modelShader.setVec3("light.color", lightColor);
 }
 
+void RoadSigns::loadResources()
+{
+   signModel = std::make_unique<Model>("../assets/RoadSign/roadSign.obj");
+   signModelLP = std::make_unique<Model>("../assets/RoadSign/roadSign.obj");
+
+   signModel->loadTextures();
+   signModelLP->loadTextures();
+
+   signModel->loadShader("SignModel",
+                         "../src/Shaders/instanceModel.vert",
+                         "../src/Shaders/instanceModel.frag",
+                         nullptr);
+   signModelLP->loadShader("SignModelLP",
+                           "../src/Shaders/instanceModel.vert",
+                           "../src/Shaders/instanceModel.frag",
+                           nullptr);
+   this->setUp();
+}
+
 void RoadSigns::cleanUpBuffers()
 {
    modelInstances.clearBuffers();

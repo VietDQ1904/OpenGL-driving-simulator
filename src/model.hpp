@@ -30,14 +30,13 @@ public:
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
    std::vector<Texture> textures;
+   unsigned int material;
    GLuint vao, vbo, ebo;
 
-   Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+   Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int material);
    void draw(Shader &shader);
    void cleanUpBuffers();
    void bindTextures(Shader &shader);
-
-private:
    void setUpMesh();
 };
 
@@ -50,14 +49,18 @@ public:
    std::string shaderName;
 
    Model(const char *path);
+   void loadTextures();
    void loadShader(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile);
    void draw();
    void cleanUpBuffers();
    void setDiffuseTexture(unsigned int materialIndex, const std::string &texturePath);
 
 private:
+   const aiScene *scene;
+   Assimp::Importer importer;
+
    void loadModel(std::string path);
-   void processNode(aiNode *node, const aiScene *scene);
+   void processNode(aiNode *node);
    Mesh processMesh(aiMesh *mesh, const aiScene *scene);
    std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
 };

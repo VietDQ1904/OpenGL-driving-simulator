@@ -42,29 +42,15 @@ public:
 
    RoadSigns()
    {
-      if (!splineGenerated)
-      {
-         this->generateSpline();
-      }
-
-      signModel = std::make_unique<Model>("../assets/RoadSign/roadSign.obj");
-      signModelLP = std::make_unique<Model>("../assets/RoadSign/roadSign.obj");
-      signModel->loadShader("SignModel",
-                            "../src/Shaders/instanceModel.vert",
-                            "../src/Shaders/instanceModel.frag",
-                            nullptr);
-      signModelLP->loadShader("SignModelLP",
-                              "../src/Shaders/instanceModel.vert",
-                              "../src/Shaders/instanceModel.frag",
-                              nullptr);
-
+      this->generateSpline();
       this->generateModels();
-      this->setUp();
    }
    ~RoadSigns()
    {
       this->cleanUpBuffers();
    }
+
+   void loadResources();
    void render(glm::mat4 view, glm::mat4 projection, Camera &camera);
    void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
    void cleanUpBuffers();
