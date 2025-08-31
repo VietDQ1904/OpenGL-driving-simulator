@@ -6,7 +6,7 @@ glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t)
    return c;
 }
 
-float getRandomNumber(std::mt19937 &engine, float start, float end, unsigned int seed)
+float getRandomFloatNumber(std::mt19937 &engine, float start, float end, unsigned int seed)
 {
    std::uniform_real_distribution<float> distribution(start, end);
    float rand = distribution(engine);
@@ -35,11 +35,12 @@ void GrassBlades::generateGrassModels()
 
    std::vector<glm::mat4> modelMatrices;
    glm::mat4 modelMatrix;
+   glm::mat4 rotationMatrix;
    glm::vec3 pivot;
 
    std::mt19937 engine(seed);
 
-   for (int i = 0; i < generatedPath.size(); ++i)
+   for (size_t i = 0; i < generatedPath.size() - 1; ++i)
    {
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
       w = glm::normalize(glm::cross(u, v));
@@ -71,21 +72,23 @@ void GrassBlades::generateGrassModels()
       prevB2 = D2;
 
       normal1 = glm::normalize(glm::cross(C1 - A1, B1 - A1));
+      normal2 = glm::normalize(glm::cross(C2 - A2, B2 - A2));
 
-      // Left side
-      for (int x = 0; x < grassWidthSize; ++x)
+      for (size_t x = 0; x < grassWidthSize; ++x)
       {
-         for (int z = 0; z < grassHeightSize; ++z)
+         for (size_t z = 0; z < grassHeightSize; ++z)
          {
+            // Left side
             float tx = static_cast<float>(x) / static_cast<float>(grassWidthSize);
-            float tz = static_cast<float>(z / zScale) / static_cast<float>(grassHeightSize);
+            float tz = static_cast<float>(z) / static_cast<float>(grassHeightSize);
+            tz /= zScale;
 
             glm::vec3 P1 = lerp(B1, D1, tx);
             glm::vec3 P2 = lerp(A1, C1, tx);
             glm::vec3 grassPos = lerp(P1, P2, tz);
 
-            grassPos.x += getRandomNumber(engine, -1.0f, 1.0f, seed);
-            grassPos.z += getRandomNumber(engine, -1.0f, 1.0f, seed);
+            grassPos.x += getRandomFloatNumber(engine, -3.0f, 3.0f, seed);
+            grassPos.z += getRandomFloatNumber(engine, -3.0f, 3.0f, seed);
 
             float distanceToRoad = pointToSegmentDistance(grassPos, generatedPath[i], generatedPath[i + 1]);
             float noiseValue = noise.getNoise(grassPos.x * noiseScale, 0.0, grassPos.z * noiseScale);
@@ -95,10 +98,40 @@ void GrassBlades::generateGrassModels()
             modelMatrix = glm::mat4(1.0f);
             modelMatrix = glm::translate(modelMatrix, grassPos);
             modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, -1.0f, 0.0f), normal1));
-            modelMatrix = glm::rotate(modelMatrix, getRandomNumber(engine, 0.0f, 180.0f, seed),
+            modelMatrix = glm::rotate(modelMatrix, getRandomFloatNumber(engine, -180.0f, 180.0f, seed),
                                       glm::vec3(0.0f, 1.0f, 0.0f));
 
-            float randomScale = getRandomNumber(engine, 0.75f, 1.5f, seed);
+            float randomScale = getRandomFloatNumber(engine, 0.5f, 1.5f, seed);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(randomScale,
+                                                            randomScale,
+                                                            randomScale));
+
+            modelMatrices.push_back(modelMatrix);
+
+            // Right side
+            tx = static_cast<float>(x) / static_cast<float>(grassWidthSize);
+            tz = static_cast<float>(z) / static_cast<float>(grassHeightSize);
+            tz /= zScale;
+
+            P1 = lerp(B2, D2, tx);
+            P2 = lerp(A2, C2, tx);
+            grassPos = lerp(P2, P1, tz);
+
+            grassPos.x += getRandomFloatNumber(engine, -3.0f, 3.0f, seed);
+            grassPos.z += getRandomFloatNumber(engine, -3.0f, 3.0f, seed);
+
+            distanceToRoad = pointToSegmentDistance(grassPos, generatedPath[i], generatedPath[i + 1]);
+            noiseValue = noise.getNoise(grassPos.x * noiseScale, 0.0, grassPos.z * noiseScale);
+            multiplierValue = getNoiseMultiplierByDistance(grassPathWidth / 2, distanceToRoad);
+            grassPos.y += multiplierValue * noiseValue * amplitude;
+
+            modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::translate(modelMatrix, grassPos);
+            modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, -1.0f, 0.0f), normal1));
+            modelMatrix = glm::rotate(modelMatrix, getRandomFloatNumber(engine, -180.0f, 180.0f, seed),
+                                      glm::vec3(0.0f, 1.0f, 0.0f));
+
+            randomScale = getRandomFloatNumber(engine, 0.5f, 1.5f, seed);
             modelMatrix = glm::scale(modelMatrix, glm::vec3(randomScale,
                                                             randomScale,
                                                             randomScale));
@@ -157,7 +190,6 @@ void GrassBlades::setUp()
       glVertexAttribDivisor(6, 1);
       glVertexAttribDivisor(7, 1);
       glVertexAttribDivisor(8, 1);
-
       glBindVertexArray(0);
    }
 
@@ -211,6 +243,7 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
          length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
          if (length < renderDistance)
          {
+            grassBladeModel1->modelShader.use();
             for (unsigned int meshIndex = 0; meshIndex < grassBladeModel1->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(grassBladeModel1->meshes[meshIndex].vao);
@@ -229,9 +262,11 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        0,
                                        modelInstances1.modelMatricesList[pivot].size());
             }
+            glBindVertexArray(0);
          }
          else
          {
+            grassBladeModelLP1->modelShader.use();
             for (unsigned int meshIndex = 0; meshIndex < grassBladeModelLP1->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(grassBladeModelLP1->meshes[meshIndex].vao);
@@ -250,6 +285,7 @@ void GrassBlades::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        0,
                                        modelInstances1.modelMatricesList[pivot].size());
             }
+            glBindVertexArray(0);
          }
       }
    }
@@ -271,11 +307,6 @@ void GrassBlades::setWindParameters(float time, glm::vec3 windDirection, float w
    grassBladeModel1->modelShader.setFloat("time", time);
    grassBladeModel1->modelShader.setVec3("windDirection", windDirection);
    grassBladeModel1->modelShader.setFloat("windStrength", windStrength);
-
-   grassBladeModelLP1->modelShader.use();
-   grassBladeModelLP1->modelShader.setFloat("time", time);
-   grassBladeModelLP1->modelShader.setVec3("windDirection", windDirection);
-   grassBladeModelLP1->modelShader.setFloat("windStrength", windStrength);
 }
 
 void GrassBlades::unbindBuffers()

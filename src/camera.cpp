@@ -22,8 +22,8 @@ void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos)
    offsetY *= sensitivity;
 
    this->yaw += offsetX;
-   // Add constraints to pitch (so that you cannot rotate up 360 degrees)
-   this->pitch = std::max(std::min(this->pitch + offsetY, 90.0f), -90.0f);
+   // Add constraints to pitch (so that you cannot rotate up 360 degrees
+   this->pitch = glm::clamp(this->pitch + offsetY, -89.0f, 89.0f);
 
    glm::vec3 direction;
    direction.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));

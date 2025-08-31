@@ -37,7 +37,6 @@ public:
    glm::mat4 model;
 
    float terrainPathWidth = 40.0f;
-   float alpha = 0.5f;
    float tileLength = pathWidth;
    int subdivision = 3;
    int horizontalTiles = static_cast<int>(terrainPathWidth / 5.0f);

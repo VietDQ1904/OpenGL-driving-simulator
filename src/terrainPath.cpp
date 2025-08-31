@@ -63,7 +63,7 @@ void Terrain::generateVertices(Physics &simulation)
 
    glm::vec3 pivot;
 
-   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   for (size_t i = 0; i < generatedPath.size() - 1; ++i)
    {
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
       w = glm::normalize(glm::cross(u, v));
@@ -238,7 +238,7 @@ void Terrain::generateVertices(Physics &simulation)
    std::vector<float> verticesSub;
    std::vector<float> verticesLowSub;
 
-   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   for (size_t i = 0; i < generatedPath.size() - 1; ++i)
    {
 
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);

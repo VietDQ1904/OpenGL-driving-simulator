@@ -279,6 +279,7 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
          length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
          if (length < renderDistance)
          {
+            barrierModel->modelShader.use();
             for (unsigned int meshIndex = 0; meshIndex < barrierModel->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(barrierModel->meshes[meshIndex].vao);
@@ -297,9 +298,11 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        0,
                                        modelInstances.modelMatricesList[pivot].size());
             }
+            glBindVertexArray(0);
          }
          else
          {
+            barrierModel->modelShader.use();
             for (unsigned int meshIndex = 0; meshIndex < barrierLPModel->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(barrierLPModel->meshes[meshIndex].vao);
@@ -318,6 +321,7 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        0,
                                        modelInstances.modelMatricesList[pivot].size());
             }
+            glBindVertexArray(0);
          }
       }
    }
