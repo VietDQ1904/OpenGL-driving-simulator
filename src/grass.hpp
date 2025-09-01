@@ -8,6 +8,7 @@
 #include "camera.hpp"
 #include "perlinNoise.hpp"
 #include "vertices.hpp"
+#include "worleyNoise.hpp"
 #include "noiseMultipliers.hpp"
 
 #ifndef GRASS_IMPLEMENTATION
@@ -36,19 +37,22 @@ public:
    std::unique_ptr<Model> grassBladeModelLP2;
    std::unique_ptr<Model> grassBladeModelLP3;
 
-   std::vector<GLuint> grassVAOs, grassLPVAOs;
+   std::vector<GLuint> modelVAOs1, modelVAOs2, modelVAOs3;
+   std::vector<GLuint> modelLPVAOs1, modelLPVAOs2, modelLPVAOs3;
+   std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> modelVBOs1, modelVBOs2, modelVBOs3;
+
+   std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList1;
+   std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList2;
+   std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList3;
+
    ModelInstances modelInstances;
 
    PerlinNoise noise;
+   WorleyNoise grassMap;
 
    GrassBlades()
    {
-
-      if (!splineGenerated)
-      {
-         this->generateSpline();
-      }
-
+      this->generateSpline();
       this->generateGrassModels();
    }
 
