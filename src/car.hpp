@@ -51,9 +51,8 @@ public:
    bool getUp = false, gotUp = false;
    bool jump = false, jumped = false;
 
-   Car(Physics &simulation);
-   Car(Physics &simulation,
-       glm::vec3 spawn,
+   Car();
+   Car(glm::vec3 spawn,
        glm::vec3 carPos,
        glm::vec3 carSize,
        glm::vec3 carRot,
@@ -71,6 +70,7 @@ public:
        glm::vec3 wheelSize_4);
    ~Car();
    void loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2);
+   void loadTextures();
    void loadShaderCarBody(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile);
    void loadShaderFrontWheels(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile);
    void loadShaderBackWheels(std::string shaderName, const char *vertexFile, const char *fragmentFile, const char *geometryFile);
@@ -79,13 +79,12 @@ public:
    void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
    void update();
    void control(GLFWwindow *window, float &deltaTime);
+   void setUp(Physics &simulation);
 
 private:
    glm::mat4 objectModelMatrix;
    GLfloat matrix[16];
    btTransform transform;
-
-   void setUp(Physics &simulation);
 };
 
 #endif

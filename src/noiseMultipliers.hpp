@@ -26,7 +26,7 @@ inline float pointToSegmentDistance(const glm::vec3 &p, const glm::vec3 &a, cons
 inline float getNoiseMultiplierByDistance(float referenceDistance, float distance)
 {
    float value = glm::clamp(distance / referenceDistance - 1.0f, 0.0f, 1.0f);
-   value = roundToDecimal(std::pow(value, 5), 1) * 2.0f;
+   value = roundToDecimal(std::pow(value, 3), 1) * 2.0f;
    return value;
 }
 

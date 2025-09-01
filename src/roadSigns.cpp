@@ -64,7 +64,7 @@ void RoadSigns::generateModels()
    std::vector<std::array<float, 3>> pivots2(points.size(), {0.0f, 0.0f, 0.0f});
 
    // Set up for the right side.
-   for (int i = 1; i < points.size() - 2; ++i)
+   for (size_t i = 1; i < points.size() - 2; ++i)
    {
       current = points[i + 1] - points[i];
       next = points[i + 2] - points[i + 1];
@@ -122,8 +122,8 @@ void RoadSigns::generateModels()
          continue;
       }
 
-      mid = catmullRomValue(points[i - 1], points[i], points[i + 1], points[i + 2], 0.5f);
-      tangent = catmullRomTangent(points[i - 1], points[i], points[i + 1], points[i + 2], 0.5f);
+      mid = catmullRomValue(points[i - 1], points[i], points[i + 1], points[i + 2], 0.35f);
+      tangent = catmullRomTangent(points[i - 1], points[i], points[i + 1], points[i + 2], 0.35f);
 
       dir = glm::normalize(glm::cross(glm::normalize(tangent), up));
       pos = dir * (pathWidth / 2.0f + offset) + mid * 5.0f;
@@ -142,7 +142,7 @@ void RoadSigns::generateModels()
    }
 
    // Set up for the left side
-   for (int i = points.size() - 1; i >= 2; --i)
+   for (size_t i = points.size() - 1; i >= 2; --i)
    {
       current = points[i] - points[i - 1];
       next = points[i - 1] - points[i - 2];
@@ -200,8 +200,8 @@ void RoadSigns::generateModels()
          continue;
       }
 
-      mid = catmullRomValue(points[i + 1], points[i], points[i - 1], points[i - 2], 0.5f);
-      tangent = catmullRomTangent(points[i + 1], points[i], points[i - 1], points[i - 2], 0.5f);
+      mid = catmullRomValue(points[i + 1], points[i], points[i - 1], points[i - 2], 0.35f);
+      tangent = catmullRomTangent(points[i + 1], points[i], points[i - 1], points[i - 2], 0.35f);
 
       dir = glm::normalize(glm::cross(glm::normalize(tangent), up));
       pos = dir * (pathWidth / 2.0f + offset) + mid * 5.0f;
@@ -219,7 +219,7 @@ void RoadSigns::generateModels()
       modelMatrices.clear();
    }
 
-   for (int i = 0; i < directions.size(); ++i)
+   for (size_t i = 0; i < directions.size(); ++i)
    {
       std::array<float, 3> pivot = pivots[i];
       if (pivot[0] != 0.0f && pivot[1] != 0.0f && pivot[2] != 0.0f)
@@ -228,7 +228,7 @@ void RoadSigns::generateModels()
       }
    }
 
-   for (int i = 0; i < directions2.size(); ++i)
+   for (size_t i = 0; i < directions2.size(); ++i)
    {
       std::array<float, 3> pivot = pivots2[i];
       if (pivot[0] != 0.0f && pivot[1] != 0.0f && pivot[2] != 0.0f)
@@ -321,6 +321,7 @@ void RoadSigns::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
       length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
       if (length < renderDistance)
       {
+         signModel->modelShader.use();
          for (unsigned int meshIndex = 0; meshIndex < signModel->meshes.size(); ++meshIndex)
          {
             glBindVertexArray(signModel->meshes[meshIndex].vao);
@@ -342,9 +343,11 @@ void RoadSigns::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                     0,
                                     modelInstances.modelMatricesList[pivot].size());
          }
+         glBindVertexArray(0);
       }
       else
       {
+         signModelLP->modelShader.use();
          for (unsigned int meshIndex = 0; meshIndex < signModelLP->meshes.size(); ++meshIndex)
          {
             glBindVertexArray(signModelLP->meshes[meshIndex].vao);
@@ -366,6 +369,7 @@ void RoadSigns::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                     0,
                                     modelInstances.modelMatricesList[pivot].size());
          }
+         glBindVertexArray(0);
       }
    }
 }
@@ -378,6 +382,25 @@ void RoadSigns::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor
    signModelLP->modelShader.use();
    signModelLP->modelShader.setVec3("light.direction", direction);
    signModelLP->modelShader.setVec3("light.color", lightColor);
+}
+
+void RoadSigns::loadResources()
+{
+   signModel = std::make_unique<Model>("../assets/RoadSign/roadSign.obj");
+   signModelLP = std::make_unique<Model>("../assets/RoadSign/roadSign.obj");
+
+   signModel->loadTextures();
+   signModelLP->loadTextures();
+
+   signModel->loadShader("SignModel",
+                         "../src/Shaders/instanceModel.vert",
+                         "../src/Shaders/instanceModel.frag",
+                         nullptr);
+   signModelLP->loadShader("SignModelLP",
+                           "../src/Shaders/instanceModel.vert",
+                           "../src/Shaders/instanceModel.frag",
+                           nullptr);
+   this->setUp();
 }
 
 void RoadSigns::cleanUpBuffers()

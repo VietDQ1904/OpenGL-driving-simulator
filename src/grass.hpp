@@ -2,11 +2,13 @@
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <random>
 #include "model.hpp"
 #include "spline.hpp"
 #include "camera.hpp"
 #include "perlinNoise.hpp"
 #include "vertices.hpp"
+#include "worleyNoise.hpp"
 #include "noiseMultipliers.hpp"
 
 #ifndef GRASS_IMPLEMENTATION
@@ -15,15 +17,17 @@
 class GrassBlades : Spline
 {
 public:
-   const float grassPathWidth = 30.0f;
+   const float grassPathWidth = 40.0f;
    const float grassWidthSize = 16;
    const float grassHeightSize = 60;
-   const float renderDistance = 100.0f;
+   const float renderDistance = 80.0f;
    const float maxRenderDistance = 300.0f;
    const float offset = 5.0f;
    const int partitionSize = 5;
    const float amplitude = 10.0f;
    const float noiseScale = 0.15f;
+   const float zScale = 1.25f;
+   const unsigned int seed = 255;
 
    std::unique_ptr<Model> grassBladeModel1;
    std::unique_ptr<Model> grassBladeModel2;
@@ -33,39 +37,23 @@ public:
    std::unique_ptr<Model> grassBladeModelLP2;
    std::unique_ptr<Model> grassBladeModelLP3;
 
-   std::vector<GLuint> grassVAOs, grassLPVAOs;
-   ModelInstances modelInstances1;
+   std::vector<GLuint> modelVAOs1, modelVAOs2, modelVAOs3;
+   std::vector<GLuint> modelLPVAOs1, modelLPVAOs2, modelLPVAOs3;
+   std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> modelVBOs1, modelVBOs2, modelVBOs3;
+
+   std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList1;
+   std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList2;
+   std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList3;
+
+   ModelInstances modelInstances;
 
    PerlinNoise noise;
+   WorleyNoise grassMap;
 
    GrassBlades()
    {
-
-      grassBladeModel1 = std::make_unique<Model>("../assets/Grass/grassBladeA.obj");
-      grassBladeModel2 = std::make_unique<Model>("../assets/Grass/grassBladeB.obj");
-      grassBladeModel3 = std::make_unique<Model>("../assets/Grass/grassBladeC.obj");
-
-      grassBladeModel1->loadShader("GrassBladeShader1",
-                                   "../src/Shaders/grassModel.vert",
-                                   "../src/Shaders/instanceModel.frag",
-                                   nullptr);
-
-      grassBladeModelLP1 = std::make_unique<Model>("../assets/Grass/grassBladeA.obj");
-      grassBladeModelLP2 = std::make_unique<Model>("../assets/Grass/grassBladeB.obj");
-      grassBladeModelLP3 = std::make_unique<Model>("../assets/Grass/grassBladeC.obj");
-
-      grassBladeModelLP1->loadShader("GrassBladeShaderLP1",
-                                     "../src/Shaders/grassModel.vert",
-                                     "../src/Shaders/instanceModel.frag",
-                                     nullptr);
-
-      if (!splineGenerated)
-      {
-         this->generateSpline();
-      }
-
+      this->generateSpline();
       this->generateGrassModels();
-      this->setUp();
    }
 
    ~GrassBlades()
@@ -73,6 +61,7 @@ public:
       this->unbindBuffers();
    }
 
+   void loadResources();
    void render(glm::mat4 view, glm::mat4 projection, Camera &camera);
    void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
    void setWindParameters(float time, glm::vec3 windDirection, float windStrength);

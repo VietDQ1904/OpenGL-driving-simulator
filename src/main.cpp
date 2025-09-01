@@ -1,3 +1,4 @@
+#include <thread>
 #include "camera.hpp"
 #include "model.hpp"
 #include "cubemap.hpp"
@@ -8,12 +9,11 @@
 #include "barrierPath.hpp"
 #include "roadSigns.hpp"
 #include "grass.hpp"
-#include "../lib/stb_image.h"
 
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
-// // enable NVIDIA GPU rendering
+// enable NVIDIA GPU rendering
 // extern "C"
 // {
 //    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
@@ -75,7 +75,6 @@ int main(int argc, char *argv[])
 
    float deltaTime = 0.0f;
    float lastTime = 0.0f;
-   const float radius = 10.0f;
 
    glm::vec3 lightDirection = glm::vec3(1.0f, -2.0f, -1.0f);
 
@@ -86,40 +85,58 @@ int main(int argc, char *argv[])
 
    std::unique_ptr<Cubemap> skyBox = std::make_unique<Cubemap>();
    std::unique_ptr<Physics> simulation = std::make_unique<Physics>();
-   std::unique_ptr<Road> road = std::make_unique<Road>(*simulation);
-   std::unique_ptr<Terrain> terrain = std::make_unique<Terrain>(*simulation);
 
-   std::unique_ptr<Barrier> barrier = std::make_unique<Barrier>(*simulation);
-   barrier->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
-
+   // Create main objects
+   std::unique_ptr<Car> car = std::make_unique<Car>();
+   std::unique_ptr<Barrier> barrier = std::make_unique<Barrier>();
    std::unique_ptr<RoadSigns> roadSigns = std::make_unique<RoadSigns>();
+   std::unique_ptr<GrassBlades> grassBlades;
+   std::unique_ptr<Terrain> terrain;
+   std::unique_ptr<Road> road;
+
+   // Create road and terrain objects in separate threads
+   std::thread t1([&]
+                  { road = std::make_unique<Road>(); });
+   std::thread t2([&]
+                  { terrain = std::make_unique<Terrain>(); });
+   std::thread t3([&]
+                  { grassBlades = std::make_unique<GrassBlades>(); });
+
+   t1.join();
+   t2.join();
+   t3.join();
+
+   road->addRigidBodies(*simulation);
+   terrain->addRigidBodies(*simulation);
+   barrier->addRigidBodies(*simulation);
+
+   road->setUp();
+   terrain->setUp();
+   roadSigns->loadResources();
    roadSigns->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
-   std::unique_ptr<GrassBlades> grassBlades = std::make_unique<GrassBlades>();
+   barrier->loadResources();
+   barrier->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
+
+   grassBlades->loadResources();
    grassBlades->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
-   // std::unique_ptr<Car> car = std::make_unique<Car>(*simulation);
-   // car->loadModels("../assets/Car/CarBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
-   // car->loadShaderCarBody("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   // car->loadShaderFrontWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   // car->loadShaderBackWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   // car->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
+   car->loadModels("../assets/Car/carBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
+   car->setUp(*simulation);
+   car->loadTextures();
+   car->loadShaderCarBody("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
+   car->loadShaderFrontWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
+   car->loadShaderBackWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
+   car->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
    Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
-   // camera.setPositionToCar(*car);
+   camera.setPositionToCar(*car);
 
    Shader mainShader = ResourceManagement::getShader("Main");
    mainShader.use();
 
    Shader cubemapShader = ResourceManagement::getShader("Cubemap");
    cubemapShader.use();
-
-   // Model grassBlade("../assets/Grass/GrassBladeA.obj");
-   // grassBlade.loadShader("GrassBlade", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   // grassBlade.modelShader.setVec3("light.direction", lightDirection);
-   // grassBlade.modelShader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
-
-   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
    glfwSetWindowUserPointer(window, &camera);
    glfwSetCursorPosCallback(window, [](GLFWwindow *window, double x, double y)
@@ -144,8 +161,8 @@ int main(int argc, char *argv[])
 
       processInput(window, deltaTime);
 
-      // camera.updateFollowCamera(car->car);
-      camera.control(window, deltaTime);
+      camera.updateFollowCamera(car->car);
+      // camera.control(window, deltaTime);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -173,9 +190,9 @@ int main(int argc, char *argv[])
       mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader, camera);
 
-      // car->control(window, deltaTime);
-      // car->update();
-      // car->render(view, projection, camera.cameraPos);
+      car->control(window, deltaTime);
+      car->update();
+      car->render(view, projection, camera.cameraPos);
 
       barrier->render(view, projection, camera);
       roadSigns->render(view, projection, camera);

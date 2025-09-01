@@ -24,15 +24,10 @@ public:
    int partitionSize = 20;
    float renderDistance = 350.0f;
 
-   Road(Physics &simulation)
+   Road()
    {
-      if (!splineGenerated)
-      {
-         this->generateSpline();
-      }
-      this->generateVertices(simulation);
-
-      this->setUp();
+      this->generateSpline();
+      this->generateVertices();
    }
 
    ~Road()
@@ -42,10 +37,11 @@ public:
 
    void render(Shader &shader, Camera &camera);
    void cleanUpBuffers();
+   void addRigidBodies(Physics &simulation);
+   void setUp();
 
 private:
-   void generateVertices(Physics &simulation);
-   void setUp();
+   void generateVertices();
 };
 
 #endif

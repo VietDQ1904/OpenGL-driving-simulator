@@ -48,14 +48,72 @@ void Barrier::offsetPaths()
    for (size_t i = 0; i < points.size(); ++i)
    {
       normal = getNormalVector(points, u, i);
-      glm::vec3 parallelLeftPoint = points[i] - normal * barrierOffset * 0.85f;
-      glm::vec3 parallelRightPoint = points[i] + normal * barrierOffset * 1.35f;
+      glm::vec3 parallelLeftPoint = points[i] - normal * barrierOffset * 0.45f;
+      glm::vec3 parallelRightPoint = points[i] + normal * barrierOffset * 2.45f;
       leftPoints.push_back(parallelLeftPoint);
       rightPoints.push_back(parallelRightPoint);
    }
 }
 
-void Barrier::generateVertices(Physics &simulation)
+void Barrier::addRigidBodies(Physics &simulation)
+{
+   glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
+   glm::vec3 v;
+   glm::vec3 w;
+
+   glm::vec3 prevA, prevB;
+   glm::vec3 A, B, C, D;
+
+   for (size_t i = 0; i < generatedLeftPath.size() - 1; ++i)
+   {
+      v = glm::normalize(generatedLeftPath[i + 1] - generatedLeftPath[i]);
+      w = glm::normalize(glm::cross(u, v));
+      if (i == 0)
+      {
+         A = w * barrierOffset + generatedLeftPath[i] + u * barrierHeight;
+         B = w * barrierOffset + generatedLeftPath[i];
+      }
+      else
+      {
+         A = prevA;
+         B = prevB;
+      }
+
+      C = w * barrierOffset + generatedLeftPath[i + 1] + u * barrierHeight;
+      D = w * barrierOffset + generatedLeftPath[i + 1];
+
+      prevA = C;
+      prevB = D;
+
+      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+   }
+
+   for (size_t i = 0; i < generatedRightPath.size() - 1; ++i)
+   {
+      v = glm::normalize(generatedRightPath[i + 1] - generatedRightPath[i]);
+      w = glm::normalize(glm::cross(u, v));
+      if (i == 0)
+      {
+         A = w * barrierOffset + generatedRightPath[i] + u * barrierHeight;
+         B = w * barrierOffset + generatedRightPath[i];
+      }
+      else
+      {
+         A = prevA;
+         B = prevB;
+      }
+
+      C = w * barrierOffset + generatedRightPath[i + 1] + u * barrierHeight;
+      D = w * barrierOffset + generatedRightPath[i + 1];
+
+      prevA = C;
+      prevB = D;
+
+      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+   }
+}
+
+void Barrier::generateVertices()
 {
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
    glm::vec3 v;
@@ -109,8 +167,6 @@ void Barrier::generateVertices(Physics &simulation)
       modelMatrix *= glm::toMat4(glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), v));
       modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / modelScale, 1.0f, segmentLength / modelScale));
       modelMatricesPartition.push_back(modelMatrix);
-
-      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
 
       if (elements++ >= partitionSize)
       {
@@ -167,8 +223,6 @@ void Barrier::generateVertices(Physics &simulation)
       modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
       modelMatrix = glm::scale(modelMatrix, glm::vec3(segmentLength / modelScale, 1.0f, segmentLength / modelScale));
       modelMatricesPartition.push_back(modelMatrix);
-
-      simulation.createRigidBody(A, B, C, D, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
 
       if (elements++ >= partitionSize)
       {
@@ -279,6 +333,7 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
          length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
          if (length < renderDistance)
          {
+            barrierModel->modelShader.use();
             for (unsigned int meshIndex = 0; meshIndex < barrierModel->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(barrierModel->meshes[meshIndex].vao);
@@ -297,9 +352,11 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        0,
                                        modelInstances.modelMatricesList[pivot].size());
             }
+            glBindVertexArray(0);
          }
          else
          {
+            barrierModel->modelShader.use();
             for (unsigned int meshIndex = 0; meshIndex < barrierLPModel->meshes.size(); ++meshIndex)
             {
                glBindVertexArray(barrierLPModel->meshes[meshIndex].vao);
@@ -318,6 +375,7 @@ void Barrier::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                        0,
                                        modelInstances.modelMatricesList[pivot].size());
             }
+            glBindVertexArray(0);
          }
       }
    }
@@ -333,6 +391,20 @@ void Barrier::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor)
    barrierLPModel->modelShader.use();
    barrierLPModel->modelShader.setVec3("light.direction", direction);
    barrierLPModel->modelShader.setVec3("light.color", lightColor);
+}
+
+void Barrier::loadResources()
+{
+   barrierModel = std::make_unique<Model>("../assets/Barrier/Model2/BarrierModel.obj");
+   barrierLPModel = std::make_unique<Model>("../assets/Barrier/Model2/BarrierModel.obj");
+
+   barrierModel->loadTextures();
+   barrierModel->loadShader("barrierShader", "../src/Shaders/instanceModel.vert", "../src/Shaders/instanceModel.frag", nullptr);
+
+   barrierLPModel->loadTextures();
+   barrierLPModel->loadShader("barrierLPShader", "../src/Shaders/instanceModel.vert", "../src/Shaders/instanceModel.frag", nullptr);
+
+   this->setUp();
 }
 
 void Barrier::cleanUpBuffers()

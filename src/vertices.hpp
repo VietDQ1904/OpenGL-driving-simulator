@@ -8,6 +8,7 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <mutex>
 
 #ifndef VERTICES_IMPLEMENTATION
 #define VERTICES_IMPLEMENTATION
@@ -54,6 +55,11 @@ public:
    std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vbos;
    std::unordered_map<std::array<float, 2>, std::array<float, 3>, ArrayHash<2>, ArrayEqual<2>> gridMap;
 
+   std::mutex verticesMutex;
+   std::mutex vaosMutex;
+   std::mutex vbosMutex;
+   std::mutex gridMapMutex;
+
    void clearBuffers()
    {
       for (auto &i : vaos)
@@ -69,16 +75,19 @@ public:
 
    void insertVertices(std::array<float, 3> const &key, std::vector<float> const &value)
    {
+      std::lock_guard<std::mutex> lock(verticesMutex);
       vertices[key] = value;
    }
 
    void insertVAO(std::array<float, 3> const &key, GLuint const &value)
    {
+      std::lock_guard<std::mutex> lock(vaosMutex);
       vaos[key] = value;
    }
 
    void insertVBO(std::array<float, 3> const &key, GLuint const &value)
    {
+      std::lock_guard<std::mutex> lock(vbosMutex);
       vbos[key] = value;
    }
 
@@ -88,6 +97,7 @@ public:
       int cellZ = static_cast<int>(std::floor(pivot[2] / cellSize));
       std::array<float, 2> cellKey = {static_cast<float>(cellX), static_cast<float>(cellZ)};
 
+      std::lock_guard<std::mutex> lock(gridMapMutex);
       gridMap[cellKey] = pivot;
    }
 
@@ -130,18 +140,25 @@ public:
    std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vaosLD;
    std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vbosLD;
 
+   std::mutex lowDetailsVerticesMutex;
+   std::mutex vaosLDMutex;
+   std::mutex vbosLDMutex;
+
    void insertLowDetailVertices(std::array<float, 3> const &key, std::vector<float> const &value)
    {
+      std::lock_guard<std::mutex> lock(lowDetailsVerticesMutex);
       lowDetailVertices[key] = value;
    }
 
    void insertLDVAO(std::array<float, 3> const &key, GLuint const &value)
    {
+      std::lock_guard<std::mutex> lock(vaosLDMutex);
       vaosLD[key] = value;
    }
 
    void insertLDVBO(std::array<float, 3> const &key, GLuint const &value)
    {
+      std::lock_guard<std::mutex> lock(vbosLDMutex);
       vbosLD[key] = value;
    }
 
@@ -167,13 +184,18 @@ public:
    std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList;
    std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> vaosLD;
 
+   std::mutex vaosLDMutex;
+   std::mutex modelMatricesMutex;
+
    void insertModelMatrices(std::array<float, 3> const &key, std::vector<glm::mat4> const &modelMatrices)
    {
+      std::lock_guard<std::mutex> lock(modelMatricesMutex);
       modelMatricesList[key] = modelMatrices;
    }
 
    void insertLDVAO(std::array<float, 3> const &key, GLuint const &value)
    {
+      std::lock_guard<std::mutex> lock(vaosLDMutex);
       vaosLD[key] = value;
    }
 
@@ -194,13 +216,18 @@ public:
    std::unordered_map<std::array<float, 3>, std::vector<int>, ArrayHash<3>, ArrayEqual<3>> indices;
    std::unordered_map<std::array<float, 3>, GLuint, ArrayHash<3>> ebos;
 
+   std::mutex indicesMutex;
+   std::mutex eboMutex;
+
    void insertIndices(std::array<float, 3> const &key, std::vector<int> const &value)
    {
+      std::lock_guard<std::mutex> lock(indicesMutex);
       indices[key] = value;
    }
 
    void insertEBO(std::array<float, 3> const &key, GLuint const &value)
    {
+      std::lock_guard<std::mutex> lock(eboMutex);
       ebos[key] = value;
    }
 

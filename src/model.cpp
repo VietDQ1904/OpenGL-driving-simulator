@@ -1,15 +1,12 @@
 #include "shader.hpp"
 #include "model.hpp"
-// #include "loadTexture.hpp"
 #include <string>
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, unsigned int material)
 {
    this->vertices = vertices;
    this->indices = indices;
-   this->textures = textures;
-
-   setUpMesh();
+   this->material = material;
 }
 
 void Mesh::cleanUpBuffers()
@@ -124,8 +121,8 @@ void Model::cleanUpBuffers()
 
 void Model::loadModel(std::string path)
 {
-   Assimp::Importer importer;
-   const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
+
+   scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
 
    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
    {
@@ -136,10 +133,10 @@ void Model::loadModel(std::string path)
    // Get the last directory of the path
    directory = path.substr(0, path.find_last_of('/'));
    // Process the root node.
-   processNode(scene->mRootNode, scene);
+   processNode(scene->mRootNode);
 }
 
-void Model::processNode(aiNode *node, const aiScene *scene)
+void Model::processNode(aiNode *node)
 {
    for (unsigned int i = 0; i < node->mNumMeshes; ++i)
    {
@@ -151,7 +148,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
    // Recursively process child nodes.
    for (unsigned int i = 0; i < node->mNumChildren; ++i)
    {
-      processNode(node->mChildren[i], scene);
+      processNode(node->mChildren[i]);
    }
 }
 
@@ -159,7 +156,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
    std::vector<Vertex> vertices;
    std::vector<unsigned int> indices;
-   std::vector<Texture> textures;
 
    for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
    {
@@ -209,20 +205,29 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
       }
    }
 
-   if (mesh->mMaterialIndex >= 0)
-   {
-      aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-      std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-      textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-      std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_roughness");
-      textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
-      std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-      textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-      std::vector<Texture> metalnessMaps = loadMaterialTextures(material, aiTextureType_METALNESS, "texture_metallic");
-      textures.insert(textures.end(), metalnessMaps.begin(), metalnessMaps.end());
-   }
+   unsigned int material = mesh->mMaterialIndex;
 
-   return Mesh(vertices, indices, textures);
+   return Mesh(vertices, indices, material);
+}
+
+void Model::loadTextures()
+{
+   for (unsigned int i = 0; i < meshes.size(); ++i)
+   {
+      if (meshes[i].material >= 0)
+      {
+         aiMaterial *material = scene->mMaterials[meshes[i].material];
+         std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+         meshes[i].textures.insert(meshes[i].textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+         std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_roughness");
+         meshes[i].textures.insert(meshes[i].textures.end(), roughnessMaps.begin(), roughnessMaps.end());
+         std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+         meshes[i].textures.insert(meshes[i].textures.end(), normalMaps.begin(), normalMaps.end());
+         std::vector<Texture> metalnessMaps = loadMaterialTextures(material, aiTextureType_METALNESS, "texture_metallic");
+         meshes[i].textures.insert(meshes[i].textures.end(), metalnessMaps.begin(), metalnessMaps.end());
+      }
+      meshes[i].setUpMesh();
+   }
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)

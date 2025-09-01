@@ -35,7 +35,56 @@ void Terrain::subdivide(std::vector<Quadrilateral> &quadrilaterals, const Quadri
    subdivide(quadrilaterals, {ab, quadrilateral.b, cd, quadrilateral.d}, depth - 1);
 }
 
-void Terrain::generateVertices(Physics &simulation)
+void Terrain::addRigidBodies(Physics &simulation)
+{
+   glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
+   glm::vec3 v;
+   glm::vec3 w;
+
+   glm::vec3 prevA1, prevB1, prevA2, prevB2;
+
+   glm::vec3 A1, B1, C1, D1; // the left side
+   glm::vec3 A2, B2, C2, D2; // the right side
+
+   glm::vec3 pivot;
+
+   for (size_t i = 0; i < generatedPath.size() - 1; ++i)
+   {
+      v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
+      w = glm::normalize(glm::cross(u, v));
+
+      if (i == 0)
+      {
+         A1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+         B1 = w * (pathWidth / 2) + generatedPath[i];
+         A2 = -w * (pathWidth / 2) + generatedPath[i];
+         B2 = -w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i];
+      }
+      else
+      {
+         A1 = prevA1;
+         B1 = prevB1;
+         A2 = prevA2;
+         B2 = prevB2;
+      }
+
+      C1 = w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+      D1 = w * (pathWidth / 2) + generatedPath[i + 1];
+      C2 = -w * (pathWidth / 2) + generatedPath[i + 1];
+      D2 = -w * (pathWidth / 2 + terrainPathWidth / horizontalTiles) + generatedPath[i + 1];
+
+      // Save point C1, D1 of the current iteration.
+      prevA1 = C1;
+      prevB1 = D1;
+      prevA2 = C2;
+      prevB2 = D2;
+
+      simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+      simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+   }
+}
+
+void Terrain::generateVertices()
 {
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
    glm::vec3 v;
@@ -56,6 +105,7 @@ void Terrain::generateVertices(Physics &simulation)
    // Setup for grass path next to the road
    std::vector<float> verticesPathSub;
    std::vector<int> indicesPathSub;
+
    int elements = 0;
    int lastIndex = 0;
    int startIndex = 0;
@@ -63,7 +113,10 @@ void Terrain::generateVertices(Physics &simulation)
 
    glm::vec3 pivot;
 
-   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   verticesPathSub.reserve(partitionSize * 64);
+   indicesPathSub.reserve(partitionSize * 12);
+
+   for (size_t i = 0; i < generatedPath.size() - 1; ++i)
    {
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);
       w = glm::normalize(glm::cross(u, v));
@@ -211,11 +264,10 @@ void Terrain::generateVertices(Physics &simulation)
          lastIndex = i;
          verticesPathSub.clear();
          indicesPathSub.clear();
-      }
 
-      // Create a rigid body.
-      simulation.createRigidBody(A1, B1, C1, D1, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
-      simulation.createRigidBody(A2, B2, C2, D2, 0.0f, 0.5f, 0.5f, COLLISION_TERRAIN, COLLISION_ELSE);
+         verticesPathSub.reserve(partitionSize * 64);
+         indicesPathSub.reserve(partitionSize * 12);
+      }
    }
 
    if (!indicesPathSub.empty())
@@ -238,7 +290,7 @@ void Terrain::generateVertices(Physics &simulation)
    std::vector<float> verticesSub;
    std::vector<float> verticesLowSub;
 
-   for (int i = 0; i < generatedPath.size() - 1; ++i)
+   for (size_t i = 0; i < generatedPath.size() - 1; ++i)
    {
 
       v = glm::normalize(generatedPath[i + 1] - generatedPath[i]);

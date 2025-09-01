@@ -34,6 +34,13 @@ glm::vec3 Spline::catmullRom(const glm::vec3 &p0, const glm::vec3 &p1,
 
 void Spline::generateSpline()
 {
+   std::lock_guard<std::mutex> lock(splineMutex);
+
+   if (splineGenerated)
+   {
+      return;
+   }
+
    for (auto &point : points)
    {
       point *= 5.0f;

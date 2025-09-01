@@ -21,9 +21,6 @@ public:
    Texture();
    void bindTexture();
    void generateTexture(int width, int height, int nrChannels, unsigned char *data);
-
-private:
-   void loadTexture();
 };
 
 #endif
