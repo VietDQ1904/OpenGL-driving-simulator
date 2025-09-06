@@ -58,6 +58,13 @@ Car::~Car()
    carModel->cleanUpBuffers();
    wheelModel1->cleanUpBuffers();
    wheelModel2->cleanUpBuffers();
+
+   // No need to handle rigid bodies as they are managed by the destructor of class Physics.
+
+   delete springConst1;
+   delete springConst2;
+   delete springConst3;
+   delete springConst4;
 }
 
 void Car::loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2)

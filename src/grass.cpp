@@ -1,25 +1,5 @@
 #include "grass.hpp"
 
-glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t)
-{
-   glm::vec3 c = a + (b - a) * t;
-   return c;
-}
-
-float getRandomFloatNumber(std::mt19937 &engine, float start, float end, unsigned int seed)
-{
-   std::uniform_real_distribution<float> distribution(start, end);
-   float rand = distribution(engine);
-   return rand;
-}
-
-int getRandomIntegerNumber(std::mt19937 &engine, int start, int end, unsigned int seed)
-{
-   std::uniform_int_distribution<int> distribution(start, end);
-   int rand = distribution(engine);
-   return rand;
-}
-
 void GrassBlades::generateGrassModels()
 {
    glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -36,8 +16,6 @@ void GrassBlades::generateGrassModels()
 
    int elements = 0;
    int lastIndex = 0;
-
-   std::vector<glm::mat4> modelMatrices;
 
    std::vector<glm::mat4> modelMatrices1;
    std::vector<glm::mat4> modelMatrices2;
@@ -73,7 +51,6 @@ void GrassBlades::generateGrassModels()
       C2 = -w * (pathWidth / 2 + offset) + generatedPath[i + 1];
       D2 = -w * (pathWidth / 2 + grassPathWidth + offset) + generatedPath[i + 1];
 
-      // Save point C1, D1 of the current iteration.
       prevA1 = C1;
       prevB1 = D1;
       prevA2 = C2;
@@ -202,11 +179,9 @@ void GrassBlades::generateGrassModels()
       }
    }
 
-   if (!modelMatrices.empty())
+   if (!modelMatricesList1.empty() || !modelMatrices2.empty() || !modelMatrices3.empty())
    {
       pivot = generatedPath[lastIndex + (generatedPath.size() - 1 - lastIndex) / 2];
-      // modelInstances.insertModelMatrices({pivot.x, pivot.y, pivot.z}, modelMatrices);
-
       modelMatricesList1[{pivot.x, pivot.y, pivot.z}] = modelMatrices1;
       modelMatricesList2[{pivot.x, pivot.y, pivot.z}] = modelMatrices2;
       modelMatricesList3[{pivot.x, pivot.y, pivot.z}] = modelMatrices3;

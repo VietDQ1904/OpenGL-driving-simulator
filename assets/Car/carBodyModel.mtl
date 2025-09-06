@@ -13,7 +13,6 @@ Pm 0.000000
 map_Kd CarBodyDiffuse.png
 map_Bump CarBodyNormal.png
 map_Ks CarBodyRoughness.png
-map_Ka CarBodyMetalness.png
 
 newmtl Material2
 Kd 0.800000 0.800000 0.800000
@@ -27,7 +26,6 @@ Pm 0.000000
 map_Kd CarBodyDiffuse.png
 map_Bump CarBodyNormal.png
 map_Ks CarBodyRoughness.png
-map_Ka CarBodyMetalness.png
 
 newmtl Material3
 Kd 0.800000 0.800000 0.800000
@@ -41,7 +39,6 @@ Pm 0.000000
 map_Kd CarBodyDiffuse.png
 map_Bump CarBodyNormal.png
 map_Ks CarBodyRoughness.png
-map_Ka CarBodyMetalness.png
 
 newmtl Material4
 Kd 0.800000 0.800000 0.800000
@@ -55,4 +52,3 @@ Pm 0.000000
 map_Kd CarBodyDiffuse.png
 map_Bump CarBodyNormal.png
 map_Ks CarBodyRoughness.png
-map_Ka CarBodyMetalness.png

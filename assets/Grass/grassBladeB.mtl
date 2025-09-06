@@ -12,4 +12,3 @@ illum 2
 map_Kd GrassBladeDiffuse.png
 map_Bump GrassBladeNormal.png
 map_Ks GrassBladeRoughness.png
-map_Ka GrassBladeMetalness.png

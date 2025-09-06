@@ -9,6 +9,7 @@
 #include "barrierPath.hpp"
 #include "roadSigns.hpp"
 #include "grass.hpp"
+#include "tree.hpp"
 
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
@@ -90,6 +91,7 @@ int main(int argc, char *argv[])
    std::unique_ptr<Car> car = std::make_unique<Car>();
    std::unique_ptr<Barrier> barrier = std::make_unique<Barrier>();
    std::unique_ptr<RoadSigns> roadSigns = std::make_unique<RoadSigns>();
+   std::unique_ptr<Trees> trees = std::make_unique<Trees>();
    std::unique_ptr<GrassBlades> grassBlades;
    std::unique_ptr<Terrain> terrain;
    std::unique_ptr<Road> road;
@@ -120,6 +122,9 @@ int main(int argc, char *argv[])
 
    grassBlades->loadResources();
    grassBlades->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
+
+   trees->loadResources();
+   trees->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
 
    car->loadModels("../assets/Car/carBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
    car->setUp(*simulation);
@@ -152,6 +157,7 @@ int main(int argc, char *argv[])
       } });
 
    float maxSecPerFrame = 1.0f / 60.0f;
+   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
    while (!glfwWindowShouldClose(window))
    {
@@ -201,6 +207,7 @@ int main(int argc, char *argv[])
                                      glm::normalize(glm::vec3(1.0f, 0.5f, -0.5f)),
                                      0.05f);
       grassBlades->render(view, projection, camera);
+      trees->render(view, projection, camera);
 
       skyBox->draw(cubemapShader, projection, view);
 

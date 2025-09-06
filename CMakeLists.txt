@@ -19,9 +19,8 @@ set (SOURCES src/main.cpp
              src/resourceManagement.cpp
              src/roadSigns.cpp
              src/grass.cpp
+             src/tree.cpp
     )
-
-
 
 # ========= FIND LIBRARIES ==========
 find_package(OpenGL REQUIRED)
@@ -102,7 +101,6 @@ include_directories(
     ${ZLIB_INCLUDE_DIRS}
     ${HARFBUZZ_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIRS}
-    # D:/Installs/MSYS/mingw64/include/freetype2
     ./lib/freetype/include
     ./lib/bullet/include
 )
