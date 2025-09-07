@@ -124,7 +124,7 @@ void ResourceManagement::clearResources()
    {
       glDeleteProgram(i.second.shaderProgram);
    }
-   for (auto i : textures)
+   for (auto &i : textures)
    {
       glDeleteTextures(1, &i.second.textureID);
    }

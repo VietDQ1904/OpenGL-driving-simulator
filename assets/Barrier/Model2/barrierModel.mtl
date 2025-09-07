@@ -13,7 +13,6 @@ illum 3
 map_Kd BarrierMainDiffuse.png
 map_Bump BarrierMainNormal.png
 map_Ks BarrierMainRoughness.png
-map_Pm BarrierMainMetalness.png
 
 newmtl MaterialBarrier
 Ns 250.000000

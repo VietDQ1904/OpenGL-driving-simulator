@@ -1,0 +1,26 @@
+# Blender 4.3.2 MTL File: 'tree.blend'
+# www.blender.org
+
+newmtl Empty
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.0
+map_Kd BranchDiffuse.png
+map_d BranchDiffuse.png
+illum 2
+map_Bump BranchNormal.png
+map_Ks BranchRoughness.png
+
+newmtl bark_willow_02
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd TreeBarkDiffuse.png
+map_Bump TreeBarkNormal.png
+map_Ks TreeBarkRoughness.png

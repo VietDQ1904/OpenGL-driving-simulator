@@ -58,6 +58,13 @@ Car::~Car()
    carModel->cleanUpBuffers();
    wheelModel1->cleanUpBuffers();
    wheelModel2->cleanUpBuffers();
+
+   // No need to handle rigid bodies as they are managed by the destructor of class Physics.
+
+   delete springConst1;
+   delete springConst2;
+   delete springConst3;
+   delete springConst4;
 }
 
 void Car::loadModels(std::string carModelPath, std::string wheelModelPath_1, std::string wheelModelPath_2)
@@ -147,11 +154,16 @@ void Car::update()
    }
 }
 
-void Car::control(GLFWwindow *window, float &deltaTime)
+void Car::control(GLFWwindow *window, float &deltaTime, Sound &sound)
 {
 
    float steeringLimit = 1.0f;
    float steeringSpeed = 0.05f;
+
+   engineAccelerated = false;
+   carBraked = false;
+   carHandbrake = false;
+   carHonked = false;
 
    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
    {
@@ -173,10 +185,12 @@ void Car::control(GLFWwindow *window, float &deltaTime)
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
    {
       acceleration = 1;
+      engineAccelerated = true;
    }
    else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
    {
       acceleration = -1;
+      carBraked = true;
    }
    else
    {
@@ -188,6 +202,7 @@ void Car::control(GLFWwindow *window, float &deltaTime)
    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
    {
       handbrake = true;
+      carHandbrake = true;
    }
    else
    {
@@ -235,6 +250,54 @@ void Car::control(GLFWwindow *window, float &deltaTime)
    else
    {
       movingForward = true;
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+   {
+      carHonked = true;
+   }
+
+   if (engineAccelerated && !engineAccelerateSoundPlayed)
+   {
+      engineAccelerateSoundPlayed = true;
+      sound.playAudio("CarAccelerate", true);
+   }
+
+   if (!engineAccelerated)
+   {
+      engineAccelerateSoundPlayed = false;
+      sound.stopAudio("CarAccelerate");
+   }
+
+   if (carBraked && !carBrakeSoundPlayed)
+   {
+      carBrakeSoundPlayed = true;
+      sound.playAudio("CarBrake", false);
+   }
+
+   if (!carBraked)
+   {
+      carBrakeSoundPlayed = false;
+   }
+
+   if (carHandbrake && !carHandbrakeSoundPlayed)
+   {
+      carHandbrakeSoundPlayed = true;
+      sound.playAudio("CarHandbrake", false);
+   }
+   if (!carHandbrake)
+   {
+      carHandbrakeSoundPlayed = false;
+   }
+
+   if (carHonked && !carHonkSoundPlayed)
+   {
+      carHonkSoundPlayed = true;
+      sound.playAudio("CarHonk", false);
+   }
+   if (!carHonked)
+   {
+      carHonkSoundPlayed = false;
    }
 }
 

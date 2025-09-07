@@ -2,7 +2,6 @@
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
-#include <random>
 #include "model.hpp"
 #include "spline.hpp"
 #include "camera.hpp"
@@ -10,6 +9,7 @@
 #include "vertices.hpp"
 #include "worleyNoise.hpp"
 #include "noiseMultipliers.hpp"
+#include "utils.hpp"
 
 #ifndef GRASS_IMPLEMENTATION
 #define GRASS_IMPLEMENTATION
@@ -18,8 +18,8 @@ class GrassBlades : Spline
 {
 public:
    const float grassPathWidth = 40.0f;
-   const float grassWidthSize = 16;
-   const float grassHeightSize = 60;
+   const float grassWidthSize = 8;
+   const float grassHeightSize = 32;
    const float renderDistance = 80.0f;
    const float maxRenderDistance = 300.0f;
    const float offset = 5.0f;
@@ -45,7 +45,7 @@ public:
    std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList2;
    std::unordered_map<std::array<float, 3>, std::vector<glm::mat4>, ArrayHash<3>, ArrayEqual<3>> modelMatricesList3;
 
-   ModelInstances modelInstances;
+   Vertices modelInstances;
 
    PerlinNoise noise;
    WorleyNoise grassMap;
