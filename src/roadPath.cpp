@@ -93,7 +93,7 @@ void Road::generateVertices()
       prevA = C;
       prevB = D;
 
-      normal = glm::normalize(glm::cross(C - A, B - A));
+      normal = glm::normalize(glm::cross(B - A, C - A));
       segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
 
       // 1st vertex

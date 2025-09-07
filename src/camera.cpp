@@ -54,6 +54,14 @@ void Camera::control(GLFWwindow *window, float deltaTime)
    {
       cameraPos += right * cameraSpeed;
    }
+   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   }
+   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+   }
 }
 
 void Camera::scrollCallback(GLFWwindow *window, double offsetX, double offsetY)

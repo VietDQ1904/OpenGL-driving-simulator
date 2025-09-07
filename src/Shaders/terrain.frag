@@ -17,6 +17,7 @@ struct DirLight{
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform DirLight light;
+uniform vec3 viewPos;
 
 // Generate a pseudo-random number.
 float hash(vec2 p) {
@@ -33,37 +34,26 @@ vec2 rotateUV(vec2 uv, float angle, vec2 center) {
    return uv;
 }
 
-vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir){
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec2 uv) {
    vec3 lightDir = normalize(-light.direction);
-   float diff = max(dot(normal, lightDir), 0.0);
-   
-   vec3 reflectDir = reflect(-lightDir, normal);
-   float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0f);
 
-   vec3 ambient = light.ambient * vec3(texture(texture_diffuse1, vs_out.TexCoords));
-   vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse1, vs_out.TexCoords));
-   vec3 specular = light.specular * spec * vec3(texture(texture_specular1, vs_out.TexCoords));
+   // Ambient
+   vec3 ambient = light.ambient * vec3(texture(texture_diffuse1, uv));
+
+   // Diffuse
+   float diff = max(dot(normal, lightDir), 0.0);
+   vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse1, uv));
+
+   // Specular
+   vec3 halfwayDir = normalize(lightDir + viewDir);
+   float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
    
-   return (ambient + diffuse + specular);
+   vec3 specular = light.specular * spec * vec3(texture(texture_specular1, uv));
+
+   return ambient + diffuse + specular;
 }
 
 void main(){
-   
-   // vec3 dir = normalize(-lightDir);
-   // vec3 ambient = ambientColor * lightColor * vec3(texture(texture_diffuse1, TexCoords));
-   // vec3 normalizedNorm = normalize(normal); 
-   // float diff = max(dot(normalizedNorm, dir), 0.0);
-   // vec3 diffuse = diffuseColor * diff * vec3(texture(texture_diffuse1, TexCoords));
-
-   // vec3 viewDir = normalize(viewPos - fragPos);
-   // vec3 reflectDir = reflect(-dir, normalizedNorm);  
-
-   // float specularVal = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-   // vec3 specular = specularColor * specularVal * vec3(0.1); //* vec3(texture(texture_specular1, TexCoords));
-
-   // vec3 result = ambient + diffuse + specular;
-
-   //FragColor = vec4(vec3(texture(texture_diffuse1, TexCoords)), 1.0);
 
    vec2 tileCoord = floor(vs_out.fragPos.xz);
    float angle = hash(tileCoord) * 6.28318530718;
@@ -73,8 +63,12 @@ void main(){
    uv = (uv - 0.5) * scale + 0.5;
 
    uv = rotateUV(uv, angle, vec2(0.5));
-   vec4 color = texture(texture_diffuse1, uv);
-   
+   vec3 normalizedNormal = normalize(vs_out.normal);
+   vec3 viewDir = normalize(viewPos - vs_out.fragPos);
+   vec3 result = calcDirLight(light, normalizedNormal, viewDir, uv);
 
-   FragColor = color;
+   //vec3 result = vec3(texture(texture_specular1, uv));
+   //FragColor = vec4(normalize(vs_out.normal) * 0.5 + 0.5, 1.0);
+   
+   FragColor = vec4(result, 1.0);
 }

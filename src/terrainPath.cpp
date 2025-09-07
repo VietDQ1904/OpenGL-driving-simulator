@@ -147,8 +147,8 @@ void Terrain::generateVertices()
       prevA2 = C2;
       prevB2 = D2;
 
-      normal1 = glm::normalize(glm::cross(C1 - A1, B1 - A1));
-      normal2 = glm::normalize(glm::cross(C2 - A2, B2 - A2));
+      normal1 = glm::normalize(glm::cross(B1 - A1, C1 - A1));
+      normal2 = glm::normalize(glm::cross(B2 - A2, C2 - A2));
 
       segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
 
@@ -286,6 +286,7 @@ void Terrain::generateVertices()
    lastIndex = 0;
    startIndex = 0;
    totalVertices = 0;
+   float epsilon = 1e-1f;
 
    std::vector<float> verticesSub;
    std::vector<float> verticesLowSub;
@@ -317,10 +318,10 @@ void Terrain::generateVertices()
       D2 = -w * (pathWidth / 2 + terrainPathWidth) + generatedPath[i + 1];
 
       // Save point C1, D1 of the current iteration.
-      prevA1 = C1;
-      prevB1 = D1;
-      prevA2 = C2;
-      prevB2 = D2;
+      prevA1 = C1 - (v * epsilon);
+      prevB1 = D1 - (v * epsilon);
+      prevA2 = C2 - (v * epsilon);
+      prevB2 = D2 - (v * epsilon);
 
       segmentLength = glm::length(generatedPath[i + 1] - generatedPath[i]);
 
@@ -355,6 +356,10 @@ void Terrain::generateVertices()
             }
 
             normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
+            if (glm::dot(normal, u) < 0.0f)
+            {
+               normal = -normal;
+            }
 
             for (glm::vec3 p : {t.a, t.b, t.c})
             {
@@ -399,6 +404,10 @@ void Terrain::generateVertices()
             }
 
             normal = glm::normalize(glm::cross(t.c - t.a, t.b - t.a));
+            if (glm::dot(normal, u) < 0.0f)
+            {
+               normal = -normal;
+            }
 
             for (glm::vec3 p : {t.a, t.b, t.c})
             {
@@ -558,9 +567,11 @@ void Terrain::render(Shader &shader, Camera &camera)
             glBindVertexArray(verticesTerrainMaps.vaos[pivot]);
             glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrainMaps.vertices[pivot].size() / 8));
          }
-
-         glBindVertexArray(verticesTerrainMaps.vaosLD[pivot]);
-         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrainMaps.lowDetailVertices[pivot].size() / 8));
+         else
+         {
+            glBindVertexArray(verticesTerrainMaps.vaosLD[pivot]);
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(verticesTerrainMaps.lowDetailVertices[pivot].size() / 8));
+         }
       }
    }
 

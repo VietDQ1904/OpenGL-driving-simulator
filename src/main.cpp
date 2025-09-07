@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
    ResourceManagement::loadShader("Main", "../src/Shaders/terrain.vert", "../src/Shaders/terrain.frag", nullptr);
    ResourceManagement::loadTexture("Grass", "../assets/grass.png", false, false);
    ResourceManagement::loadTexture("Asphalt", "../assets/asphalt.png", false, false);
+   ResourceManagement::loadTexture("GrassSpec", "../assets/grassSpec.png", false, false);
+   ResourceManagement::loadTexture("AsphaltSpec", "../assets/asphaltSpec.png", false, false);
    ResourceManagement::loadShader("Cubemap", "../src/Shaders/cubemap.vert", "../src/Shaders/cubemap.frag", nullptr);
 
    std::unique_ptr<Cubemap> skyBox = std::make_unique<Cubemap>();
@@ -177,8 +179,8 @@ int main(int argc, char *argv[])
 
       processInput(window, deltaTime);
 
-      camera.updateFollowCamera(car->car);
-      // camera.control(window, deltaTime);
+      // camera.updateFollowCamera(car->car);
+      camera.control(window, deltaTime);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -194,21 +196,37 @@ int main(int argc, char *argv[])
 
       glActiveTexture(GL_TEXTURE0);
       ResourceManagement::getTexture("Grass").bindTexture();
+      glActiveTexture(GL_TEXTURE1);
+      ResourceManagement::getTexture("GrassSpec").bindTexture();
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);
       mainShader.setInt("texture_diffuse1", 0);
+      mainShader.setInt("texture_specular1", 1);
+      mainShader.setVec3("viewPos", camera.cameraPos);
+      mainShader.setVec3("light.direction", lightDirection);
+      mainShader.setVec3("light.ambient", glm::vec3(0.6f));
+      mainShader.setVec3("light.diffuse", glm::vec3(0.7f));
+      mainShader.setVec3("light.specular", glm::vec3(0.6f));
       terrain->render(mainShader, camera);
 
-      glActiveTexture(GL_TEXTURE1);
+      glActiveTexture(GL_TEXTURE2);
       ResourceManagement::getTexture("Asphalt").bindTexture();
+      glActiveTexture(GL_TEXTURE3);
+      ResourceManagement::getTexture("AsphaltSpec").bindTexture();
       mainShader.setMat4("view", view);
       mainShader.setMat4("projection", projection);
-      mainShader.setInt("texture_diffuse1", 1);
+      mainShader.setInt("texture_diffuse1", 2);
+      mainShader.setInt("texture_specular1", 3);
+      mainShader.setVec3("viewPos", camera.cameraPos);
+      mainShader.setVec3("light.direction", lightDirection);
+      mainShader.setVec3("light.ambient", glm::vec3(0.6f));
+      mainShader.setVec3("light.diffuse", glm::vec3(0.7f));
+      mainShader.setVec3("light.specular", glm::vec3(0.6f));
       road->render(mainShader, camera);
 
-      car->control(window, deltaTime, *sound);
-      car->update();
-      car->render(view, projection, camera.cameraPos);
+      // car->control(window, deltaTime, *sound);
+      // car->update();
+      // car->render(view, projection, camera.cameraPos);
 
       barrier->render(view, projection, camera);
       roadSigns->render(view, projection, camera);

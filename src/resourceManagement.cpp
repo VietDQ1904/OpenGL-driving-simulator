@@ -20,14 +20,14 @@ Shader ResourceManagement::getShader(std::string shaderName)
    return shaders[shaderName];
 }
 
-Texture ResourceManagement::loadTexture(std::string textureName, const char *fileName, bool isAlpha, bool isGammaCorrected)
+Texture ResourceManagement::loadTexture(std::string textureName, const char *fileName, bool isAlpha, bool isSRGB)
 {
    if (textures.find(textureName) != textures.end())
    {
       return textures[textureName];
    }
 
-   textures[textureName] = loadTextureFromFile(fileName, isAlpha, isGammaCorrected);
+   textures[textureName] = loadTextureFromFile(fileName, isAlpha, isSRGB);
    return textures[textureName];
 }
 
