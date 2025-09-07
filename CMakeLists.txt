@@ -20,6 +20,7 @@ set (SOURCES src/main.cpp
              src/roadSigns.cpp
              src/grass.cpp
              src/tree.cpp
+             src/soundTrack.cpp
     )
 
 # ========= FIND LIBRARIES ==========

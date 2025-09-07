@@ -10,15 +10,16 @@
 #include "roadSigns.hpp"
 #include "grass.hpp"
 #include "tree.hpp"
+#include "soundTrack.hpp"
 
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
 // enable NVIDIA GPU rendering
-// extern "C"
-// {
-//    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-// }
+extern "C"
+{
+   __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+}
 
 // // enable AMD GPU rendering
 // extern "C" {
@@ -86,6 +87,13 @@ int main(int argc, char *argv[])
 
    std::unique_ptr<Cubemap> skyBox = std::make_unique<Cubemap>();
    std::unique_ptr<Physics> simulation = std::make_unique<Physics>();
+   std::unique_ptr<Sound> sound = std::make_unique<Sound>();
+
+   sound->loadAudio("../assets/SoundTracks/carEngine.wav", "CarEngine");
+   sound->loadAudio("../assets/SoundTracks/carAccelerate.wav", "CarAccelerate");
+   sound->loadAudio("../assets/SoundTracks/carBrake.wav", "CarBrake");
+   sound->loadAudio("../assets/SoundTracks/carHandbrake.wav", "CarHandbrake");
+   sound->loadAudio("../assets/SoundTracks/carHonk.wav", "CarHonk");
 
    // Create main objects
    std::unique_ptr<Car> car = std::make_unique<Car>();
@@ -159,6 +167,8 @@ int main(int argc, char *argv[])
    float maxSecPerFrame = 1.0f / 60.0f;
    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+   sound->playAudio("CarEngine", true);
+
    while (!glfwWindowShouldClose(window))
    {
       float timeValue = glfwGetTime();
@@ -196,7 +206,7 @@ int main(int argc, char *argv[])
       mainShader.setInt("texture_diffuse1", 1);
       road->render(mainShader, camera);
 
-      car->control(window, deltaTime);
+      car->control(window, deltaTime, *sound);
       car->update();
       car->render(view, projection, camera.cameraPos);
 

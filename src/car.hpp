@@ -1,5 +1,6 @@
 #include "physics.hpp"
 #include "model.hpp"
+#include "soundTrack.hpp"
 #include <memory>
 
 #ifndef CAR_IMPLEMENTATION
@@ -50,6 +51,14 @@ public:
    bool handbrake = false;
    bool getUp = false, gotUp = false;
    bool jump = false, jumped = false;
+   bool engineAccelerated = false;
+   bool engineAccelerateSoundPlayed = false;
+   bool carBraked = false;
+   bool carBrakeSoundPlayed = false;
+   bool carHandbrake = false;
+   bool carHandbrakeSoundPlayed = false;
+   bool carHonked = false;
+   bool carHonkSoundPlayed = false;
 
    Car();
    Car(glm::vec3 spawn,
@@ -78,7 +87,7 @@ public:
    void render(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPos);
    void setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor);
    void update();
-   void control(GLFWwindow *window, float &deltaTime);
+   void control(GLFWwindow *window, float &deltaTime, Sound &sound);
    void setUp(Physics &simulation);
 
 private:
