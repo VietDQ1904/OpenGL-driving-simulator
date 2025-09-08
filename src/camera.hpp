@@ -30,6 +30,9 @@ public:
    float nearPlane = 0.1f;
    float farPlane = 300.0f;
 
+   bool isMovingFreely = false;
+   bool controllable = false;
+
    Camera(glm::vec3 cameraPos) : cameraPos(cameraPos) {}
    void control(GLFWwindow *window, float deltaTime);
    void mouseCallback(GLFWwindow *window, double xpos, double ypos);

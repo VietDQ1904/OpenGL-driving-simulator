@@ -1,17 +1,10 @@
 #include <thread>
-#include "camera.hpp"
-#include "model.hpp"
-#include "cubemap.hpp"
-#include "car.hpp"
-#include "resourceManagement.hpp"
-#include "roadPath.hpp"
-#include "terrainPath.hpp"
-#include "barrierPath.hpp"
-#include "roadSigns.hpp"
-#include "grass.hpp"
-#include "tree.hpp"
-#include "soundTrack.hpp"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "scene.hpp"
 
+float mainScale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
 const float windowWidth = 1080.0f;
 const float windowHeight = 720.0f;
 
@@ -32,11 +25,32 @@ void frameBufferSizeCallback(GLFWwindow *window, int width, int height)
 }
 
 // Check if the escape key is pressed, exit when pressed
-void processInput(GLFWwindow *window, float &deltaTime)
+void processInput(GLFWwindow *window, float &deltaTime, Scene *scene)
 {
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
    {
       glfwSetWindowShouldClose(window, true);
+   }
+
+   static bool xKeyPressed = false;
+   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS && !xKeyPressed)
+   {
+      scene->isFollowingCar = !scene->isFollowingCar;
+      xKeyPressed = true;
+
+      if (scene->isFollowingCar)
+      {
+         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      }
+      else
+      {
+         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+      }
+   }
+
+   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_RELEASE)
+   {
+      xKeyPressed = false;
    }
 }
 
@@ -68,92 +82,15 @@ int main(int argc, char *argv[])
 
    glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
 
-   glm::mat4 model = glm::mat4(0.0f);
-   glm::mat4 view = glm::mat4(1.0f);
-   glm::mat4 projection;
-
    glEnable(GL_DEPTH_TEST);
-   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+   // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
    float deltaTime = 0.0f;
    float lastTime = 0.0f;
+   std::unique_ptr<Scene> scene = std::make_unique<Scene>();
+   scene->loadScene(window);
 
-   glm::vec3 lightDirection = glm::vec3(1.0f, -2.0f, -1.0f);
-
-   ResourceManagement::loadShader("Main", "../src/Shaders/terrain.vert", "../src/Shaders/terrain.frag", nullptr);
-   ResourceManagement::loadTexture("Grass", "../assets/grass.png", false, false);
-   ResourceManagement::loadTexture("Asphalt", "../assets/asphalt.png", false, false);
-   ResourceManagement::loadTexture("GrassSpec", "../assets/grassSpec.png", false, false);
-   ResourceManagement::loadTexture("AsphaltSpec", "../assets/asphaltSpec.png", false, false);
-   ResourceManagement::loadShader("Cubemap", "../src/Shaders/cubemap.vert", "../src/Shaders/cubemap.frag", nullptr);
-
-   std::unique_ptr<Cubemap> skyBox = std::make_unique<Cubemap>();
-   std::unique_ptr<Physics> simulation = std::make_unique<Physics>();
-   std::unique_ptr<Sound> sound = std::make_unique<Sound>();
-
-   sound->loadAudio("../assets/SoundTracks/carEngine.wav", "CarEngine");
-   sound->loadAudio("../assets/SoundTracks/carAccelerate.wav", "CarAccelerate");
-   sound->loadAudio("../assets/SoundTracks/carBrake.wav", "CarBrake");
-   sound->loadAudio("../assets/SoundTracks/carHandbrake.wav", "CarHandbrake");
-   sound->loadAudio("../assets/SoundTracks/carHonk.wav", "CarHonk");
-
-   // Create main objects
-   std::unique_ptr<Car> car = std::make_unique<Car>();
-   std::unique_ptr<Barrier> barrier = std::make_unique<Barrier>();
-   std::unique_ptr<RoadSigns> roadSigns = std::make_unique<RoadSigns>();
-   std::unique_ptr<Trees> trees = std::make_unique<Trees>();
-   std::unique_ptr<GrassBlades> grassBlades;
-   std::unique_ptr<Terrain> terrain;
-   std::unique_ptr<Road> road;
-
-   // Create road and terrain objects in separate threads
-   std::thread t1([&]
-                  { road = std::make_unique<Road>(); });
-   std::thread t2([&]
-                  { terrain = std::make_unique<Terrain>(); });
-   std::thread t3([&]
-                  { grassBlades = std::make_unique<GrassBlades>(); });
-
-   t1.join();
-   t2.join();
-   t3.join();
-
-   road->addRigidBodies(*simulation);
-   terrain->addRigidBodies(*simulation);
-   barrier->addRigidBodies(*simulation);
-
-   road->setUp();
-   terrain->setUp();
-   roadSigns->loadResources();
-   roadSigns->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
-
-   barrier->loadResources();
-   barrier->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
-
-   grassBlades->loadResources();
-   grassBlades->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
-
-   trees->loadResources();
-   trees->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
-
-   car->loadModels("../assets/Car/carBodyModel.obj", "../assets/Car/wheelModel.obj", "../assets/Car/wheelModel.obj");
-   car->setUp(*simulation);
-   car->loadTextures();
-   car->loadShaderCarBody("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   car->loadShaderFrontWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   car->loadShaderBackWheels("CarShader", "../src/Shaders/modelTexture.vert", "../src/Shaders/modelTexture.frag", nullptr);
-   car->setEnvironmentLighting(lightDirection, glm::vec3(1.0f, 1.0f, 1.0f));
-
-   Camera camera(glm::vec3(-1.0f, 1.0f, 0.0f));
-   camera.setPositionToCar(*car);
-
-   Shader mainShader = ResourceManagement::getShader("Main");
-   mainShader.use();
-
-   Shader cubemapShader = ResourceManagement::getShader("Cubemap");
-   cubemapShader.use();
-
-   glfwSetWindowUserPointer(window, &camera);
+   glfwSetWindowUserPointer(window, scene->camera.get());
    glfwSetCursorPosCallback(window, [](GLFWwindow *window, double x, double y)
                             {
       if (Camera *cam = static_cast<Camera*> (glfwGetWindowUserPointer(window))){
@@ -166,10 +103,32 @@ int main(int argc, char *argv[])
          cam->scrollCallback(window, scroll_x, scroll_y);
       } });
 
-   float maxSecPerFrame = 1.0f / 60.0f;
-   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   IMGUI_CHECKVERSION();
+   ImGui::CreateContext();
+   ImGuiIO &io = ImGui::GetIO();
+   (void)io;
+   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+   io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-   sound->playAudio("CarEngine", true);
+   ImGui::StyleColorsDark(); // Setup ImGui style
+   ImGuiStyle &style = ImGui::GetStyle();
+
+   if (mainScale < 1.0f)
+   {
+      mainScale = 1.0f;
+   }
+
+   style.ScaleAllSizes(mainScale); // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+
+   // Set font
+   style.FontScaleDpi = mainScale;
+   style.FontSizeBase = 18.0f;
+   ImFont *font = io.Fonts->AddFontFromFileTTF("../assets/Fonts/FiraCode-Regular.ttf");
+   IM_ASSERT(font != nullptr);
+
+   ImGui_ImplGlfw_InitForOpenGL(window, true); // Initialize renderer backends for OpenGL
+   ImGui_ImplOpenGL3_Init("#version 440");
+   bool drawLine = false;
 
    while (!glfwWindowShouldClose(window))
    {
@@ -177,67 +136,73 @@ int main(int argc, char *argv[])
       deltaTime = timeValue - lastTime;
       lastTime = timeValue;
 
-      processInput(window, deltaTime);
+      // New frame for ImGUI.
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
 
-      // camera.updateFollowCamera(car->car);
-      camera.control(window, deltaTime);
+      ImGui::NewFrame();
+      {
+         ImGui::SetNextWindowPos(ImVec2(0, 0));
+         ImGui::SetNextWindowSize(ImVec2(250, windowHeight));
+         ImGui::Begin("Debug Window", nullptr,
+                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+         ImGui::Text("FPS: %.1f", io.Framerate);
+
+         ImGui::NewLine();
+         if (ImGui::Checkbox("Draw Lines", &drawLine))
+         {
+            if (drawLine)
+            {
+               glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else
+            {
+               glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+         }
+
+         ImGui::NewLine();
+         ImGui::Checkbox("Spectator Mode", &scene->camera->controllable);
+
+         ImGui::NewLine();
+         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Cursor");
+
+         std::string mode = scene->camera->isMovingFreely ? "Locked Cursor" : "Free Cursor";
+         ImGui::Text(mode.c_str());
+
+         ImGui::NewLine();
+
+         if (ImGui::Button("Respawn Car"))
+         {
+            scene->car->resetPosition();
+         }
+
+         ImGui::NewLine();
+         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Camera");
+         ImGui::Text("Press W,A,S,D to \nnavigate.");
+         ImGui::Text("Press X to \nenable/disable cursor");
+         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Car");
+         ImGui::Text("Press W,A,D to \ncontrol the car.\n");
+         ImGui::Text("Press S to brake.\n");
+         ImGui::Text("Press Space to \nhandbrake.\n");
+         ImGui::Text("Press R to roll.\n");
+         ImGui::Text("Press T to jump.\n");
+         ImGui::Text("Press C to \ngo backward.\n");
+
+         ImGui::End();
+      }
+
+      ImGui::Render(); // End frame
+
+      processInput(window, deltaTime, scene.get());
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
-      simulation->dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime : maxSecPerFrame), 10);
+      scene->updateScene(deltaTime, windowWidth, windowHeight);
+      scene->renderScene(window, deltaTime);
 
-      projection = camera.getProjectionMatrix(static_cast<float>(windowWidth / windowHeight));
-      view = camera.getViewMatrix();
-
-      camera.calculateFrustrumPlanes(projection * view, static_cast<float>(windowWidth / windowHeight));
-
-      mainShader.use();
-
-      glActiveTexture(GL_TEXTURE0);
-      ResourceManagement::getTexture("Grass").bindTexture();
-      glActiveTexture(GL_TEXTURE1);
-      ResourceManagement::getTexture("GrassSpec").bindTexture();
-      mainShader.setMat4("view", view);
-      mainShader.setMat4("projection", projection);
-      mainShader.setInt("texture_diffuse1", 0);
-      mainShader.setInt("texture_specular1", 1);
-      mainShader.setVec3("viewPos", camera.cameraPos);
-      mainShader.setVec3("light.direction", lightDirection);
-      mainShader.setVec3("light.ambient", glm::vec3(0.6f));
-      mainShader.setVec3("light.diffuse", glm::vec3(0.7f));
-      mainShader.setVec3("light.specular", glm::vec3(0.6f));
-      terrain->render(mainShader, camera);
-
-      glActiveTexture(GL_TEXTURE2);
-      ResourceManagement::getTexture("Asphalt").bindTexture();
-      glActiveTexture(GL_TEXTURE3);
-      ResourceManagement::getTexture("AsphaltSpec").bindTexture();
-      mainShader.setMat4("view", view);
-      mainShader.setMat4("projection", projection);
-      mainShader.setInt("texture_diffuse1", 2);
-      mainShader.setInt("texture_specular1", 3);
-      mainShader.setVec3("viewPos", camera.cameraPos);
-      mainShader.setVec3("light.direction", lightDirection);
-      mainShader.setVec3("light.ambient", glm::vec3(0.6f));
-      mainShader.setVec3("light.diffuse", glm::vec3(0.7f));
-      mainShader.setVec3("light.specular", glm::vec3(0.6f));
-      road->render(mainShader, camera);
-
-      // car->control(window, deltaTime, *sound);
-      // car->update();
-      // car->render(view, projection, camera.cameraPos);
-
-      barrier->render(view, projection, camera);
-      roadSigns->render(view, projection, camera);
-
-      grassBlades->setWindParameters(static_cast<float>(glfwGetTime()),
-                                     glm::normalize(glm::vec3(1.0f, 0.5f, -0.5f)),
-                                     0.05f);
-      grassBlades->render(view, projection, camera);
-      trees->render(view, projection, camera);
-
-      skyBox->draw(cubemapShader, projection, view);
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // Draw data.
 
       glfwSwapBuffers(window);
       glfwPollEvents();

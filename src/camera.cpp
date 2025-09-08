@@ -2,6 +2,10 @@
 
 void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos)
 {
+   if (!isMovingFreely)
+   {
+      return;
+   }
 
    if (this->firstMouse)
    {
@@ -23,7 +27,8 @@ void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos)
 
    this->yaw += offsetX;
    // Add constraints to pitch (so that you cannot rotate up 360 degrees
-   this->pitch = glm::clamp(this->pitch + offsetY, -89.0f, 89.0f);
+   const float minAngle = controllable ? -89.0f : 0.0f;
+   this->pitch = glm::clamp(this->pitch + offsetY, minAngle, 89.0f);
 
    glm::vec3 direction;
    direction.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
@@ -54,14 +59,6 @@ void Camera::control(GLFWwindow *window, float deltaTime)
    {
       cameraPos += right * cameraSpeed;
    }
-   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-   {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   }
-   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-   {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-   }
 }
 
 void Camera::scrollCallback(GLFWwindow *window, double offsetX, double offsetY)
@@ -87,6 +84,10 @@ void Camera::updateFollowCamera(btRigidBody *car)
    offset.y = camDistance * sin(glm::radians(this->pitch));
    offset.z = camDistance * cos(glm::radians(this->pitch)) * cos(glm::radians(this->yaw));
 
+   float extraAngle = glm::radians(90.0f);
+   glm::mat4 rotY = glm::rotate(glm::mat4(1.0f), extraAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+   offset = glm::vec3(rotY * glm::vec4(offset, 1.0f));
+
    glm::vec3 camWorldOffset = carRotation * offset;
 
    this->cameraPos = carPosition + camWorldOffset;
@@ -100,7 +101,7 @@ void Camera::updateFollowCamera(btRigidBody *car)
 
 void Camera::setPositionToCar(Car &car)
 {
-   glm::vec3 offsetBehind = car.carRot * glm::vec3(0.0f, 3.0f, 8.0f);
+   glm::vec3 offsetBehind = car.carRot * glm::vec3(0.0f, 6.0f, 12.0f);
    this->cameraPos = car.carPos + offsetBehind;
    this->cameraFront = glm::normalize(car.carPos - this->cameraPos);
    this->right = glm::normalize(glm::cross(this->cameraFront, glm::vec3(0.0f, 1.0f, 0.0f)));
