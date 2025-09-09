@@ -12,9 +12,9 @@ public:
    short acceleration = 0;
    float steering = 0.0f;
    float maxAcceleration = 1200.0f;
-   float maxVelocity = 120.0f;
-   float carMass = 2200.0f;
-   float wheelMass_1 = 15.0f;
+   float maxVelocity = 150.0f;
+   float carMass = 2500.0f;
+   float wheelMass_1 = 20.0f;
    float wheelMass_2 = 20.0f;
    float wheelFriction = 4.25f;
    float wheelStiffness = 220000.0f;
@@ -89,6 +89,7 @@ public:
    void update();
    void control(GLFWwindow *window, float &deltaTime, Sound &sound);
    void setUp(Physics &simulation);
+   void resetPosition();
 
 private:
    glm::mat4 objectModelMatrix;

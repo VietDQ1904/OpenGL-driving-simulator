@@ -13,6 +13,8 @@ This project demonstrates a driving simulator using OpenGL, Bullet Physics and o
    - GLM: matrix and vector calculations.
    - stb_image: loading images. 
    - Assimp: loading 3D models.
+   - OpenAL: sound implementation.
+   - Dear ImGui: user interface.  
 
 <a name = "instructions"></a>
 

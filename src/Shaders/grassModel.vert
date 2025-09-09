@@ -46,13 +46,13 @@ void main()
    vs_out.TexCoords = aTexCoords;
 
    float factor = pow(smoothstep(0.0, 1.0, aPos.y), 1.5);
-   float sway = sin(time * 2.0 + aPos.x * 0.5 + aPos.z * 0.5) + 1.0;
+   float sway = sin(time * 2.0 + aPos.x * 0.5 + aPos.z * 0.5);
 
    vec3 wind = normalize(windDirection * mat3(instanceMat)) * windStrength;
 
    // Control points Bezier
    vec3 p0 = aPos;
-   vec3 p1 = aPos + wind * 0.5 * sway * factor; 
+   vec3 p1 = aPos + wind * 0.25 * sway * factor; 
    vec3 p2 = aPos + wind * 0.5 * sway * factor;          
    vec3 p3 = aPos + wind * 0.75 * sway * factor;   
 

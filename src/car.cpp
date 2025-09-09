@@ -301,6 +301,24 @@ void Car::control(GLFWwindow *window, float &deltaTime, Sound &sound)
    }
 }
 
+void Car::resetPosition()
+{
+   car->setLinearVelocity(btVector3(0, 0, 0));
+   car->setAngularVelocity(btVector3(0, 0, 0));
+
+   btTransform transform;
+   transform.setIdentity();
+   transform.setOrigin(btVector3(this->spawn.x, this->spawn.y, this->spawn.z));
+
+   car->setWorldTransform(transform);
+   car->getMotionState()->setWorldTransform(transform);
+
+   steering = 0.0f;
+   acceleration = 0.0f;
+   movingForward = true;
+   handbrake = false;
+}
+
 void Car::setUp(Physics &simulation)
 {
 

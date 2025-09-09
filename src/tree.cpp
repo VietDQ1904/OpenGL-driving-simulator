@@ -288,6 +288,9 @@ void Trees::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
                                maxRenderDistance,
                                nearByPivots);
 
+   glEnable(GL_CULL_FACE);
+   glCullFace(GL_BACK);
+
    for (auto &pivot : nearByPivots)
    {
       length = glm::distance(camera.cameraPos, glm::vec3(pivot[0], pivot[1], pivot[2]));
@@ -363,6 +366,7 @@ void Trees::render(glm::mat4 view, glm::mat4 projection, Camera &camera)
          glBindVertexArray(0);
       }
    }
+   glDisable(GL_CULL_FACE);
 }
 
 void Trees::setEnvironmentLighting(glm::vec3 direction, glm::vec3 lightColor)
