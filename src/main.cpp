@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
    ImGui_ImplOpenGL3_Init("#version 440");
 
    bool drawLine = false;
-   const char *drawOptions[] = {"Render full", "Render lines", "Render points"};
+   const char *drawOptions[] = {"Render faces", "Render lines", "Render points"};
    int currentDrawOption = 0;
    float volume = 60.0f;
    float cameraSpeed = 50.0f;
