@@ -42,7 +42,7 @@ void Camera::mouseCallback(GLFWwindow *window, double xpos, double ypos)
 
 void Camera::control(GLFWwindow *window, float deltaTime)
 {
-   const float cameraSpeed = 50.0f * deltaTime;
+   const float cameraSpeed = speedFactor * deltaTime;
    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
    {
       cameraPos += cameraFront * cameraSpeed;

@@ -122,3 +122,13 @@ void Sound::pauseAudio(const std::string &soundTrackName)
    ALuint source = soundTrackSources.at(soundTrackName);
    alSourcePause(source);
 }
+
+void Sound::setVolume(float volume)
+{
+   alListenerf(AL_GAIN, volume);
+
+   for (auto &i : soundTrackSources)
+   {
+      alSourcef(i.second, AL_GAIN, volume);
+   }
+}

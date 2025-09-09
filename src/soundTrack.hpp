@@ -18,6 +18,7 @@ public:
    void playAudio(const std::string &soundTrackName, bool loop);
    void stopAudio(const std::string &soundTrackName);
    void pauseAudio(const std::string &soundTrackName);
+   void setVolume(float volume);
 
 private:
    ALCdevice *device;

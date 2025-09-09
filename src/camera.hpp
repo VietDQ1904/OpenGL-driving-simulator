@@ -26,6 +26,7 @@ public:
    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
    glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
    bool firstMouse = true;
+   float speedFactor = 50.0f;
 
    float nearPlane = 0.1f;
    float farPlane = 300.0f;

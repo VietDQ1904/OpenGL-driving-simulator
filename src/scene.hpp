@@ -60,6 +60,7 @@ inline void Scene::loadScene(GLFWwindow *window)
    sound->loadAudio("../assets/SoundTracks/carBrake.wav", "CarBrake");
    sound->loadAudio("../assets/SoundTracks/carHandbrake.wav", "CarHandbrake");
    sound->loadAudio("../assets/SoundTracks/carHonk.wav", "CarHonk");
+   sound->setVolume(0.6f);
 
    // Create main objects
 

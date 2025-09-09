@@ -127,7 +127,7 @@ target_link_libraries(DrivingSimulator PRIVATE
     glfw3
     OpenGL::GL
     assimp::assimp
-
+    
     # Add these before Freetype.
     ${HARFBUZZ_LIBRARY}        
     ${BZIP2_LIBRARIES}
@@ -135,4 +135,9 @@ target_link_libraries(DrivingSimulator PRIVATE
     OpenAL::OpenAL
     Freetype::Freetype
     BulletDynamics BulletCollision LinearMath
+
+    pdh
+    dxgi
+    d3d11
+    d3dcompiler
 )
