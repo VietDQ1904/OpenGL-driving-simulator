@@ -14,7 +14,11 @@ This project demonstrates a driving simulator using OpenGL, Bullet Physics and o
    - stb_image: loading images. 
    - Assimp: loading 3D models.
    - OpenAL: sound implementation.
-   - Dear ImGui: user interface.  
+   - ImGui: user interface. 
+   - Implot: realtime plots.  
+
+   >[!Warning]
+   > RAM and CPU's usage functions only work for Windows systems.
 
 <a name = "instructions"></a>
 
