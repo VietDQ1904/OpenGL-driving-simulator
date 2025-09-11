@@ -31,6 +31,10 @@ set (IMGUI  lib/imgui/imgui.cpp
             lib/imgui/backends/imgui_impl_opengl3.cpp
     )
 
+set (IMPLOT lib/implot/implot.cpp
+            lib/implot/implot_items.cpp
+    )
+
 # ========= FIND LIBRARIES ==========
 find_package(OpenGL REQUIRED)
 
@@ -107,6 +111,7 @@ include_directories(
     ./lib/glm/glmlib/include
     ./lib/imgui
     ./lib/imgui/backends 
+    ./lib/implot
     ${FREETYPE_INCLUDE_DIRS}
     ${BZIP2_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
@@ -120,7 +125,7 @@ include_directories(
 add_library(glad STATIC ./lib/glad/src/glad.c)
 
 # ========= EXECUTABLE ==========
-add_executable(DrivingSimulator ${SOURCES} ${IMGUI})
+add_executable(DrivingSimulator ${SOURCES} ${IMGUI} ${IMPLOT})
 # ========= LINK LIBRARIES ==========
 target_link_libraries(DrivingSimulator PRIVATE
     glad

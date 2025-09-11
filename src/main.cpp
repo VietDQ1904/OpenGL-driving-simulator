@@ -2,7 +2,9 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "implot.h"
 #include "scene.hpp"
+#include "systemsInfo.hpp"
 
 float mainScale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
 const float windowWidth = 1080.0f;
@@ -212,8 +214,10 @@ int main(int argc, char *argv[])
          cam->scrollCallback(window, scroll_x, scroll_y);
       } });
 
+   // Initialize ImGUI
    IMGUI_CHECKVERSION();
    ImGui::CreateContext();
+   ImPlot::CreateContext();
    ImGuiIO &io = ImGui::GetIO();
    (void)io;
    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -239,6 +243,14 @@ int main(int argc, char *argv[])
    int currentDrawOption = 0;
    float volume = 60.0f;
    float cameraSpeed = 50.0f;
+
+   static double startTime = ImGui::GetTime();
+   static double lastUpdate = ImGui::GetTime();
+   static std::vector<double> fpsData;
+   static std::vector<double> timeData;
+   static std::vector<double> ramData;
+   static std::vector<double> cpuData;
+   static double maxRAMCapacity = getTotalRAMMB();
 
    while (!glfwWindowShouldClose(window))
    {
@@ -413,10 +425,96 @@ int main(int argc, char *argv[])
 
             if (ImGui::BeginTabItem("Stats"))
             {
-               std::string statsText;
-               ImVec2 textSize;
+               double currentTime = ImGui::GetTime();
+               if (currentTime - lastUpdate >= 1)
+               {
+                  if (timeData.size() > 30)
+                  {
+                     fpsData.erase(fpsData.begin());
+                     timeData.erase(timeData.begin());
+                     ramData.erase(ramData.begin());
+                     cpuData.erase(cpuData.begin());
+                  }
+                  fpsData.push_back(ImGui::GetIO().Framerate);
+                  timeData.push_back(currentTime - startTime);
+                  ramData.push_back(getRAMUsageMB());
+                  cpuData.push_back(getProcessCPUUsage());
 
-               ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+                  lastUpdate = currentTime;
+               }
+
+               if (ImPlot::BeginPlot("FPS", ImVec2(ImGui::GetContentRegionAvail().x, 150)))
+               {
+                  ImPlot::SetupAxes("", "");
+                  ImPlot::SetupAxisLimits(ImAxis_X1,
+                                          timeData.empty() ? 0.0 : timeData.front(),
+                                          timeData.empty() ? 30.0 : timeData.back(),
+                                          ImGuiCond_Always);
+
+                  ImPlot::SetupAxisLimits(ImAxis_Y1, 0, fpsData[fpsData.size() - 1] * 1.5f, ImGuiCond_Always);
+
+                  if (!fpsData.empty())
+                  {
+                     ImPlot::PushStyleColor(ImPlotCol_Fill, ImVec4(0.2f, 0.7f, 1.0f, 1.0f));
+                     ImPlot::PlotShaded("", timeData.data(), fpsData.data(), static_cast<int>(fpsData.size()), 0.0);
+                     ImPlot::PopStyleColor();
+                  }
+
+                  ImPlot::EndPlot();
+               }
+               textSize = ImGui::CalcTextSize("FPS: %.1f");
+               ImGui::SetCursorPosX((ImGui::GetWindowSize().x - textSize.x) * 0.5f);
+               ImGui::Text("FPS: %.1f", fpsData[fpsData.size() - 1]);
+               ImGui::NewLine();
+
+               if (ImPlot::BeginPlot("RAM", ImVec2(ImGui::GetContentRegionAvail().x, 150)))
+               {
+                  ImPlot::SetupAxes("", "");
+                  ImPlot::SetupAxisLimits(ImAxis_X1,
+                                          timeData.empty() ? 0.0 : timeData.front(),
+                                          timeData.empty() ? 30.0 : timeData.back(),
+                                          ImGuiCond_Always);
+
+                  ImPlot::SetupAxisLimits(ImAxis_Y1, 0, maxRAMCapacity, ImGuiCond_Always);
+
+                  if (!ramData.empty())
+                  {
+                     ImPlot::PushStyleColor(ImPlotCol_Fill, ImVec4(0.3f, 0.9f, 0.2f, 1.0f));
+                     ImPlot::PlotShaded("", timeData.data(), ramData.data(), static_cast<int>(ramData.size()), 0.0);
+                     ImPlot::PopStyleColor();
+                  }
+
+                  ImPlot::EndPlot();
+               }
+
+               textSize = ImGui::CalcTextSize("RAM: %.2f");
+               ImGui::SetCursorPosX((ImGui::GetWindowSize().x - textSize.x * 2.0f) * 0.5f);
+               ImGui::Text("RAM: %.2f MB / %.2f MB", ramData[ramData.size() - 1], maxRAMCapacity);
+               ImGui::NewLine();
+
+               if (ImPlot::BeginPlot("CPU", ImVec2(ImGui::GetContentRegionAvail().x, 150)))
+               {
+                  ImPlot::SetupAxes("", "");
+                  ImPlot::SetupAxisLimits(ImAxis_X1,
+                                          timeData.empty() ? 0.0 : timeData.front(),
+                                          timeData.empty() ? 30.0 : timeData.back(),
+                                          ImGuiCond_Always);
+
+                  ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 100, ImGuiCond_Always);
+
+                  if (!cpuData.empty())
+                  {
+                     ImPlot::PushStyleColor(ImPlotCol_Fill, ImVec4(0.7f, 0.6f, 1.0f, 1.0f));
+                     ImPlot::PlotShaded("", timeData.data(), cpuData.data(), static_cast<int>(cpuData.size()), 0.0);
+                     ImPlot::PopStyleColor();
+                  }
+
+                  ImPlot::EndPlot();
+               }
+
+               textSize = ImGui::CalcTextSize("CPU: %.2f");
+               ImGui::SetCursorPosX((ImGui::GetWindowSize().x - textSize.x) * 0.5f);
+               ImGui::Text("CPU: %2.f %%", cpuData[cpuData.size() - 1]);
                ImGui::NewLine();
 
                ImGui::EndTabItem();
@@ -509,6 +607,11 @@ int main(int argc, char *argv[])
       glfwPollEvents();
    }
 
+   ImGui_ImplOpenGL3_Shutdown();
+   ImGui_ImplGlfw_Shutdown();
+
+   ImPlot::DestroyContext();
+   ImGui::DestroyContext();
    ResourceManagement::clearResources();
    glfwTerminate();
 
