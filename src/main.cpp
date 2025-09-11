@@ -249,8 +249,8 @@ int main(int argc, char *argv[])
    static std::vector<double> fpsData;
    static std::vector<double> timeData;
    static std::vector<double> ramData;
-   static double maxRAMCapacity = GetTotalRAMMB();
-   std::cout << maxRAMCapacity << "\n";
+   static std::vector<double> cpuData;
+   static double maxRAMCapacity = getTotalRAMMB();
 
    while (!glfwWindowShouldClose(window))
    {
@@ -433,10 +433,12 @@ int main(int argc, char *argv[])
                      fpsData.erase(fpsData.begin());
                      timeData.erase(timeData.begin());
                      ramData.erase(ramData.begin());
+                     cpuData.erase(cpuData.begin());
                   }
                   fpsData.push_back(ImGui::GetIO().Framerate);
                   timeData.push_back(currentTime - startTime);
-                  ramData.push_back(GetRAMUsageMB());
+                  ramData.push_back(getRAMUsageMB());
+                  cpuData.push_back(getProcessCPUUsage());
 
                   lastUpdate = currentTime;
                }
@@ -477,7 +479,7 @@ int main(int argc, char *argv[])
 
                   if (!ramData.empty())
                   {
-                     ImPlot::PushStyleColor(ImPlotCol_Fill, ImVec4(0.2f, 0.7f, 1.0f, 1.0f));
+                     ImPlot::PushStyleColor(ImPlotCol_Fill, ImVec4(0.3f, 0.9f, 0.2f, 1.0f));
                      ImPlot::PlotShaded("", timeData.data(), ramData.data(), static_cast<int>(ramData.size()), 0.0);
                      ImPlot::PopStyleColor();
                   }
@@ -488,6 +490,31 @@ int main(int argc, char *argv[])
                textSize = ImGui::CalcTextSize("RAM: %.2f");
                ImGui::SetCursorPosX((ImGui::GetWindowSize().x - textSize.x * 2.0f) * 0.5f);
                ImGui::Text("RAM: %.2f MB / %.2f MB", ramData[ramData.size() - 1], maxRAMCapacity);
+               ImGui::NewLine();
+
+               if (ImPlot::BeginPlot("CPU", ImVec2(ImGui::GetContentRegionAvail().x, 150)))
+               {
+                  ImPlot::SetupAxes("", "");
+                  ImPlot::SetupAxisLimits(ImAxis_X1,
+                                          timeData.empty() ? 0.0 : timeData.front(),
+                                          timeData.empty() ? 30.0 : timeData.back(),
+                                          ImGuiCond_Always);
+
+                  ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 100, ImGuiCond_Always);
+
+                  if (!cpuData.empty())
+                  {
+                     ImPlot::PushStyleColor(ImPlotCol_Fill, ImVec4(0.7f, 0.6f, 1.0f, 1.0f));
+                     ImPlot::PlotShaded("", timeData.data(), cpuData.data(), static_cast<int>(cpuData.size()), 0.0);
+                     ImPlot::PopStyleColor();
+                  }
+
+                  ImPlot::EndPlot();
+               }
+
+               textSize = ImGui::CalcTextSize("CPU: %.2f");
+               ImGui::SetCursorPosX((ImGui::GetWindowSize().x - textSize.x) * 0.5f);
+               ImGui::Text("CPU: %2.f %%", cpuData[cpuData.size() - 1]);
                ImGui::NewLine();
 
                ImGui::EndTabItem();
