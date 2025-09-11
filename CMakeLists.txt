@@ -54,43 +54,6 @@ else()
     message(FATAL_ERROR "Assimp package not found.")
 endif()
 
-# Package Freetype
-find_package(Freetype REQUIRED)
-
-if (Freetype_FOUND)
-    message(STATUS "Freetype package found.")
-else()
-    message(FATAL_ERROR "Freetype package not found.")
-endif()
-
-# Package BZip2
-find_package(BZip2 REQUIRED)
-
-if (BZip2_FOUND)
-    message(STATUS "BZip2 package found.")
-else()
-    message(FATAL_ERROR "BZip2 package not found.")
-endif()
-
-# Package ZLIB
-find_package(ZLIB REQUIRED)
-
-if (ZLIB_FOUND)
-    message(STATUS "ZLIB package found.")
-else()
-    message(FATAL_ERROR "ZLIB package not found.")
-endif()
-
-# Binds harfbuzz statically.
-set(HARFBUZZ_LIBRARY "${CMAKE_SOURCE_DIR}/lib/harfbuzz/libharfbuzz.a")
-
-if (NOT EXISTS "${HARFBUZZ_LIBRARY}")
-    message(FATAL_ERROR "Harfbuzz library not found at ${HARFBUZZ_LIBRARY}")
-endif()
-
-set(HARFBUZZ_INCLUDE_DIR "./lib/harfbuzz/include")
-
-
 find_package(OpenAL REQUIRED)
 if (OpenAL_FOUND)
     message(STATUS "OpenAL package found.")
@@ -112,10 +75,6 @@ include_directories(
     ./lib/imgui
     ./lib/imgui/backends 
     ./lib/implot
-    ${FREETYPE_INCLUDE_DIRS}
-    ${BZIP2_INCLUDE_DIRS}
-    ${ZLIB_INCLUDE_DIRS}
-    ${HARFBUZZ_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIRS}
     ./lib/freetype/include
     ./lib/bullet/include
@@ -132,12 +91,6 @@ target_link_libraries(DrivingSimulator PRIVATE
     glfw3
     OpenGL::GL
     assimp::assimp
-    
-    # Add these before Freetype.
-    ${HARFBUZZ_LIBRARY}        
-    ${BZIP2_LIBRARIES}
-    ${ZLIB_LIBRARIES}
     OpenAL::OpenAL
-    Freetype::Freetype
     BulletDynamics BulletCollision LinearMath
 )
